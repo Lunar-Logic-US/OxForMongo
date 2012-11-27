@@ -1,0 +1,12 @@
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteBase /
+
+    RewriteRule ^/?js/.*\.js$ - [L]
+    RewriteRule ^/?css/.*\.css$ - [L]
+    RewriteRule ^/?images/.*\.(png|jpg|gif)$ - [L]
+
+    RewriteCond $1 !=favicon.ico
+    RewriteRule ^(.*) index.php [L]
+ </IfModule>
