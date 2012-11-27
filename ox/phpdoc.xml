@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdoc>
+    <parser>
+        <target>data/output</target>
+    </parser>
+    <transformer>
+        <target>data/output</target>
+    </transformer>
+    <files>
+        <directory>.</directory>
+        <ignore>tests/*</ignore>
+    </files>
+    <transformations>
+        <template name="/home/m2calabr/Downloads/template/template.responsive-master/"/>
+        <!--<template name="new-black"/>-->
+    </transformations>
+</phpdoc>

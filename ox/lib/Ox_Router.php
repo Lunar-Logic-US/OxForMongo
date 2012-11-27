@@ -1,0 +1,128 @@
+<?php
+/**
+ *    Copyright (c) 2012 Lunar Logic LLC
+ *
+ *    This program is free software: you can redistribute it and/or  modify
+ *    it under the terms of the GNU Affero General Public License, version 3,
+ *    as published by the Free Software Foundation.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Affero General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Affero General Public License
+ *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Routing to actions.
+ *
+ * Request come into the framework and are routed to the appropriate action.
+ * Routed and argument capture are determined by regex.
+ *
+ * Routing is performed on a first come first serve basis. Any route added with
+ * a regex that matches (exactly) an existing regex will overwrite said regex.
+ *
+ * The router also handles redirects.
+ */
+class Ox_Router
+{
+    /**
+     * Enable/Disable Debugging for this object.
+     */
+    const DEBUG = FALSE;
+
+    /**
+     * List of routes registered.
+     * @var array
+     */
+    private static $_routes = array();
+
+    /**
+     * Register a route.
+     *
+     * @param $regex
+     * @param $action
+     */
+    public static function add($regex, $action) {
+        self::$_routes[$regex] = $action;
+    }
+
+    /**
+     * Return all route for inspection for unit testing
+     *
+     * @static
+     * @return array
+     */
+    public static function getAll() {
+        return self::$_routes;
+    }
+
+
+    /**
+     * Route based on the url and registered routes.
+     * @param $request_url
+     */
+    public static function route($request_url)
+    {
+        $routed = false;
+        foreach(self::$_routes as $regex => $obj) {
+            if(self::DEBUG)  Ox_Logger::logDebug("Routing:" . $request_url . ' : regex : ' . $regex);
+            if(preg_match($regex, $request_url, $matches)) {
+                if(self::DEBUG)  Ox_Logger::logDebug('Route Match: ' . print_r($matches,1));
+                if(self::DEBUG) Ox_Logger::logDebug($request_url . ' matched ' . $regex);
+                $obj->go($matches);
+                $routed = true;
+                // First come, first serve. One action per request.
+                break;
+            }
+        }
+
+        if(!$routed) {
+            // Couldn't find a route. Log and return message.
+            Ox_Logger::logWarning('Could not route ' . $request_url);
+            header("HTTP/1.0 404 Not Found");
+            echo "Route not found for '{$request_url}'";
+        }
+    }
+
+    /**
+     * Redirect to the give url
+     *
+     * @param $url
+     * @param null $params
+     * @param null $headers
+     */
+    public static function redirect($url, $params = null, $headers = null)
+    {
+        if($headers) {
+            foreach($headers as $header) {
+                header($header);
+            }
+        }
+        header('Location: ' . self::buildURL($url, $params));
+    }
+
+    /**
+     * Build a url with an array of parameters.
+     *
+     * @param $url
+     * @param null $params
+     * @return string
+     */
+    public static function buildURL($url, $params = null)
+    {
+        $param_str = "";
+        if($params) {
+            foreach($params as $name => $value) {
+                if(!strlen($param_str)) {
+                    $param_str = $param_str."?{$name}=" . urlencode($value);
+                } else {
+                    $param_str = $param_str."&{$name}=" . urlencode($value);
+                }
+            }
+        }
+        return $url = $url.$param_str;
+    }
+}
