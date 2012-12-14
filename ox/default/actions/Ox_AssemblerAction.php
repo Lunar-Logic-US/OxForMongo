@@ -192,6 +192,7 @@ class Ox_AssemblerAction implements Ox_Routable
             }
         } else {
             Ox_Logger::logError('Could not load assembler: ' . $file);
+            throw new Ox_RouterException('Could not find Assembler','NotFound');
         }
         return false;
     }
