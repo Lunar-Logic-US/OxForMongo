@@ -72,7 +72,12 @@ class Ox_Router
             if(preg_match($regex, $request_url, $matches)) {
                 if(self::DEBUG)  Ox_Logger::logDebug('Route Match: ' . print_r($matches,1));
                 if(self::DEBUG) Ox_Logger::logDebug($request_url . ' matched ' . $regex);
-                $obj->go($matches);
+                try {
+                    $obj->go($matches);
+                } catch (Ox_RouterException $e){
+                    $routed = false;
+                    break;
+                }
                 $routed = true;
                 // First come, first serve. One action per request.
                 break;
