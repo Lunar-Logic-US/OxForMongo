@@ -181,6 +181,9 @@ class Ox_AssemblerAction implements Ox_Routable
                 if(self::DEBUG) Ox_Logger::logDebug('Calling method: ' . $method);
                 //call_user_func_Array can be slow
                 //call_user_func_array(array( $assembler, $method), $parsed_args);
+                if (!method_exists($assembler,$method)) {
+                    throw new Ox_RouterException('Assembler \''.$asm_class.'\' does not have method: ' . $method);
+                }
                 $this->callAssemblerMethod($assembler, $method, $parsed_args);
                 if (isset($assembler->layout)) {
                     $this->layout = $assembler->layout;
@@ -192,6 +195,7 @@ class Ox_AssemblerAction implements Ox_Routable
             }
         } else {
             Ox_Logger::logError('Could not load assembler: ' . $file);
+            throw new Ox_RouterException('Could not find Assembler: ' . $file,'NotFound');
         }
         return false;
     }
