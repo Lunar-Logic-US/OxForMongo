@@ -29,7 +29,7 @@ class Ox_AssemblerAction implements Ox_Routable
     /**
      * Turns on object debug logging.
      */
-    const DEBUG = TRUE;
+    const DEBUG = FALSE;
     /**
      * directory to find assembler.php (string)
      * @var string
@@ -68,8 +68,7 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     public function go($args)
     {
-        global $security;
-
+        if (self::DEBUG) Ox_Logger::logDebug('Actions Args:' . print_r($args,true));
         // Used for deep linking if login required.
         $full_path = array_shift($args); // $match[0] from the preg_match in router
         if(!$this->asm_class) {
@@ -121,17 +120,19 @@ class Ox_AssemblerAction implements Ox_Routable
         ob_start();
         //print_r($this->asm_class);
         $assembler = $this->loadAndRunAssembler($full_path, $file, $this->asm_class, $method, $parsed_args);
+        if ($assembler!==false) {
 
-        // It's template time!
-        if($assembler->template && file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $assembler->template . '.php')) {
-            $assembler->renderTemplate($template_file);
-        } else if(file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $method . '.php')) {
-            $assembler->renderTemplate($template_file);
+            // It's template time!
+            if($assembler->template && file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $assembler->template . '.php')) {
+                $assembler->renderTemplate($template_file);
+            } else if(file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $method . '.php')) {
+                $assembler->renderTemplate($template_file);
+            }
+            //embed the results in a layout
         }
-        //embed the results in a layout
         $content = ob_get_clean();
 
-        if (!$assembler->layout) {
+        if ($assembler===false || !$assembler->layout) {
             print $content;
         } else {
             //Ox_LibraryLoader::getResource('security')->debug();
@@ -168,6 +169,7 @@ class Ox_AssemblerAction implements Ox_Routable
             $assembler = new $asm_class;
             $assembler->db = $db;
             $assembler->user = $user;
+            $assembler->dir = $this->asm_dir;
 
             // Allow for default requires roles if specific requirements are not set for a given action.
             // Does this belong here or should it be moved elsewhere?  Code wise it's easiest to put here,
@@ -212,6 +214,7 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     private function callAssemblerMethod($assembler, $method, $args)
     {
+        //test if the assembler has the method
         switch(count($args)) {
             case 0:
                 return $assembler->$method();

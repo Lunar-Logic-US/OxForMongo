@@ -125,6 +125,48 @@ class Ox_AssemblerConstruct
         extract($this->template_vars);
         require($template_file);
     }
+
+    /**
+     * This allows you to define sub-assemblies in your construct.
+     * @param string $subConstruct
+     * @param array $args
+     */
+    protected function _subAssembly($subConstruct,$args)
+    {
+        array_unshift($args,'dummy-full-path');
+        if (count($args)<1) {
+            $args[]= 'index';
+        }
+        if (empty($args[1])) {
+            $args[1]= 'index';
+        }
+        //var_dump($args);
+        $action = new Ox_AssemblerAction($this->dir . DIRECTORY_SEPARATOR .$subConstruct,$subConstruct);
+        $action->go($args);
+    }
+
+    /**
+     * Allow js files to be called inside the construct
+     *
+     * @param $fileName string
+     */
+    public function js($fileName){
+        header("Content-type: application/x-javascript",true);
+        @readfile($this->dir  . '/js/' . $fileName);
+
+    }
+
+    /**
+     * Allow css files to be called inside the construct
+     *
+     * @param $fileName string
+     */
+    public function css($fileName){
+        header("Content-type: text/css", true);
+        @readfile($this->dir  . '/css/' . $fileName);
+
+    }
+
     
 }
 
