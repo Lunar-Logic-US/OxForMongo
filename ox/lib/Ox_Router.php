@@ -96,8 +96,9 @@ class Ox_Router
      */
     public static function redirect($url, $params = null, $headers = null)
     {
-        if($headers) {
+        if(is_array($headers)) {
             foreach($headers as $header) {
+                Ox_Logger::logDebug('Sending Headers  ' . $header);
                 header($header);
             }
         }
