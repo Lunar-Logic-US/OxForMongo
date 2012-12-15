@@ -38,7 +38,7 @@ class Ox_Router
      * @var array
      */
     private static $_routes = array();
-
+ 
     /**
      * Register a route.
      *
@@ -67,6 +67,7 @@ class Ox_Router
     public static function route($request_url)
     {
         $routed = false;
+        $errorMessage = null;
         foreach(self::$_routes as $regex => $obj) {
             if(self::DEBUG)  Ox_Logger::logDebug("Routing:" . $request_url . ' : regex : ' . $regex);
             if(preg_match($regex, $request_url, $matches)) {
@@ -76,6 +77,7 @@ class Ox_Router
                     $obj->go($matches);
                 } catch (Ox_RouterException $e){
                     $routed = false;
+                    $errorMessage = $e->getMessage();
                     break;
                 }
                 $routed = true;
@@ -87,8 +89,19 @@ class Ox_Router
         if(!$routed) {
             // Couldn't find a route. Log and return message.
             Ox_Logger::logWarning('Could not route ' . $request_url);
-            header("HTTP/1.0 404 Not Found");
-            echo "Route not found for '{$request_url}'";
+            //header("HTTP/1.0 404 Not Found");
+            if (!isset($errorMessage)) {
+               $errorMessage = "Route not found for:  {$request_url}";
+            }
+            $config_parser = Ox_LibraryLoader::getResource('config_parser');
+            $path = $config_parser->getAppConfigValue('errorPage');
+            if (isset($path['404']) && $path['404'] != $request_url) {
+                $_POST['errorMessage']=$errorMessage;
+                self::route($path['404']);
+            } else {
+                //die($path['404'].$request_url);
+                echo "<div class=\"error404\"><h1>404 Error</h1> <p>$errorMessage</p></div>";
+            }
         }
     }
 
