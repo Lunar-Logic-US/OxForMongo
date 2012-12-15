@@ -146,9 +146,9 @@ class Ox_WidgetHandler
     public static function reset($widget_name)
     {
         try {
-            self::_load($name,TRUE);
+            self::_load($widget_name,TRUE);
         } catch (Exception $e) {
-            print "BROKEN Widget {$name}: Could not load or call the display function.";
+            print "BROKEN Widget {$widget_name}: Could not load or call the display function.";
         }
     }
     
