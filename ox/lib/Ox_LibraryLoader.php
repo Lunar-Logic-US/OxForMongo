@@ -272,10 +272,14 @@ class Ox_LibraryLoader
      */
     public static function autoLoad($className) {
         $path = array(
+            DIR_APP . 'validators' . DIRECTORY_SEPARATOR,
             OX_FRAME_DEFAULT . 'validators' . DIRECTORY_SEPARATOR,
             OX_FRAME_DEFAULT . 'exceptions' . DIRECTORY_SEPARATOR,
             OX_FRAME_EXCEPTIONS
         );
+        if (self::DEBUG) {
+            Ox_Logger::logDebug("Ox_LibraryLoader - AutoLoad: $className");
+        }
         Ox_LibraryLoader::loadCode($className,$path,false);
     }
 

@@ -193,7 +193,8 @@ DEBUG;
     /**
      * Getter for session vars.
      *
-     * @return string
+     * @param string $key
+     * @return mixed
      */
     function get($key)
     {
