@@ -77,13 +77,18 @@ class Ox_AssemblerAction implements Ox_Routable
 
         // Determine the method called.
         $method = 'index';
+        //var_dump($args); die();
         if(isset($args[0])) {
-            if(strpos($args[0], '/') !== false) {
+            if ($args[0]=='/' || empty($args[0])) {
+                //if we only have a / or nothing
+                $method = 'index';
+            } elseif(strpos($args[0], '/') !== false) {
                 $a = explode('/', $args[0]);
                 if($a[1]) {
                     $method = $a[1];
                 }
             } else {
+                //no /, just a string with the method name
                 $method = $args[0];
             }
             // Remove the method from the args
