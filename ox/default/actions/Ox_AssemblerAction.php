@@ -29,7 +29,7 @@ class Ox_AssemblerAction implements Ox_Routable
     /**
      * Turns on object debug logging.
      */
-    const DEBUG = TRUE;
+    const DEBUG = FALSE;
     /**
      * directory to find assembler.php (string)
      * @var string
@@ -68,8 +68,7 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     public function go($args)
     {
-        global $security;
-
+        if (self::DEBUG) Ox_Logger::logDebug('Actions Args:' . print_r($args,true));
         // Used for deep linking if login required.
         $full_path = array_shift($args); // $match[0] from the preg_match in router
         if(!$this->asm_class) {
@@ -78,13 +77,18 @@ class Ox_AssemblerAction implements Ox_Routable
 
         // Determine the method called.
         $method = 'index';
+        //var_dump($args); die();
         if(isset($args[0])) {
-            if(strpos($args[0], '/') !== false) {
+            if ($args[0]=='/' || empty($args[0])) {
+                //if we only have a / or nothing
+                $method = 'index';
+            } elseif(strpos($args[0], '/') !== false) {
                 $a = explode('/', $args[0]);
                 if($a[1]) {
                     $method = $a[1];
                 }
             } else {
+                //no /, just a string with the method name
                 $method = $args[0];
             }
             // Remove the method from the args
@@ -121,17 +125,19 @@ class Ox_AssemblerAction implements Ox_Routable
         ob_start();
         //print_r($this->asm_class);
         $assembler = $this->loadAndRunAssembler($full_path, $file, $this->asm_class, $method, $parsed_args);
+        if ($assembler!==false) {
 
-        // It's template time!
-        if($assembler->template && file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $assembler->template . '.php')) {
-            $assembler->renderTemplate($template_file);
-        } else if(file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $method . '.php')) {
-            $assembler->renderTemplate($template_file);
+            // It's template time!
+            if($assembler->template && file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $assembler->template . '.php')) {
+                $assembler->renderTemplate($template_file);
+            } else if(file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $method . '.php')) {
+                $assembler->renderTemplate($template_file);
+            }
+            //embed the results in a layout
         }
-        //embed the results in a layout
         $content = ob_get_clean();
 
-        if (!$assembler->layout) {
+        if ($assembler===false || !$assembler->layout) {
             print $content;
         } else {
             //Ox_LibraryLoader::getResource('security')->debug();
@@ -168,6 +174,7 @@ class Ox_AssemblerAction implements Ox_Routable
             $assembler = new $asm_class;
             $assembler->db = $db;
             $assembler->user = $user;
+            $assembler->dir = $this->asm_dir;
 
             // Allow for default requires roles if specific requirements are not set for a given action.
             // Does this belong here or should it be moved elsewhere?  Code wise it's easiest to put here,
@@ -181,6 +188,9 @@ class Ox_AssemblerAction implements Ox_Routable
                 if(self::DEBUG) Ox_Logger::logDebug('Calling method: ' . $method);
                 //call_user_func_Array can be slow
                 //call_user_func_array(array( $assembler, $method), $parsed_args);
+                if (!method_exists($assembler,$method)) {
+                    throw new Ox_RouterException('Assembler \''.$asm_class.'\' does not have method: ' . $method);
+                }
                 $this->callAssemblerMethod($assembler, $method, $parsed_args);
                 if (isset($assembler->layout)) {
                     $this->layout = $assembler->layout;
@@ -192,6 +202,7 @@ class Ox_AssemblerAction implements Ox_Routable
             }
         } else {
             Ox_Logger::logError('Could not load assembler: ' . $file);
+            throw new Ox_RouterException('Could not find Assembler: ' . $file,'NotFound');
         }
         return false;
     }
@@ -208,6 +219,7 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     private function callAssemblerMethod($assembler, $method, $args)
     {
+        //test if the assembler has the method
         switch(count($args)) {
             case 0:
                 return $assembler->$method();

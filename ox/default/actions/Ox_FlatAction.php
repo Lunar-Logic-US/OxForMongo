@@ -70,7 +70,8 @@ class Ox_FlatAction implements Ox_Routable
         if(isset($a[1])){
             $dir = $a[1];
         } else {
-            print "<div class=\"error\">File not found (Flat Action) : " . $path . "</div>";
+            throw new Ox_RouterException('File was not specified','NotFound');
+            //print "<div class=\"error\">File not found (Flat Action) : " . $path . "</div>";
             Ox_Logger::logError('FlatAction Directory not specified in URL: ' . $path);
             return;
         }
@@ -95,6 +96,8 @@ class Ox_FlatAction implements Ox_Routable
         } else if(file_exists($file . '.php')) {
             $file .= '.php';
         }
+                     
+        
         if (self::DEBUG) Ox_Logger::logDebug('Ox_FlatAction go - file:' . $file);
 
         if(file_exists($file)) {
@@ -113,8 +116,10 @@ class Ox_FlatAction implements Ox_Routable
                 }
             }
         } else {
-            print "FlatAction: File Not Found ({$file})";
+            //print "FlatAction: File Not Found ({$file})";
             Ox_Logger::logError('FlatAction: Could not load: ' . $file);
+            throw new Ox_RouterException('File ('.$file.')was not found','NotFound');   
+            
         }
 
     }

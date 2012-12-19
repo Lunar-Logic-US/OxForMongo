@@ -117,6 +117,7 @@ class Ox_MongoCollection
      *
      * @param array $a
      * @param array $options
+     * @return array|bool
      */
     public function insert (array $a, array $options = array())
     {

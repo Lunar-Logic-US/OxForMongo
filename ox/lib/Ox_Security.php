@@ -285,7 +285,7 @@ class Ox_Security
                     }
                 }
                 $fromUrl = array('r'=>Ox_Router::buildURL($path, $_GET));
-                if (self::DEBUG) Ox_Logger::logMessage('Ox_Security - secureResource Redirect: ' . $path . ' -> ' . $fromUrl);
+                if (self::DEBUG) Ox_Logger::logMessage('Ox_Security - secureResource Redirect: ' . $path . ' -> ' . print_r($fromUrl,1));
                 Ox_Router::redirect($url, $fromUrl,array("HTML/1.1 401 Authorization Required"));
             }
         } else if($this->checkPermission($required_roles,$roles)) {
