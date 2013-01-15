@@ -39,7 +39,7 @@ class LocalAsset extends Ox_Asset
     /**
      * Save the uploaded file.
      * @param $file_info array
-     * @return array|bool|null
+     * @return array|bool|null (the uploaded asset record)
      */
     public function save($file_info)
     {
@@ -49,7 +49,7 @@ class LocalAsset extends Ox_Asset
         } else {
             Ox_Logger::logError('Uploaded: ' . $file_info['file']['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
         }
-        return $uploaded;
+        return $doc;
     }
 
     /**

@@ -151,6 +151,7 @@ class Ox_AssemblerConstruct
      * @param $fileName string
      */
     public function js($fileName){
+        $this->layout = 'ajax';
         header("Content-type: application/x-javascript",true);
         @readfile($this->dir  . '/js/' . $fileName);
 
@@ -162,6 +163,7 @@ class Ox_AssemblerConstruct
      * @param $fileName string
      */
     public function css($fileName){
+        $this->layout = 'ajax';
         header("Content-type: text/css", true);
         @readfile($this->dir  . '/css/' . $fileName);
 
