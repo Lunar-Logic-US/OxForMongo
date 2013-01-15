@@ -16,6 +16,20 @@
  */
 
 /**
+ * @var array
+ */
+$class_overload = array();
+
+
+/**
+ * If the app is in a subdirectory the you need to set webdir_base to the directory that the app is in. Note no trailing /
+ * @var string
+ */
+//$web_base_dir = '/appdir';
+
+
+
+/**
  * MongoDB connection settings
  */
 $mongo_config = array(
@@ -34,12 +48,11 @@ $mongo_config = array(
  */
 $login_url = '/user/login';
 
-$class_overload = array();
 /**
  * Session handling configuration
  */
 $session = array(
-    'mongo_enabled' => TRUE,            //if FALSE reverts to php sessions
+    'mongo_enabled' => FALSE,            //if FALSE reverts to php sessions
     'mongo_collection' =>'sessions',
     //'cookie_path' => '/',             //defaults to /
     //'cookie_domain' => 'example.com', //defaults to the current domain
