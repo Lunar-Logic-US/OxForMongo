@@ -165,9 +165,10 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     private function loadAndRunAssembler($path, $file, $asm_class, $method, $parsed_args)
     {
-        $security = Ox_LibraryLoader::getResource('security');
-        $db = Ox_LibraryLoader::getResource('db');
-        $user = Ox_LibraryLoader::getResource('user');
+        $security = Ox_LibraryLoader::Security();
+        $db = Ox_LibraryLoader::db();
+        $user = Ox_LibraryLoader::User();
+        $widgetHandler = Ox_LibraryLoader::Widget_Handler();
 
         if (file_exists($file)) {
             require_once($file);
@@ -175,6 +176,7 @@ class Ox_AssemblerAction implements Ox_Routable
             $assembler->db = $db;
             $assembler->user = $user;
             $assembler->dir = $this->asm_dir;
+            $assembler->widgetHandler = $widgetHandler;
 
             // Allow for default requires roles if specific requirements are not set for a given action.
             // Does this belong here or should it be moved elsewhere?  Code wise it's easiest to put here,

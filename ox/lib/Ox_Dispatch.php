@@ -27,7 +27,7 @@ require_once(DIR_FRAMELIB . 'constructs/Ox_AssemblerConstruct.php');
 
 class Ox_Dispatch
 {
-    const DEBUG = TRUE;
+    const DEBUG = FALSE;
     /**
      * Flag to disable dispatch.
      */

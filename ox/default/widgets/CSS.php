@@ -43,13 +43,15 @@ class CSS implements Ox_Widget {
     public function render($return_string = FALSE) {
         $output = '';
 
+        $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         foreach ($this->_css_file_list as $css_file => $css_options) {
             $media = '';
             if (isset($css_options['media']) && $css_options['media']!==FALSE) {
                 $media = " media=\"{$css_options['media']}\" ";
             }
             $file = $css_file;
-            $directory = $css_options['directory'];
+
+            $directory = $appWebBase . $css_options['directory'];
             $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media} href=\"{$directory}{$file}\" />\n";
         }
 
