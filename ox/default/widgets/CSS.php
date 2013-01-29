@@ -52,7 +52,7 @@ class CSS implements Ox_Widget {
             $file = $css_file;
 
             $directory = $appWebBase . $css_options['directory'];
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media} href=\"{$directory}{$file}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
         }
 
         if ($return_string === FALSE) {
