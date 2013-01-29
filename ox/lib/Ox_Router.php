@@ -142,10 +142,6 @@ class Ox_Router
                 }
             }
         }
-        $webBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
-        if (!empty($webBase)) {
-            $url = $webBase . $url;
-        }
         return $url = $url.$param_str;
     }
 }
