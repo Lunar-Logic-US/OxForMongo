@@ -117,4 +117,8 @@ abstract class Ox_User {
             return null;
         }
     }
+
+    public function getUserDoc(){
+        return $this->user;
+    }
 }

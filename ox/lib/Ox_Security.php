@@ -221,7 +221,7 @@ class Ox_Security
      * @param $plainString
      * @return string
      */
-    public function hashAndSaltString($plainString)
+    public static function hashAndSaltString($plainString)
     {
         $salt = substr(sha1(uniqid(rand(), true)), 0, 6);
         $hashed = $salt . sha1($salt . $plainString);

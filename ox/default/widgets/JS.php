@@ -34,6 +34,7 @@ class JS implements Ox_Widget {
      * Array of javascript filenames.
      */
     private $_js_file_list = array();
+    private $_pageBase = '';
 
     /**
      * Create script tags for the list of js files.
@@ -41,9 +42,19 @@ class JS implements Ox_Widget {
      * @param bool $return_string
      * @return string
      */
-    public function render($return_string = FALSE) {
+    public function render($return_string = FALSE)
+    {
         $output = '';
+        if (!empty($this->_pageBase)) {
+            $output .= <<<JS
+<script>
+    var pageBase = '{$this->_pageBase}';
+</script>
 
+JS;
+        }
+
+        $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         foreach ($this->_js_file_list as $js_file => $js_options) {
             $type = '';
             if (isset($js_options['type']) && $js_options['type']!==FALSE) {
@@ -55,7 +66,9 @@ class JS implements Ox_Widget {
             }
 
             $file = $js_file;
-            $directory = $js_options['directory'];
+            $directory = $appWebBase . $js_options['directory'];
+
+
             $output .= "<script src=\"{$directory}{$file}\"{$type}{$charset}></script>\n";
         }
 
@@ -76,7 +89,8 @@ class JS implements Ox_Widget {
      * @return void
      * @internal param bool $media
      */
-    public function add_to_top($file,$directory='/js/',$type=FALSE,$charset=FALSE) {
+    public function add_to_top($file,$directory='/js/',$type=FALSE,$charset=FALSE)
+    {
         $options = array('directory'=>$directory,'type'=>$type,'charset'=>$charset);
         if (isset($this->_js_file_list[$file])) {
             $this->_js_file_list[$file] = $options;
@@ -96,7 +110,8 @@ class JS implements Ox_Widget {
      * @return void
      * @internal param bool $media
      */
-    public function add_to_bottom($file,$directory='/js/',$type=FALSE,$charset=FALSE) {
+    public function add_to_bottom($file,$directory='/js/',$type=FALSE,$charset=FALSE)
+    {
         $options = array('directory'=>$directory,'type'=>$type,'charset'=>$charset);
         $new = array($file => $options);
         //This will overwrite if the same file is used twice.
@@ -113,7 +128,17 @@ class JS implements Ox_Widget {
      * @return void
      * @internal param bool $media
      */
-    public function add($file,$directory='/js/',$type=FALSE,$charset=FALSE){
+    public function add($file,$directory='/js/',$type=FALSE,$charset=FALSE)
+    {
         $this->add_to_bottom($file,$directory,$type,$charset);
+    }
+
+    public function setPageBase($pageBase)
+    {
+        $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
+//        if (!empty($appWebBase)) {
+//            $appWebBase .= '/';
+//        }
+        $this->_pageBase = $appWebBase . $pageBase;
     }
 }

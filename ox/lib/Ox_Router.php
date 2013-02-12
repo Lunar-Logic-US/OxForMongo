@@ -142,6 +142,11 @@ class Ox_Router
                 }
             }
         }
+        $config = Ox_LibraryLoader::config_parser();
+        $webDir = $config->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
+        if(!preg_match('/^http/',$url) && !empty($webDir)){
+            $url = $webDir.$url;
+        }
         return $url = $url.$param_str;
     }
 }

@@ -50,8 +50,17 @@ class Ox_Dispatch
     
     /**
      * The path to application routes.
+     * @var array
      */
     private static $_appRoutes;
+
+    /**
+     * The base of the URL to strip off if the app is in a sub directory.
+     * @var string
+     */
+    private static $_appWebBase='';
+
+    const CONFIG_WEB_BASE_NAME = 'web_base_dir';
 
 
     /**
@@ -80,6 +89,7 @@ class Ox_Dispatch
         self::$_dirDefaultActions = OX_FRAME_DEFAULT . 'actions' . DIRECTORY_SEPARATOR;
         self::$_dirAppActions = DIR_APP . 'actions' . DIRECTORY_SEPARATOR;
         self::$_appRoutes = DIR_APP . 'config' . DIRECTORY_SEPARATOR . 'routes.php';
+        self::$_appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(self::CONFIG_WEB_BASE_NAME);
 
     }
 
@@ -145,6 +155,19 @@ class Ox_Dispatch
         self::_loadRoutes();
         //decode the URL
         $url_info = parse_url($_SERVER['REQUEST_URI']);
-        Ox_Router::route($url_info['path']);
+        if (self::DEBUG) {
+            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
+        }
+
+        // Strip off part of the url as needed
+        $url = $url_info['path'];
+        if (substr($url, 0, strlen(self::$_appWebBase)) == self::$_appWebBase) {
+            $url = substr($url, strlen(self::$_appWebBase), strlen($url) );
+        }
+
+        if (self::DEBUG) {
+            Ox_Logger::logDebug("Ox_Dispatch: Dispatching path (After Trim): " . $url);
+        }
+        Ox_Router::route($url);
     }
 }

@@ -39,7 +39,7 @@ class LocalAsset extends Ox_Asset
     /**
      * Save the uploaded file.  The form file input must have a name of "file".
      * @param $file_info array
-     * @return the uploaded asset record
+     * @return array|bool|null (the uploaded asset record)
      */
     public function save($file_info)
     {
@@ -59,13 +59,13 @@ class LocalAsset extends Ox_Asset
      */
     public function createURI($asset)
     {
-        global $logger;
         if(!$asset) {
             Ox_Logger::logWarning('LocalAsset::createURI Received null asset');
             return '#';
         }
         $extension = pathinfo($asset['original_name'], PATHINFO_EXTENSION);
-        return $this->base_uri . $asset['_id']->__toString() . '.' . $extension;
+        $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
+        return $appWebBase . $this->base_uri . $asset['_id']->__toString() . '.' . $extension;
     }
 
     /**
