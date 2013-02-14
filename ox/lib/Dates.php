@@ -7,6 +7,24 @@
  * To change this template use File | Settings | File Templates.
  */
 
+function createDate( $p_dateTime, $p_locationDoc = 0 )
+{
+    if ($p_dateTime === null || $p_dateTime ==='' ) {
+        return null;
+    }
+
+    if( is_numeric( $p_dateTime) ){
+        $dateTimeString = "@" . $p_dateTime;
+    } else if (is_string( $p_dateTime)) {
+        $dateTimeString = $p_dateTime;
+    } else {
+        $dateTimeString = $p_dateTime;
+    }
+
+    $dateTime = new DateTime( $dateTimeString, getActiveTimeZone($p_locationDoc ));
+    return new MongoDate( $dateTime->getTimestamp() );
+}
+
 function localizedDate( $p_mongoDate, $p_locationDoc = 0 ) {
     return formattedDate($p_mongoDate, 'm/d/Y', $p_locationDoc);
 }
