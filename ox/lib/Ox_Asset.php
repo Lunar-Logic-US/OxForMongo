@@ -34,20 +34,23 @@ abstract class Ox_Asset
      * @param $file_info array
      * @return array|null
      */
-    public function save($file_info)
+    public function save($file_info, $fieldName='file')
     {
         $db = Ox_LibraryLoader::Db();
         $assets = $db->getCollection('assets');
-        $tmp_name = $file_info["file"]["tmp_name"];
+        $tmp_name = $file_info[$fieldName]["tmp_name"];
+        //var_dump($file_info);
         if (!file_exists($tmp_name)) {
             return null;
         }
         $md5_file = md5_file($tmp_name);
-        $doc = array('original_name'=>$file_info['file']['name'],
-                              'type'=>$file_info['file']['type'],
-                              'size'=>$file_info['file']['size'],
+        $doc = array('original_name'=>$file_info[$fieldName]['name'],
+                              'type'=>$file_info[$fieldName]['type'],
+                              'size'=>$file_info[$fieldName]['size'],
                               'md5'=> $md5_file
                             );
+        //var_dump($doc);
+        //print "xxxxxxxxxxxxxxxxxxxxxxxxx";
         $assets->insert($doc);
         return $doc;
         
