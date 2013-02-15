@@ -37,7 +37,7 @@ class LocalAsset extends Ox_Asset
     }
 
     /**
-     * Save the uploaded file.
+     * Save the uploaded file.  The form file input must have a name of "file".
      * @param $file_info array
      * @return array|bool|null (the uploaded asset record)
      */

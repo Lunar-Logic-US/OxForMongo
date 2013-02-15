@@ -73,9 +73,9 @@ class Ox_MongoCollection
         if ($id instanceof MongoId) {
             $mongoId = $id;
         } else {
-            $mongoId = new MongoId($id);
+            $mongoId = new MongoId(idString($id));
         }
-
+        
         return $this->_mongoCollection->findOne( array( '_id' => $mongoId ) );
     }
 
