@@ -41,13 +41,18 @@ class LocalAsset extends Ox_Asset
      * @param $file_info array
      * @return array|bool|null (the uploaded asset record)
      */
-    public function save($file_info)
+    public function save($file_info,$fieldName='file')
     {
-        $doc = parent::save($file_info);
-        if($uploaded=move_uploaded_file($file_info["file"]["tmp_name"], DIR_UPLOAD . $doc['_id']->__tostring())) {
-            Ox_Logger::logMessage('Uploaded: ' . $file_info['file']['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
+        $doc = parent::save($file_info,$fieldName);
+        if(empty($doc)) {
+            return false;
+        }
+        //print "yyyyyyyyyyyyyyyyyyyyyyyyyy";
+        //var_dump($doc);
+        if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], DIR_UPLOAD . $doc['_id']->__tostring())) {
+            Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
         } else {
-            Ox_Logger::logError('Uploaded: ' . $file_info['file']['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
+            Ox_Logger::logError('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
         }
         return $doc;
     }
