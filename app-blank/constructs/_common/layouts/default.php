@@ -3,6 +3,7 @@
 <head>
     <link rel="stylesheet" type="text/css" media="all" href="/css/global.css" />
     <?php Ox_WidgetHandler::CSS() ?>
+    <?php Ox_WidgetHandler::JS() ?>
     <?php Ox_WidgetHandler::HtmlTitle() ?>
 </head>
 <body>
