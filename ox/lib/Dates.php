@@ -52,6 +52,20 @@ function utc( $p_mongoDate ) {
     return mongoDate($p_mongoDate)->sec;
 }
 
+function timeIntTo24HourPadded( $time ) {
+    $time = (string) $time;
+    switch(strlen($time)) {
+        case 3:
+            return '0' . $time;
+        case 2:
+            return '00' . $time;
+        case 1:
+            return '000' . $time;
+        default:
+            return $time;
+    }
+}
+
 function mongoDate($p_dateTime, $p_locationDoc = 0) {
     if($p_dateTime instanceof MongoDate) {
         return $p_dateTime;
