@@ -88,7 +88,7 @@ JS;
             $output .= "<script>\n";
             $output .= '$(window).load(function() {' . "\n";
             foreach ($this->_js_jQuery_ready_list as $id => $script) {
-                $output .= "    <!-- Script ID: {$id} -->\n";
+                $output .= "    //<!-- Script ID: {$id} -->\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
