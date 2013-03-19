@@ -72,11 +72,13 @@ class Ox_MongoCollection
     {
         if ($id instanceof MongoId) {
             $mongoId = $id;
+        } elseif (preg_match('/^[0-9A-F]{24}\z/i',$id)) {
+            $mongoId = new MongoId($id);
         } else {
-            $mongoId = new MongoId(idString($id));
+            $mongoId = $id;
         }
         
-        return $this->_mongoCollection->findOne( array( '_id' => $mongoId ) );
+        return $this->_mongoCollection->findOne(array('_id' => $mongoId));
     }
 
     /**
@@ -87,7 +89,7 @@ class Ox_MongoCollection
      */
     public function __call($name, $params)
     {
-        return call_user_func_array(array( $this->_mongoCollection, $name), $params);
+        return call_user_func_array(array($this->_mongoCollection, $name), $params);
     }
 
     /**
