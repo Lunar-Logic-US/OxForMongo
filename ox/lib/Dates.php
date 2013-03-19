@@ -52,6 +52,20 @@ function utc( $p_mongoDate ) {
     return mongoDate($p_mongoDate)->sec;
 }
 
+function timeIntTo24HourPadded( $time ) {
+    $time = (string) $time;
+    switch(strlen($time)) {
+        case 3:
+            return '0' . $time;
+        case 2:
+            return '00' . $time;
+        case 1:
+            return '000' . $time;
+        default:
+            return $time;
+    }
+}
+
 function mongoDate($p_dateTime, $p_locationDoc = 0) {
     if($p_dateTime instanceof MongoDate) {
         return $p_dateTime;
@@ -143,17 +157,6 @@ function getActiveTimeZone( $p_locationDoc = 0 ) {
 
 function isFuture( $p_date ) {
     return dateLessThan( mongoDate('today'), $p_date );
-}
-
-function isDateLocked($p_date) {
-    global $db;
-    
-    $date_fence = $db->vars->findOne(array('_id'=>'id_date_fence'));
-    if(!$date_fence) {
-        return false;
-    }
-    
-    return dateLessThanEq($p_date, $date_fence['value']);
 }
 
 class DateRange {
@@ -451,6 +454,60 @@ class DateRange {
 
     public function getIndexedDateRange() {
         return $this->indexed_date_range;
+    }
+
+    /**
+     * Returns an array of years, each of which is an array of ISO weeks, which are arrays
+     * of Mongo dates.  Part of the problem encountered when iterating over an normal
+     * indexed date range is that weeks may not be contiguous if they span two months, or
+     * even two years.  This function retains whole weeks within the date range and
+     * eliminates months, and spans over years, from the equation for smoother calculations.
+     */
+    public function getIndexedIterativeDateRangeByWeek() {
+        $idxr = $this->indexed_date_range;
+        $first = $this->getFirstDay();
+        $last = $this->getLastDay();
+        $retval = array();
+
+        foreach($idxr as $yidx => $year) {
+            if(!isset($retval[$yidx])) {
+                $retval[$yidx] = array();
+            }
+            foreach($year as $month) {
+                foreach($month as $widx => $week) {
+                    if(!isset($retval[$yidx][$widx])) {
+                        $retval[$yidx][$widx] = array();
+                    }
+                    // get the full ISO week for the first day of this week.
+                    $this_week = DateRange::getISOWeekForDate($week[0]);
+                    $this_week = $this_week->indexed_date_range;
+                    foreach($this_week as $this_year) {
+                        foreach($this_year as $this_month) {
+                            foreach($this_month as $this_week) {
+                                foreach($this_week as $this_day) {
+                                    // ensure the date is within our range before adding it
+                                    if(dateGreaterThanEq($this_day, $first) && dateLessThanEq($this_day, $last)) {
+                                        // ensure we don't have duplicates
+                                        if(!$this->dateInArray($this_day, $retval[$yidx][$widx])) {
+                                            $retval[$yidx][$widx][] = $this_day;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $retval;
+    }
+
+    private function dateInArray( $date, $array ) {
+        foreach($array as $check_day) {
+            if(sameDateAndTime($date, $check_day)) { return true; }
+        }
+        return false;
     }
 
     private function getLastDayOfMonth( $date )

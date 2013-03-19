@@ -34,6 +34,8 @@ class JS implements Ox_Widget {
      * Array of javascript filenames.
      */
     private $_js_file_list = array();
+    private $_js_jQuery_ready_list = array();
+    private $_js_script_list = array();
     private $_pageBase = '';
 
     /**
@@ -71,6 +73,29 @@ JS;
 
             $output .= "<script src=\"{$directory}{$file}\"{$type}{$charset}></script>\n";
         }
+        
+        if (count($this->_js_script_list)) {
+            $output .= "<script>\n";
+            foreach ($this->_js_script_list as $id => $script) {
+                $output .= "    <!-- Script ID: {$id} -->\n";
+                $output .= "    " . $script;
+                $output .= "\n";
+            }
+            $output .= "</script>\n";
+        }
+
+        if (count($this->_js_jQuery_ready_list)) {
+            $output .= "<script>\n";
+            $output .= '$(window).load(function() {' . "\n";
+            foreach ($this->_js_jQuery_ready_list as $id => $script) {
+                $output .= "    //<!-- Script ID: {$id} -->\n";
+                $output .= "    " . $script;
+                $output .= "\n";
+            }
+            $output .= "});\n";
+            $output .= "</script>\n";
+        }
+
 
         if ($return_string === FALSE) {
             print $output;
@@ -141,4 +166,18 @@ JS;
 //        }
         $this->_pageBase = $appWebBase . $pageBase;
     }
+    
+    public function addHeaderScript ($id,$script) {
+        $new = array($id=>$script);
+        //This will overwrite if the same script id is used twice.
+        $this->_js_script_list = array_merge($this->_js_script_list,$new);
+        
+    }
+    
+    public function addjQueryReady ($id,$script) {
+        $new = array($id=>$script);
+        //This will overwrite if the same script id is used twice.
+        $this->_js_jQuery_ready_list = array_merge($this->_js_jQuery_ready_list,$new);
+    }
+    
 }
