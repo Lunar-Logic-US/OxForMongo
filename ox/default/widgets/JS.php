@@ -88,7 +88,7 @@ JS;
             $output .= "<script>\n";
             $output .= '$(window).load(function() {' . "\n";
             foreach ($this->_js_jQuery_ready_list as $id => $script) {
-                $output .= "    <!-- Script ID: {$id} -->\n";
+                $output .= "    //<!-- Script ID: {$id} -->\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
@@ -170,7 +170,7 @@ JS;
     public function addHeaderScript ($id,$script) {
         $new = array($id=>$script);
         //This will overwrite if the same script id is used twice.
-        $this->$_js_script_list = array_merge($this->$_js_script_list,$new);
+        $this->_js_script_list = array_merge($this->_js_script_list,$new);
         
     }
     
