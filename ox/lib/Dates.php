@@ -159,17 +159,6 @@ function isFuture( $p_date ) {
     return dateLessThan( mongoDate('today'), $p_date );
 }
 
-function isDateLocked($p_date) {
-    global $db;
-    
-    $date_fence = $db->vars->findOne(array('_id'=>'id_date_fence'));
-    if(!$date_fence) {
-        return false;
-    }
-    
-    return dateLessThanEq($p_date, $date_fence['value']);
-}
-
 class DateRange {
     
     private $indexed_date_range = null;
