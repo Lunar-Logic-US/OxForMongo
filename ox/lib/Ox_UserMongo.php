@@ -113,7 +113,7 @@ class Ox_UserMongo extends Ox_User
     public function getPassword() {
         return $this->get('password');
     }
-    
+
     /**
      * Returns the MongoId object for this user.
      */

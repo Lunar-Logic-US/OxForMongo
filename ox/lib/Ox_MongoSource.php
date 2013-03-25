@@ -259,7 +259,7 @@ class Ox_MongoSource
      * This setup this object o be able to return collections in the form $var->collection_name.
      *
      * @param $name
-     * @return mixed
+     * @return Ox_MongoCollection
      */
     public  function __get($name)
     {
