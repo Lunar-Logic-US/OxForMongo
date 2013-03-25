@@ -137,6 +137,8 @@ class Ox_MongoSource
 
             if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
                 $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
+            } else if ($this->_driverVersion >= '1.3.0') {
+                $this->_connection = new MongoClient($host);
             } else if ($this->_driverVersion >= '1.2.0') {
                 $this->_connection = new Mongo($host);
             } else {
