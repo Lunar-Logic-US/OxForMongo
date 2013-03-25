@@ -53,11 +53,12 @@ class Ox_AssemblerAction implements Ox_Routable
      * @param null $asm_class
      * @param array $map
      */
-    public function __construct($asm_dir = null, $asm_class = null, $map = array())
+    public function __construct($asm_dir = null, $asm_class = null, $map = array(),$args = array())
     {
         $this->asm_dir = $asm_dir;
         $this->asm_class = $asm_class;
         $this->method_map = $map;
+        $this->asm_args = $args;
     }
 
     /**
@@ -106,6 +107,10 @@ class Ox_AssemblerAction implements Ox_Routable
                 array_push($parsed_args, $arg);
             }
         }
+        if (empty($parsed_args) && !empty($this->asm_args)) {
+            $parsed_args = $this->asm_args;
+        }
+        //var_dump($this->asm_args);die();
 
         // Check our mapping
         if($this->method_map) {
