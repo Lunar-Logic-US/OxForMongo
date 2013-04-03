@@ -91,6 +91,8 @@ class LocalAsset extends Ox_Asset
         }
 
         header('Content-Type: ' . $asset['type']);
+        header('Content-Length: ' . $asset['size']);
+        header('Content-Disposition: filename="' . $asset['original_name'] . '"');
 
         if(!@readfile(DIR_UPLOAD . $base_filename)) {
             Ox_Logger::logError('Could not read file: ' . DIR_UPLOAD . $base_filename);
