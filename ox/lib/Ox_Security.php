@@ -269,6 +269,7 @@ class Ox_Security
             Ox_Logger::logDebug("User : " . print_r($this->user,true));
         }
         if($this->isPublic($required_roles)) {
+            if (self::DEBUG) Ox_Logger::logMessage('Ox_Security - found public resource. ');
             return true;
         } else if(!$this->isPublic($required_roles) && !$this->loggedIn()) {
             // We don't want to deep link people to immediately logout
