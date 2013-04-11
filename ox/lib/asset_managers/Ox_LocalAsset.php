@@ -39,6 +39,7 @@ class LocalAsset extends Ox_Asset
     /**
      * Save the uploaded file.  The form file input must have a name of "file".
      * @param $file_info array
+     * @param $fieldName string
      * @return array|bool|null (the uploaded asset record)
      */
     public function save($file_info,$fieldName='file')
@@ -47,8 +48,6 @@ class LocalAsset extends Ox_Asset
         if(empty($doc)) {
             return false;
         }
-        //print "yyyyyyyyyyyyyyyyyyyyyyyyyy";
-        //var_dump($doc);
         if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], DIR_UPLOAD . $doc['_id']->__tostring())) {
             Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
         } else {

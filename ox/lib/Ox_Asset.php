@@ -32,6 +32,7 @@ abstract class Ox_Asset
      * You then use the information in $doc to the actual save.
      *
      * @param $file_info array
+     * @param $fieldName string
      * @return array|null
      */
     public function save($file_info, $fieldName='file')
@@ -39,21 +40,44 @@ abstract class Ox_Asset
         $db = Ox_LibraryLoader::Db();
         $assets = $db->getCollection('assets');
         $tmp_name = $file_info[$fieldName]["tmp_name"];
-        //var_dump($file_info);
-        if (!file_exists($tmp_name)) {
+        if ($file_info[$fieldName]['error']!==0) {
+            switch ($file_info[$fieldName]['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                    Ox_Logger::logError('The uploaded file exceeds the upload_max_filesize directive in php.ini: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    Ox_Logger::logError('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    Ox_Logger::logError('The uploaded file was only partially uploaded.: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    Ox_Logger::logError('No file was uploaded: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    Ox_Logger::logError('Missing a temporary folder: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    Ox_Logger::logError('Failed to write file to disk: ' . $file_info[$fieldName]['name']);
+                    break;
+                case UPLOAD_ERR_EXTENSION:
+                    Ox_Logger::logError('TA PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help' . $file_info[$fieldName]['name']);
+                    break;
+            }
+
+        }
+        if (!file_exists($tmp_name) || !is_uploaded_file($tmp_name)) {
             return null;
         }
+
         $md5_file = md5_file($tmp_name);
         $doc = array('original_name'=>$file_info[$fieldName]['name'],
                               'type'=>$file_info[$fieldName]['type'],
                               'size'=>$file_info[$fieldName]['size'],
                               'md5'=> $md5_file
                             );
-        //var_dump($doc);
-        //print "xxxxxxxxxxxxxxxxxxxxxxxxx";
         $assets->insert($doc);
         return $doc;
-        
     }
 
     /**
