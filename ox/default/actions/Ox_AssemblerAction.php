@@ -154,8 +154,6 @@ class Ox_AssemblerAction implements Ox_Routable
                 print $content;
             }
         }
-
-        exit(0);
     }
 
     /**
