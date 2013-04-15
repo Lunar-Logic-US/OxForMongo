@@ -72,10 +72,10 @@ class Ox_MongoCollection
     {
         if ($id instanceof MongoId) {
             $mongoId = $id;
-        } elseif (preg_match('/^[0-9A-F]{24}\z/i',$id)) {
+        } elseif ($id instanceof string && preg_match('/^[0-9A-F]{24}\z/i',$id)) {
             $mongoId = new MongoId($id);
         } else {
-            $mongoId = $id;
+            $mongoId = mongoId(idString($id));
         }
         
         return $this->_mongoCollection->findOne(array('_id' => $mongoId));
