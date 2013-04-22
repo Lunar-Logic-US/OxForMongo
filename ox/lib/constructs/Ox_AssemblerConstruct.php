@@ -143,6 +143,7 @@ class Ox_AssemblerConstruct
         //var_dump($args);
         $action = new Ox_AssemblerAction($this->dir . DIRECTORY_SEPARATOR .$subConstruct,$subConstruct);
         $action->go($args);
+        exit(0);
     }
 
     /**
