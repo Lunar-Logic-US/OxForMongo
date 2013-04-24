@@ -131,7 +131,7 @@ class LocalAsset extends Ox_Asset
         if ($partial_content) header('Content-Range: bytes ' . $offset . '-' . ($offset + $length) . '/' . $file_size);
         header("Connection: close");
         //header('Content-Type: audio/mpeg');
-        //header('Content-Type: ' . $asset['type']);
+        header('Content-Type: ' . $asset['type']);
         //header('Content-Disposition: attachment; filename=' . $file_name);
         header('Content-Disposition: filename="' . $asset['original_name'] . '"');
         $fs = stat(DIR_UPLOAD . $base_filename);
