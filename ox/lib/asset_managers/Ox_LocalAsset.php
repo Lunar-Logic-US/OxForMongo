@@ -86,9 +86,11 @@ class LocalAsset extends Ox_Asset
         $asset = $assets->findOne(array('_id'=>new MongoId($base_filename)));
         if(!$asset) {
             header("HTTP/1.0 404 Not Found (Not in DB)");
+            Ox_Logger::logWarning('LocalAsset::getAsset File: '.$base_filename.' Not found in the database.');
             exit(1);
         }
         if (!file_exists(DIR_UPLOAD . $base_filename)) {
+            Ox_Logger::logWarning('LocalAsset::getAsset File: '.$base_filename.' Not found on the filesystem.');
             header("HTTP/1.0 404 Not Found (File Missing)");
             exit(1);
         }
