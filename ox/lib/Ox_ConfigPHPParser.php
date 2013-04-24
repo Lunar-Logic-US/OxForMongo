@@ -101,5 +101,3 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
         }
     }
 }
-
-?>

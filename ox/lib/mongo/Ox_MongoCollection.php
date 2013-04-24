@@ -65,7 +65,7 @@ class Ox_MongoCollection
 
     /**
      * Find doc with _id of string|MongoId of p_id
-     * @param $id string|MongoId
+     * @param $id string|MongoId|array
      * @return array|null
      */
     public function findById($id)

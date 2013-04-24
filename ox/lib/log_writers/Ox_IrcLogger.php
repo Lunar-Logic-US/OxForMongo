@@ -107,5 +107,3 @@ class IRCLogger implements Ox_LogWriter {
         echo "[SEND] $cmd <br>"; //displays it on the screen 
     }
 }
-
-?>

@@ -73,5 +73,3 @@ class Ox_SecurityMongoCollection extends Ox_Security
     }
     */
 }
-
-?>
