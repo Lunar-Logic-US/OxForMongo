@@ -85,22 +85,58 @@ class LocalAsset extends Ox_Asset
         $assets = $db->getCollection('assets');
         $asset = $assets->findOne(array('_id'=>new MongoId($base_filename)));
         if(!$asset) {
-            header("HTTP/1.0 404 Not Found");
+            header("HTTP/1.0 404 Not Found (Not in DB)");
+            exit(1);
+        }
+        if (!file_exists(DIR_UPLOAD . $base_filename)) {
+            header("HTTP/1.0 404 Not Found (File Missing)");
             exit(1);
         }
 
-        header('Content-Type: ' . $asset['type']);
-        header('Content-Length: ' . $asset['size']);
+        $file_size = $asset['size'];
+
+        if (isset($_SERVER['HTTP_RANGE'])) {
+            $partial_content = true;
+            $range = explode("-", $_SERVER['HTTP_RANGE']);
+            $offset = intval($range[0]);
+            $length = intval($range[1]) - $offset;
+        }
+        else {
+            $partial_content = false;
+            $offset = 0;
+            $length = $file_size;
+        }
+
+        //read the data from the file
+        $handle = fopen(DIR_UPLOAD . $base_filename, 'r');
+        $buffer = '';
+        fseek($handle, $offset);
+        $buffer = fread($handle, $length);
+        if ($partial_content) {
+            $data_size = intval($range[1]) - intval($range[0]);
+            $md5_sum = md5($buffer);
+        } else {
+            $data_size = $file_size;
+            $md5_sum = $asset['md5'];
+        }
+        fclose($handle);
+
+        @ini_set('magic_quotes_runtime', 0);
+        // send the headers and data
+        header("Content-Length: " . $data_size);
+        header("Content-md5: " . $md5_sum);
+        header("Accept-Ranges: bytes");
+        if ($partial_content) header('Content-Range: bytes ' . $offset . '-' . ($offset + $length) . '/' . $file_size);
+        header("Connection: close");
+        //header('Content-Type: audio/mpeg');
+        //header('Content-Type: ' . $asset['type']);
+        //header('Content-Disposition: attachment; filename=' . $file_name);
         header('Content-Disposition: filename="' . $asset['original_name'] . '"');
-
-        if(!@readfile(DIR_UPLOAD . $base_filename)) {
-            Ox_Logger::logError('Could not read file: ' . DIR_UPLOAD . $base_filename);
-            exit(1);
-        }
-
+        $fs = stat(DIR_UPLOAD . $base_filename);
+        header("Etag: ".sprintf('"%x-%x-%s"', $fs['ino'], $fs['size'],base_convert(str_pad($fs['mtime'],16,"0"),10,16)));
+        echo $buffer;
+        flush();
         exit(0);
 
     }
-
-
 }
