@@ -44,27 +44,26 @@ abstract class Ox_Asset
             switch ($file_info[$fieldName]['error']) {
                 case UPLOAD_ERR_INI_SIZE:
                     Ox_Logger::logError('The uploaded file exceeds the upload_max_filesize directive in php.ini: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('The uploaded file exceeds the maximum upload size.', 'UPLOAD_ERR_INI_SIZE');
                 case UPLOAD_ERR_FORM_SIZE:
                     Ox_Logger::logError('The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('The uploaded file exceeds the maximum file size.', 'UPLOAD_ERR_FORM_SIZE');
                 case UPLOAD_ERR_PARTIAL:
                     Ox_Logger::logError('The uploaded file was only partially uploaded.: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('The uploaded file was only partially uploaded.', 'UPLOAD_ERR_PARTIAL');
                 case UPLOAD_ERR_NO_FILE:
                     Ox_Logger::logError('No file was uploaded: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('No file was uploaded.', 'UPLOAD_ERR_NO_FILE');
                 case UPLOAD_ERR_NO_TMP_DIR:
                     Ox_Logger::logError('Missing a temporary folder: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('A temporary folder was missing preventing the upload.', 'UPLOAD_ERR_NO_TMP_DIR');
                 case UPLOAD_ERR_CANT_WRITE:
                     Ox_Logger::logError('Failed to write file to disk: ' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('The file could not be written to disk.', 'UPLOAD_ERR_CANT_WRITE');
                 case UPLOAD_ERR_EXTENSION:
                     Ox_Logger::logError('TA PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help' . $file_info[$fieldName]['name']);
-                    break;
+                    throw new Ox_AssetException('A TA PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; the system administrator may want to examine the list of loaded extensions with phpinfo().', 'UPLOAD_ERR_EXTENSION');
             }
-
         }
         if (!file_exists($tmp_name) || !is_uploaded_file($tmp_name)) {
             return null;

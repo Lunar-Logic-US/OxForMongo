@@ -114,7 +114,7 @@ class Ox_AssemblerAction implements Ox_Routable
 
         // Check our mapping
         if($this->method_map) {
-            if($this->method_map[$method]) {
+            if(isset($this->method_map[$method])) {
                 $method = $this->method_map[$method];
             }
         }
