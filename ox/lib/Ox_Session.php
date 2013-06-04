@@ -81,6 +81,8 @@ class Ox_Session
             if (self::DEBUG) Ox_Logger::logDebug('Session: PHP')
             ;
             $this->_uses_mongo = FALSE;
+            ini_set('session.use_cookies',              1);
+            ini_set('session.cookie_httponly',          1);
             session_start();
         }  else {
             $mongo_config=$config_parser->getAppConfigValue('mongo_config');
