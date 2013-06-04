@@ -108,6 +108,7 @@ class Ox_MongoSessionManager
         ini_set('session.use_trans_sid',            0);
         ini_set('session.hash_function',            1);
         ini_set('session.hash_bits_per_character',  5);
+        ini_set('session.cookie_httponly',          1);
 
         // disable client/proxy caching
         session_cache_limiter('nocache');
