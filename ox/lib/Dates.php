@@ -33,17 +33,19 @@ function localizedDateTime( $p_mongoDate, $p_locationDoc = 0 ) {
     return formattedDate($p_mongoDate, 'm/d/Y h:i:sa', $p_locationDoc);
 }
 
-function formattedDate( $p_mongoDate, $format='', $p_locationDoc = 0 ) {
+function formattedDate($p_mongoDate, $format = '', $p_locationDoc = 0) {
     if(is_null($p_mongoDate)) {
         return '';
     }
 
-    if (!$format) {
+    if(!$format) {
         $format = 'm/d/Y';
     }
 
-    $dateTime = new DateTime( "@" . utc($p_mongoDate), new DateTimeZone( 'UTC' ));
-    $dateTime->setTimezone(getActiveTimeZone($p_locationDoc));
+    // The following is a work-around to creating a date with a Unix timestamp
+    // and PHP not honoring the timezone (which is inconvenient for our purposes).
+    $dateTime = new DateTime('now', getActiveTimeZone($p_locationDoc));
+    $dateTime->setTimestamp(utc($p_mongoDate));
 
     return $dateTime->format($format);
 }
@@ -151,8 +153,14 @@ function getActiveTimeZone( $p_locationDoc = 0 ) {
         $timeZoneString = $p_locationDoc['time_zone'];
     }
 
-    $timeZone = new DateTimeZone($timeZoneString);
-    return $timeZone;
+    // creating timezones gets costly when we're doing it many times, we only
+    // want to get a new one if it differs from the default.
+    if($timeZoneString == date_default_timezone_get()) {
+        return null;
+    } else {
+        $timeZone = new DateTimeZone($timeZoneString);
+        return $timeZone;
+    }
 }
 
 function isFuture( $p_date ) {
