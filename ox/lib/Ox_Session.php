@@ -27,6 +27,8 @@ require_once(DIR_FRAMELIB . 'session_managers/Ox_MongoSessionManager.php');
 
 class Ox_Session
 {
+    const DEBUG = FALSE;
+
     /**
      * MongoDB session
      */
@@ -52,8 +54,6 @@ class Ox_Session
      */
     private $_max_timeout = 900;
     
-    const DEBUG = FALSE;
-
     /**
      * Singleton instantiation of the session.
      */
@@ -83,6 +83,39 @@ class Ox_Session
             $this->_uses_mongo = FALSE;
             ini_set('session.use_cookies',              1);
             ini_set('session.cookie_httponly',          1);
+
+            $runSet = false;
+            $domain = null;
+            if (isset($session_config['cookie_domain'])) {
+                $domain=$session_config['cookie_domain'];
+                $runSet = true;
+            }
+
+            $path = '/';
+            if (isset($session_config['cookie_path'])) {
+                $path=$session_config['cookie_path'];
+                $runSet = true;
+            }
+
+            $lifetime = 3600;
+            if (isset($session_config['lifetime'])) {
+                $path=$this->_config['cookie_path'];
+                $runSet = true;
+            }
+
+            //Only run if there is a change.  otherwise just use system defaults.
+            if ($runSet) {
+                session_set_cookie_params(
+                    $lifetime,
+                    $path,
+                    $domain
+                );
+            }
+            if (isset($session_config['session_name'])) {
+                session_name($session_config['session_name']);
+            }
+
+
             session_start();
         }  else {
             $mongo_config=$config_parser->getAppConfigValue('mongo_config');
@@ -239,7 +272,7 @@ DEBUG;
             }
             $time_left = $default_timeout - (time() - $_SESSION['last_request_time']);
         }
-        if (self::DEBUG) Ox_Logger::logDebug('SESSION - getSessionTimeRemaining : Session Timeleft: ' . $time_left);
+        if (self::DEBUG) Ox_Logger::logDebug('SESSION - getSessionTimeRemaining : Session Time left: ' . $time_left);
         return $time_left;
 
     }
