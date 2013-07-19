@@ -105,7 +105,7 @@ class Ox_Security
                 if ($redirect) {
                     if(isset($_GET['r'])) {
                         $redirect = urldecode($_GET['r']);
-                        if (self::DEBUG) Ox_Logger::logDebug('Redirect: login -> ' . $redirect);
+                        if (self::DEBUG) Ox_Logger::logDebug('Ox_Security::login - Redirect: login -> ' . $redirect);
                         Ox_Router::redirect($redirect);
                     }
                 }
@@ -190,8 +190,8 @@ class Ox_Security
         } else {
             $this->session->set('user_id', $user['_id']->__toString());
         }
-        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser adding to session " . $this->user->getIdString());
-        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser Session " . print_r($_SESSION,1));
+        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser - adding to session " . $this->user->getIdString());
+        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser - Session " . print_r($_SESSION,1));
     }
 
     /**
@@ -201,7 +201,8 @@ class Ox_Security
     public function loggedIn()
     {
         $user_id = $this->session->get('user_id');
-        if (self::DEBUG) Ox_Logger::logDebug('SECURITY: loggedIn - Logging in:' .$user_id);
+        if (self::DEBUG) Ox_Logger::logDebug('Ox_Security::loggedIn - Logging in:' .$user_id);
+        //if (self::DEBUG) Ox_Logger::logDebug('Ox_Security::loggedIn - Call Trace:' . print_r(debug_backtrace(),1));
         return $user_id;
     }
 
@@ -211,7 +212,7 @@ class Ox_Security
     public function logout()
     {
         $user_id = $this->session->get('user_id');
-        if (self::DEBUG) Ox_Logger::logMessage("Logged user $user_id out");
+        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::logout - Logged user $user_id out");
         $this->session->stop();
     }
 
@@ -263,18 +264,18 @@ class Ox_Security
         }
         // See if this method requires login
         if (self::DEBUG) {
-            Ox_Logger::logDebug("Path : $path  ");
-            Ox_Logger::logDebug("Required Roles: " . print_r($required_roles,true));
-            Ox_Logger::logDebug("Method: $method");
-            Ox_Logger::logDebug("User : " . print_r($this->user,true));
+            Ox_Logger::logDebug("Ox_Security::secureResource - Path : $path  ");
+            Ox_Logger::logDebug("Ox_Security::secureResource - Required Roles: " . print_r($required_roles,true));
+            Ox_Logger::logDebug("Ox_Security::secureResource - Method: $method");
+            Ox_Logger::logDebug("Ox_Security::secureResource - User : " . print_r($this->user,true));
         }
         if($this->isPublic($required_roles)) {
-            if (self::DEBUG) Ox_Logger::logMessage('Ox_Security - found public resource. ');
+            if (self::DEBUG) Ox_Logger::logMessage('Ox_Security::secureResource -  found public resource. ');
             return true;
         } else if(!$this->isPublic($required_roles) && !$this->loggedIn()) {
             // We don't want to deep link people to immediately logout
             if($method == 'logout') {
-                if (self::DEBUG) Ox_Logger::logDebug('Redirect: ' . $path . ' -> /');
+                if (self::DEBUG) Ox_Logger::logDebug('Ox_Security::secureResource - Redirect logout: ' . $path . ' -> /');
                 Ox_Router::redirect('/');
             } else {
                 $url = '/users/login';
@@ -286,7 +287,7 @@ class Ox_Security
                     }
                 }
                 $fromUrl = array('r'=>Ox_Router::buildURL($path, $_GET));
-                if (self::DEBUG) Ox_Logger::logMessage('Ox_Security - secureResource Redirect: ' . $path . ' -> ' . print_r($fromUrl,1));
+                if (self::DEBUG) Ox_Logger::logMessage('Ox_Security::secureResource -  Not Public/Not Logged in Redirect: ' . $path . ' -> ' . print_r($fromUrl,1));
                 Ox_Router::redirect($url, $fromUrl,array("HTML/1.1 401 Authorization Required"));
             }
         } else if($this->checkPermission($required_roles,$roles)) {
