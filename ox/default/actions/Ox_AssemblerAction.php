@@ -69,7 +69,7 @@ class Ox_AssemblerAction implements Ox_Routable
      */
     public function go($args)
     {
-        if (self::DEBUG) Ox_Logger::logDebug('Actions Args:' . print_r($args,true));
+        if (self::DEBUG) Ox_Logger::logDebug('Ox_AssemblerAction::go - Actions Args:' . print_r($args,true));
         // Used for deep linking if login required.
         $full_path = array_shift($args); // $match[0] from the preg_match in router
         if(!$this->asm_class) {
@@ -190,7 +190,7 @@ class Ox_AssemblerAction implements Ox_Routable
                 $required_roles = $assembler->default_roles;
             }
             if($security->secureResource($path, $required_roles, $method)) {
-                if(self::DEBUG) Ox_Logger::logDebug('Calling method: ' . $method);
+                if(self::DEBUG) Ox_Logger::logDebug('Ox_AssemblerAction::loadAndRunAssembler - calling method: ' . $method);
                 //call_user_func_Array can be slow
                 //call_user_func_array(array( $assembler, $method), $parsed_args);
                 if (!method_exists($assembler,$method)) {
