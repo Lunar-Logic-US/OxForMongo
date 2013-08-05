@@ -89,9 +89,9 @@ class Ox_UserMongo extends Ox_User
             $this->user = $db->$collection->findOne($this->user);
         }
         if (isset($this->user) && !empty($this->user)) {
-	    return true;
-	}
-	return false;
+	        return true;
+	    }
+	    return false;
     }
 
     /**
