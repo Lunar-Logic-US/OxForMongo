@@ -61,8 +61,8 @@ abstract class Ox_Asset
                     Ox_Logger::logError('Failed to write file to disk: ' . $file_info[$fieldName]['name']);
                     throw new Ox_AssetException('The file could not be written to disk.', 'UPLOAD_ERR_CANT_WRITE');
                 case UPLOAD_ERR_EXTENSION:
-                    Ox_Logger::logError('TA PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help' . $file_info[$fieldName]['name']);
-                    throw new Ox_AssetException('A TA PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; the system administrator may want to examine the list of loaded extensions with phpinfo().', 'UPLOAD_ERR_EXTENSION');
+                    Ox_Logger::logError('A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; examining the list of loaded extensions with phpinfo() may help' . $file_info[$fieldName]['name']);
+                    throw new Ox_AssetException('A PHP extension stopped the file upload. PHP does not provide a way to ascertain which extension caused the file upload to stop; the system administrator may want to examine the list of loaded extensions with phpinfo().', 'UPLOAD_ERR_EXTENSION');
             }
         }
         if (!file_exists($tmp_name) || !is_uploaded_file($tmp_name)) {
