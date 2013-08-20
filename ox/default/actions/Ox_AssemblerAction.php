@@ -145,7 +145,7 @@ class Ox_AssemblerAction implements Ox_Routable
         if ($assembler===false || !$assembler->layout) {
             print $content;
         } else {
-            if($assembler->layout_dir) {
+            if(isset($assembler->layout_dir) && $assembler->layout_dir) {
                 $layout_file = $assembler->layout_dir . $assembler->layout . '.php';
             } else {
                 $layout_file = DIR_LAYOUTS . $assembler->layout . '.php';
