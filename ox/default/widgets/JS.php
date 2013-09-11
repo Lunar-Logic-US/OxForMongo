@@ -77,7 +77,7 @@ JS;
         if (count($this->_js_script_list)) {
             $output .= "<script>\n";
             foreach ($this->_js_script_list as $id => $script) {
-                $output .= "    <!-- Script ID: {$id} -->\n";
+                $output .= "    //<!-- Script ID: {$id} -->\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
