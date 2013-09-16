@@ -119,8 +119,13 @@ if (DEBUG_BOOT) Ox_Logger::logDebug("*****************Loading Page: " .$_SERVER[
 Ox_LibraryLoader::load('session','Ox_Session');
 Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
-Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
+Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
+
+//Router uses the Ox_Dispatch::CONFIG_WEB_BASE_NAME, must be after OxDispatch
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
+
+//asset must load after router...is used buildURL
+Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
 
 if (file_exists(DIR_APPCONFIG . 'global.php')) {
     include_once (DIR_APPCONFIG . 'global.php');
