@@ -114,13 +114,26 @@ class Ox_Router
      */
     public static function redirect($url, $params = null, $headers = null)
     {
+        $url = self::buildURL($url, $params);
         if(is_array($headers)) {
+            //The location header is a 302 redirect.. so can only be used by itself,
+            //is we use any other header we, need to send those headers and then do a
+            //JS redirect.
             foreach($headers as $header) {
                 Ox_Logger::logDebug('Sending Headers  ' . $header);
                 header($header);
             }
+            ?>
+            <html>
+            <head>
+                <script>window.location='<?= $url ?>'</script>
+            </head>
+            <body>Redirecting to login page...</body>
+            </html>
+            <?php
+        } else {
+            header('Location: ' . self::buildURL($url, $params));
         }
-        header('Location: ' . self::buildURL($url, $params));
     }
 
     /**
