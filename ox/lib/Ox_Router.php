@@ -162,4 +162,18 @@ class Ox_Router
         }
         return $url = $url.$param_str;
     }
+
+    public static function trimPrefix($uri,$prefix) {
+        //decode the URL
+        $url_info = parse_url($uri);
+        if (self::DEBUG) {
+            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
+        }
+
+        // Strip off part of the uri as needed
+        $url = $url_info['path'];
+        if (substr($url, 0, strlen($prefix)) == $prefix) {
+            $url = substr($url, strlen($prefix), strlen($url) );
+        }
+    }
 }
