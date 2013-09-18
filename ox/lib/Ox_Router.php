@@ -132,7 +132,7 @@ class Ox_Router
             </html>
             <?php
         } else {
-            header('Location: ' . self::buildURL($url, $params));
+            header('Location: ' . $url);
         }
     }
 
