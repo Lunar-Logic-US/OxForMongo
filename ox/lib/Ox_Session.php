@@ -297,4 +297,15 @@ DEBUG;
             }
         }
     }
+
+    /**
+     * Return the current session if it has been started.
+     */
+    public static function getSessionId()
+    {
+        if (is_null(self::$_instance)) {
+            return null;
+        }
+        return session_id();
+    }
 }
