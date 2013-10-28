@@ -34,6 +34,11 @@ class Ox_Router
     const DEBUG = FALSE;
 
     /**
+     * The domain variable name to use in the app.php file.
+     */
+    const DOMAIN_APP_CONFIG = 'domain';
+
+    /**
      * List of routes registered.
      * @var array
      */
@@ -137,13 +142,15 @@ class Ox_Router
     }
 
     /**
-     * Build a url with an array of parameters.
+     * Build a url with an array of parameters. This function takes into account if
+     * Ox is being access from a subdirectory and corrects the path accordingly.
      *
-     * @param $url
-     * @param null $params
+     * @param string $url
+     * @param null|array $params -- parameters to add to the URL as get vars
+     * @param bool $buildFQURL -- Generate a fully qualified URL (http://domain/etc)
      * @return string
      */
-    public static function buildURL($url, $params = null)
+    public static function buildURL($url, $params = null,$buildFQURL=false)
     {
         $param_str = "";
         if($params) {
@@ -158,12 +165,54 @@ class Ox_Router
         $config = Ox_LibraryLoader::config_parser();
         $webDir = $config->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         if(!preg_match('/^http/',$url) && !empty($webDir)){
-            $url = $webDir.$url;
+            if ($buildFQURL) {
+                $url = self::getProtocol() . self::getDomain() . $webDir.$url;
+            } else {
+                $url = $webDir.$url;
+            }
         }
         return $url = $url.$param_str;
     }
 
-    public static function trimPrefix($uri,$prefix) {
+    /**
+     * Returns the current or set domain name for this app.
+     *
+     * The domain name can be be set in the app.php as using $domain = 'domain name';
+     * @return string
+     */
+    public static function getDomain()
+    {
+        $config = Ox_LibraryLoader::config_parser();
+        $domain = $config->getAppConfigValue(self::DOMAIN_APP_CONFIG);
+        if ($domain) {
+            return $domain;
+        } else {
+            return $_SERVER['HTTP_HOST'];
+        }
+
+    }
+
+    /**
+     * Returns the currently used protocol string for creating a Fully qualified URL
+     * @return string
+     */
+    public static function getProtocol()
+    {
+            if ( (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) {
+                $protocol = "https://";
+            } else {
+                $protocol = "http://";
+            }
+            return $protocol;
+    }
+
+    /**
+     * I am not sure this function is being used. TODO: See if this should be removed.
+     * @param $uri
+     * @param $prefix
+     */
+    public static function trimPrefix($uri,$prefix)
+    {
         //decode the URL
         $url_info = parse_url($uri);
         if (self::DEBUG) {
