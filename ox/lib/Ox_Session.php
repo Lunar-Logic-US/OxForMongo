@@ -265,9 +265,19 @@ DEBUG;
         if (self::DEBUG) Ox_Logger::logDebug('SESSION - getSessionTimeRemaining user roles: '.print_r($security->getUserRoles(),true));
         if($security->loggedIn() && isset($_SESSION['last_request_time'])) {
             // If a user has multiple roles, simply take the one with the longest timeout.
-            foreach($security->getUserRoles() as $role) {
-                if(isset($this->_user_time_outs[$role]) && $this->_user_time_outs[$role] > $default_timeout) {
-                    $default_timeout = $this->_user_time_outs[$role];
+            $roles = $security->getUserRoles();
+            if(in_array('su', $roles)) {
+                // check for the presence of an app-defined SU timeout.  If not, set to 8 hours.
+                if(in_array('su', $this->_user_time_outs)) {
+                    $default_timeout = $this->_user_time_outs['su'];
+                } else {
+                    $default_timeout = 60 * 60 * 8;
+                }
+            } else {
+                foreach($roles as $role) {
+                    if(isset($this->_user_time_outs[$role]) && $this->_user_time_outs[$role] > $default_timeout) {
+                        $default_timeout = $this->_user_time_outs[$role];
+                    }
                 }
             }
             $time_left = $default_timeout - (time() - $_SESSION['last_request_time']);
