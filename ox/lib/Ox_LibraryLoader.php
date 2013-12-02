@@ -161,7 +161,7 @@ class Ox_LibraryLoader
         }
 
         if (empty($fileToLoad) && $throw) {
-            throw new Ox_Exception("Error: Can not find library {$name} in path: " . implode(';',self::$_classPath),'Ox_Loader::NotFound');
+            throw new Ox_Exception("Error: Can not find library {$name} in path: " . implode(';',$searchPath),'Ox_Loader::NotFound');
         }
         //Try/Catch does not work on require or includes.
         if (!empty($fileToLoad))
