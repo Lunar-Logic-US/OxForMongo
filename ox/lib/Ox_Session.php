@@ -233,7 +233,7 @@ DEBUG;
      */
     function get($key)
     {
-        if (self::DEBUG) Ox_Logger::logDebug('SESSION - sessino state :' . print_r($_SESSION,1));
+        if (self::DEBUG) Ox_Logger::logDebug('SESSION - session state :' . print_r($_SESSION,1));
         if (self::DEBUG) Ox_Logger::logDebug('SESSION - get:' . $key);
         if(isset($_SESSION[$key])) {
             if (self::DEBUG) Ox_Logger::logDebug('SESSION - value:' . $_SESSION[$key]);
