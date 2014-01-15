@@ -37,7 +37,7 @@ class ClassNames implements Ox_Widget {
     /**
      * Initialize the class names member.
      */
-    public function __construct($element){
+    public function __construct(){
         $this->_classNames = '';
     }
 
