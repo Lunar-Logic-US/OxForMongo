@@ -164,6 +164,7 @@ class Ox_Router
         }
         $config = Ox_LibraryLoader::config_parser();
         $webDir = $config->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
+        /*OLD
         if(!preg_match('/^http/',$url) && !empty($webDir)){
             if ($buildFQURL) {
                 $url = self::getProtocol() . self::getDomain() . $webDir.$url;
@@ -171,6 +172,15 @@ class Ox_Router
                 $url = $webDir.$url;
             }
         }
+        OLD*/
+        //NEW - edit to allow fully qualified url's without a web directory defined.
+        if(!empty($webDir)){
+            $url = $webDir.$url;
+        }
+        if(!preg_match('/^http/',$url) && $buildFQURL){
+            $url = self::getProtocol() . self::getDomain() . $webDir.$url;
+        }
+        //NEW
         return $url = $url.$param_str;
     }
 

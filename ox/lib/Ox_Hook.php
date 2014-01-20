@@ -54,21 +54,62 @@ class Ox_Hook
 
     /**
      * Register a function on a hook.
-     * @param $hook_area
-     * @param $action
-     * @param $function_to_use
-     * @param bool $replace
+     *
+     * Example Hook:
+        "hooks"{
+            "menu":[
+                "/cart/orders",
+                "/users/admin"
+            ]
+            "home":[
+                "/site/sidebar"
+            ]
+        }
+     * 
+     * @param $name - The name of the hook, to be invoked in the execute function.
+     * @param $construct - The plugin where this hook is implemented
+     * @param $function - The function to call in the above mentioned construct
+     * @param bool $replace - Replace the existing hook(s), or add an additional hook.
      */
-    public function register_to_execute($hook_area,$action,$function_to_use,$replace=FALSE)
+    public static function register($name,$function,$replace=false)
     {
-
+        $update = array('$addToSet'=>array(
+            'hooks.'.$name=>$function
+        ));
+        if($replace){
+            $update = array('$set'=>array(
+                'hooks.'.$name=>array($function)
+            ));
+        }
+        $db = Ox_LibraryLoader::db();
+        if(!empty($update)){
+            $db->settings->update(
+                array(),
+                $update
+            );
+        }
+        
     }
 
     /**
-     * Register a hook to be used.
+     * Execute a registered a hook to be used.
+     *
+     * $name - The name of the hook to invoke.
      */
-    public function execute()
+    public static function execute($name)
     {
-
+        $db = Ox_LibraryLoader::db();
+        $settings = $db->settings->findOne();
+        $output='';
+        if(isset($settings['hooks'][$name]) && is_array($settings['hooks'][$name])){
+            foreach($settings['hooks'][$name] as $function){
+                $url = Ox_Router::buildURL($function,null,true);
+                $source = file_get_contents($url);
+                if($source!==false){
+                    $output.=$source;
+                }
+            }
+        }
+        echo $output;
     }
 }
