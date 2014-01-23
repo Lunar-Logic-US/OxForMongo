@@ -58,27 +58,46 @@ class Ox_Hook
      * Example Hook:
         "hooks"{
             "menu":[
-                "/cart/orders",
-                "/users/admin"
-            ]
+                {
+                    "file":"/home/jesse/web/ivy/cart/hook.php",
+                    "class":"cartHook",
+                    "function":"scripts",
+                },
+                {
+                    "file":"/home/jesse/web/ivy/cart/hook.php",
+                    "class":"ordersHook",
+                    "function":"scripts",
+                }
+            ],
+            "orders":[
+                {
+                    "file":"/home/jesse/web/ivy/cart/Orders/hook.php",
+                    "class":"ordersHook",
+                    "function":"scripts",
+                }
+            ],
             "home":[
-                "/site/sidebar"
+                {
+                    "file":"/home/jesse/web/ivy/site/hook.php",
+                    "class":"siteHook",
+                    "function":"sidebar",
+                }
             ]
         }
      * 
      * @param $name - The name of the hook, to be invoked in the execute function.
      * @param $construct - The plugin where this hook is implemented
      * @param $function - The function to call in the above mentioned construct
-     * @param bool $replace - Replace the existing hook(s), or add an additional hook.
+     * @param bool $replace - Add an additional hook if false or replace the existing hook(s) if true.
      */
-    public static function register($name,$function,$replace=false)
+    public static function register($name, $file, $class, $function, $replace=false)
     {
         $update = array('$addToSet'=>array(
-            'hooks.'.$name=>$function
+            'hooks.'.$name=>array("file"=>$file, "class"=>$class, "function"=>$function)
         ));
         if($replace){
             $update = array('$set'=>array(
-                'hooks.'.$name=>array($function)
+                'hooks.'.$name=>array(array("file"=>$file, "class"=>$class, "function"=>$function))
             ));
         }
         $db = Ox_LibraryLoader::db();
@@ -96,20 +115,24 @@ class Ox_Hook
      *
      * $name - The name of the hook to invoke.
      */
-    public static function execute($name)
+    public static function execute($name, $arguments=array())
     {
         $db = Ox_LibraryLoader::db();
         $settings = $db->settings->findOne();
         $output='';
         if(isset($settings['hooks'][$name]) && is_array($settings['hooks'][$name])){
-            foreach($settings['hooks'][$name] as $function){
-                $url = Ox_Router::buildURL($function,null,true);
-                $source = file_get_contents($url);
-                if($source!==false){
-                    $output.=$source;
+            foreach($settings['hooks'][$name] as $hook){
+                if(file_exists($hook['file'])){
+                    require_once($hook['file']);
+                    if(class_exists($hook['class'])){
+                        call_user_func_array(array($hook['class'],$hook['function']),$arguments);
+                    } else {
+                        Ox_Logger::logError("Hook class ({$hook['class']}) not found for $name.");
+                    }
+                } else {
+                    Ox_Logger::logError("Hook file ({$hook['file']}) not found for $name.");
                 }
             }
         }
-        echo $output;
     }
 }
