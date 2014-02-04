@@ -18,24 +18,79 @@
 /**
  * Defines a test that can be used with an Ox_Schema.
  */
-interface Ox_Validator {
+abstract class Ox_Validator {
+
+    /**
+     * This is the default subdirectory name to use in the default lib directories.
+     */
+    const DIR_NAME = 'validators/';
+
+    /**
+     * This is a list of paths to search for validators.
+     *
+     * @var array
+     */
+    private static $_path = array();
+
     /**
      * Save the setting and setup what is need for the isValid call.
-     * @param null $testParams
+     *
+     * @param null $testParams parameters for this version of the test (like string length, or regex)
      * @param null $failMessage
      */
-    public function __construct($testParams=null,$failMessage=null);
+    public function __construct($testParams=null,$failMessage=null){}
+
+    /**
+     * Loads the given file/class from the default directories or any pushed on directory.
+     *
+     * @param $className
+     * @param null|array $testParams
+     * @param null|string $failMessage
+     * @return mixed
+     */
+    public static function load($className,$testParams=null,$failMessage=null)
+    {
+        //These are added last so they are searched last.
+        //The default path for the app vaidators
+        self::addLibPath(DIR_APPLIB . self::DIR_NAME);
+        //The default path for Ox validators
+        self::addLibPath(OX_FRAME_DEFAULT . self::DIR_NAME);
+
+        Ox_LibraryLoader::loadCode($className,self::$_path);
+        $state = new $className($testParams,$failMessage);
+        return $state;
+    }
+
+    /**
+     * Adds a new directory on the directory path for the locations of the validators
+     * @param $path
+     */
+    public static function addLibPath($path)
+    {
+        array_push(self::$_path,$path);
+    }
+
 
     /**
      * Returns whether the value given is valid.
+     *
      * @param $value
      * @return boolean
      */
-    public function isValid($value);
+    abstract public function isValid($value);
 
     /**
      * Return the error message.
+     *
      * @return string
      */
-    public function getError();
+    abstract public function getError();
+
+    /**
+     * Returns a cleaned version of the value that can be saved to the database
+     *
+     * @param $value
+     * @return mixed
+     */
+    abstract public function sanitize($value);
 }

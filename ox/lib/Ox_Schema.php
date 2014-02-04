@@ -22,23 +22,30 @@
  * <code>
  * class NewSchema extends Ox_Schema
  * {
- *     protected $_
+ *     public function __construct() {
+ *          $this->_schema = array(
+ *              <schema definitions>,
+ *          );
+ *      }
  * }
  * </code>
  * What I want:
  *
  * To test for required
- * To test for valid
+ * To test for valid - is is only if the field exists in the array, NOT if the value is empty.
  * To "fill in" defaults
  *
- * To define the scheme
- *      field = array ( '__validator => <Must from interface Ox_Validoator> , '__required' => <true | false>, '__default' => <simple type> )
- *      object = array( '__required, 'blah', ',)
- *      array =  array( __required, _fields) '
+ * Scheme definition is one of:
+ *      field => array ( '__validator => <Must from interface Ox_Validoator> , '__required' => <true | false>, '__default' => <simple type> )
+ *      object => array( '__required, 'blah', ',)
+ *      array =>  array( __required, _fields) '
  *
- * Examples of use
- *     $schema ->isFieldValid('field',$value);
- *
+ * Examples of use:
+ * <code>
+ *     $schema->isFieldValid('field',$value);
+ *     $schema->sanitize($wholeDocument);
+ *     $schema->sanitizeField('fieldName',$value);
+ * </code>
  */
 abstract class Ox_Schema
 {
@@ -68,6 +75,13 @@ abstract class Ox_Schema
      * @var bool
      */
     protected $_injectOnMissing=false;
+
+    /**
+     * Flag -- Replace missing entries with the default.
+     * @var bool
+     */
+    protected $_sanitize=false;
+
 
     /**
      * Flag -- Replace missing entries with the default.
@@ -108,15 +122,6 @@ abstract class Ox_Schema
      */
     abstract function __construct();
 
-    /**
-     * Returns true if any fields we have gone through have been required
-     *
-     * @return boolean
-     */
-    private function isRequired()
-    {
-        return $this->_required;
-    }
 
     /**
      * Checks the document to make sure all required fields are present.
@@ -170,7 +175,8 @@ abstract class Ox_Schema
     }
 
     /**
-     * Checks if the whole document is valid.
+     * Checks if the whole document is valid based on the given scheme in the constructor.
+     *
      * @param array $doc
      * @return bool
      */
@@ -242,8 +248,13 @@ abstract class Ox_Schema
         return $passes;
     }
 
+    //-------------------------------
+    //Getters
+    //-------------------------------
+
     /**
      * Return the collected errors
+     *
      * @return array
      */
     public function getErrors()
@@ -252,34 +263,19 @@ abstract class Ox_Schema
     }
 
     /**
-     * Reset the collected errors
-     */
-    public function resetErrors()
-    {
-        $this->_errors = array();
-    }
-
-    /**
-     * Manually set the fillDefault behavior.
+     * Returns true if any fields we have gone through have been required
      *
-     * @param bool $onMissing
-     * @param bool $onInvalid
+     * @return boolean
      */
-    public function fillWithDefaults(array $doc=array(),$onMissing=true,$onInvalid=true)
+    private function isRequired()
     {
-        $savedInjectOnMissing = $this->_injectOnMissing;
-        $savedReplaceOnInvalid = $this->_replaceOnInvalid;
-
-        $this->_injectOnMissing = $onMissing;
-        $this->_replaceOnInvalid = $onInvalid;
-        $this->isValid($doc);
-
-
-        $this->_injectOnMissing = $savedInjectOnMissing;
-        $this->_replaceOnInvalid = $savedReplaceOnInvalid;
-        return $doc;
+        return $this->_required;
     }
 
+
+    //-------------------------------
+    //Setters
+    //-------------------------------
     /**
      * @param boolean $injectOnMissing
      */
@@ -297,12 +293,91 @@ abstract class Ox_Schema
     }
 
     /**
+     * Reset the collected errors
+     */
+    public function resetErrors()
+    {
+        $this->_errors = array();
+    }
+
+    /**
+     * Manually set the fillDefault behavior.
+     *
+     * @param array $doc
+     * @param bool $onMissing
+     * @param bool $onInvalid
+     * @return array
+     */
+    public function fillWithDefaults(array $doc=array(),$onMissing=true,$onInvalid=true)
+    {
+        $savedInjectOnMissing = $this->_injectOnMissing;
+        $savedReplaceOnInvalid = $this->_replaceOnInvalid;
+
+        $this->_injectOnMissing = $onMissing;
+        $this->_replaceOnInvalid = $onInvalid;
+        $this->isValid($doc);
+
+
+        $this->_injectOnMissing = $savedInjectOnMissing;
+        $this->_replaceOnInvalid = $savedReplaceOnInvalid;
+        return $doc;
+    }
+
+
+    /**
      * Return private onInsert
+     *
      * @return bool
      */
     public function checkOnInsert()
     {
        return $this->_onInsert;
+    }
+
+    /**
+     * Finds the $fieldName in the schema and returns the sanitized version of $fieldValue
+     *
+     * @param $fieldName
+     * @param $fieldValue
+     * @return null|mixed A sanitized version of the $fieldValue
+     */
+    public function sanitizeField($fieldName,$fieldValue) {
+        if (isset($this->_schema[$fieldName]['__validator']) ) {
+            $v = $this->_schema[$fieldName]['__validator'];
+            return $v->sanitize($fieldValue);
+        }
+
+        if (isset($this->_schema[$fieldName]['__schema']) ) {
+            //sub object or array
+            $s = $this->_schema[$fieldName]['__schema'];
+            return $s->sanitize($fieldValue);
+        }
+        return $fieldValue;
+
+    }
+
+    /**
+     * Checks if the whole document is valid.
+     *
+     * @param array $doc Document to be sanitized.
+     * @return bool
+     */
+    public function sanitize(array &$doc)
+    {
+        $this->_errors = array(); //reset
+        foreach ($doc as $fieldName => $fieldValue) {
+            if (is_array($fieldValue) && Ox_MongoSource::isMongoArray($fieldValue)) {
+                //must test each element of the array (as an object)
+                if ($this->_schema[$fieldName]['__schema']->_type!= self::TYPE_ARRAY) {
+                    $this->_errors[] = "Expected and array, but got an object in field: $fieldName";
+                }
+                foreach ($fieldValue as $arrayObject) {
+                    $doc[$fieldName] = $this->sanitizeField($fieldName,$arrayObject,$doc);
+                }
+            } else {
+                $doc[$fieldName] = $this->sanitizeField($fieldName,$fieldValue,$doc);
+            }
+        }
     }
 
 }
