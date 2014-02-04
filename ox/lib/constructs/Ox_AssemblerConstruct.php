@@ -72,12 +72,18 @@ class Ox_AssemblerConstruct
      * @var bool|Ox_MongoSource
      */
     public $db = false;
+
     /**
      * Easy access to the DB for in the assembler.
      * @var bool|Ox_User
      */
-
     public $user = false;
+
+    /**
+     * Esasy access to the directory that the construct uses.
+     * @var null|string
+     */
+    public $dir = null;
 
     /**
      * Sets a variable to be available to the view.
