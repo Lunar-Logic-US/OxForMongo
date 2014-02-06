@@ -35,6 +35,7 @@ require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
  * @method static Ox_Router Router
  * @method static LocalAsset Assets_Helper
  * @method static Ox_Dispatch Dispatch
+ * @method static Ox_User User
  */
 class Ox_LibraryLoader
 {
