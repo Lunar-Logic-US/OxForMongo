@@ -56,12 +56,13 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
             }
         }
     }
-    
+
     /**
      * Get a value from the file by section and key.
      *
      * @param string $section
      * @param string $key
+     * @return mixed
      */
     public function getValue($section,$key)
     {
@@ -71,11 +72,12 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
             return null;
         }
     }
-    
+
     /**
      * Returns a configuration value from the app array.
      *
-     * @return string
+     * @param string $key
+     * @return mixed
      */
     public function getAppConfigValue($key)
     {

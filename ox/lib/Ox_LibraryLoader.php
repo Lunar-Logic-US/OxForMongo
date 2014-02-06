@@ -22,6 +22,20 @@
 
 require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
 
+/**
+ * Class Ox_LibraryLoader
+ *
+ * Documentation for general magic methods that are included in Ox:
+ * @method static Ox_Session Session
+ * @method static Ox_MongoSource Db
+ * @method static Ox_WidgetHandler Widget_Handler
+ * @method static Ox_ConfigPHPParser Config_Parser
+ * @method static Ox_Security Security
+ * @method static Ox_Hook Hook
+ * @method static Ox_Router Router
+ * @method static LocalAsset Assets_Helper
+ * @method static Ox_Dispatch Dispatch
+ */
 class Ox_LibraryLoader
 {
     const CONFIG_OVERLOAD_NAME = 'class_overload';
@@ -33,7 +47,7 @@ class Ox_LibraryLoader
     private static $_resources = array();
 
     /**
-     * @var null  This holds a pointer to the config parser
+     * @var null|Ox_ConfigPHPParser  This holds a pointer to the config parser
      */
     private static $_configParser = null;
     

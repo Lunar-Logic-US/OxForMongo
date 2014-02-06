@@ -80,10 +80,16 @@ class Ox_AssemblerConstruct
     public $user = false;
 
     /**
-     * Esasy access to the directory that the construct uses.
+     * Easy access to the directory that the construct uses.
      * @var null|string
      */
     public $dir = null;
+
+    /**
+     * Easy access to the Ox_WidgetHandler.
+     * @var null|Ox_WidgetHandler
+     */
+    public $widgetHandler = null;
 
     /**
      * Sets a variable to be available to the view.

@@ -19,6 +19,16 @@
  * Class to manage Widgets
  *
  * This primarily allows collections to change the page rendering in templates.
+ *
+ * Add Default "magic" widgets
+ * @method static null|string ClassNames
+ * @method static null|string js
+ * @method static null|string css
+ * @method static null|string HtmlTitle
+ * @property ClassNames ClassNames
+ * @property JS js
+ * @property CSS css
+ * @property HtmlTitle HtmlTitle
  */
 class Ox_WidgetHandler
 {
