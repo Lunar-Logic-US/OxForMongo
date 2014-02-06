@@ -18,7 +18,7 @@
 /**
  * Validator that uses the provided RegEx to check against.
  */
-class Ox_RegExValidator implements Ox_Validator
+class Ox_RegExValidator extends  Ox_Validator
 {
     /**
      * The RegEx to validate against.
@@ -75,6 +75,11 @@ class Ox_RegExValidator implements Ox_Validator
      */
     public function getError(){
         return $this->failMessage;
+    }
+
+    public function sanitize($value)
+    {
+        return $value;
     }
 
 }

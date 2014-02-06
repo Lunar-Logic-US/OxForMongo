@@ -46,7 +46,7 @@ abstract class Ox_Validator {
      * @param $className
      * @param null|array $testParams
      * @param null|string $failMessage
-     * @return mixed
+     * @return Ox_Validator
      */
     public static function load($className,$testParams=null,$failMessage=null)
     {

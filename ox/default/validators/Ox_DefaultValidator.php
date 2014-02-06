@@ -18,7 +18,7 @@
 /**
  * Default validation class.
  */
-class Ox_DefaultValidator implements Ox_Validator
+class Ox_DefaultValidator extends  Ox_Validator
 {
     /**
      * Default Constructor
@@ -42,5 +42,11 @@ class Ox_DefaultValidator implements Ox_Validator
     {
         return $this->failMessage;
     }
+
+    public function sanitize($value)
+    {
+        return $value;
+    }
+
 
 }
