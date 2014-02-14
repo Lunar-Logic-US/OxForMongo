@@ -1,7 +1,12 @@
 <?php
+Ox_LibraryLoader::loadCode('JS',array(__DIR__.DIRECTORY_SEPARATOR));
+
 /**
- * Created by PhpStorm.
- * User: m2calabr
- * Date: 2/13/14
- * Time: 9:07 AM
- */ 
+ * Class JSBottom
+ *
+ * This just gives another JS widget that we can use at the bottom of the layouts.
+ */
+class JSBottom extends JS
+{
+
+}
