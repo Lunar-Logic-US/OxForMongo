@@ -127,8 +127,13 @@ Ox_LibraryLoader::load('router','Ox_Router',FALSE);
 //asset must load after router...is used buildURL
 Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
 
+if (file_exists(DIR_APPCONFIG . 'modules.php')) {
+    if (DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading modules.php.");
+    require_once (DIR_APPCONFIG . 'modules.php');
+}
 if (file_exists(DIR_APPCONFIG . 'global.php')) {
-    include_once (DIR_APPCONFIG . 'global.php');
+    if (DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading global.php.");
+    require_once (DIR_APPCONFIG . 'global.php');
 }
 
 //---------------------------

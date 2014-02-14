@@ -49,7 +49,7 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
         $files = scandir($config_dir);
         foreach($files as $file) {
             if(preg_match('/^.*\.php$/', $file)) {
-                if(!in_array($file, array('routes.php', 'global.php', 'framework.php'))) {
+                if(!in_array($file, array('routes.php', 'global.php', 'framework.php','modules.php'))) {
                     $this->file = $file;
                     $this->inspectFile();
                 }

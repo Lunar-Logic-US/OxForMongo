@@ -54,6 +54,13 @@ class Ox_Hook
         return self::$_instance;
     }
 
+    public static function initializeModuleConstruct($construct)
+    {
+        require_once(DIR_CONSTRUCT. $construct . DIRECTORY_SEPARATOR . 'hook.php');
+        $hookObjectName = $construct . 'Hook';
+        $hookObjectName::init();
+    }
+
 
     /**
      * Register a function on a hook.
