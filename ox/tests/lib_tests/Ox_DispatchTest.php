@@ -63,7 +63,7 @@ APP_CONFIG_FILE;
         Ox_Dispatch::skipRun();
         require_once(DIR_FRAMEWORK . 'mainentry.php');
         Ox_Dispatch::allowRun();
-        $this->expectOutputString('Route not found for \'/test\'');
+        $this->expectOutputString('<div class="error404"><h1>404 Error</h1> <p>Route not found for:  /test</p></div>');
         Ox_Dispatch::run();
 
     }

@@ -21,12 +21,15 @@
  * in a layout (or anywhere)
  *
  * To set:
- * global $widget_handler;
+ * <code>
+ * $widget_handler=Ox_LibraryLoader::Widget_Handler();
  * $widget_handler->JS->add("tag-it.js"); // set a simple js from /js/tag-it.js
  * $widget_handler->JS->add("jquery.min.js",'http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/','text/javascript','utf-8');
- *
+ *</code>
  * To display:
+ * <code>
  * <?php Ox_WidgetHandler::JS(); ?>
+ * </code>
  */
 
 class JS implements Ox_Widget {

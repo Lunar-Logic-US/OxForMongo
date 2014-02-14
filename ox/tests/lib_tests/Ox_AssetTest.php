@@ -47,6 +47,10 @@ class Ox_AssetTest extends PHPUnit_Framework_TestCase {
     public function tearDown() {
     }
 
+    /**
+     * This test is no longer valid as we check to see if the tmp_name file was actually uploaded by http process.
+     * We need to write the asset so this is testable or find a way to test it.
+     *
     public function testSave()
     {
         $db = Ox_LibraryLoader::Db();
@@ -59,6 +63,7 @@ class Ox_AssetTest extends PHPUnit_Framework_TestCase {
         $md5_file = md5_file(__FILE__);
         $asset = new TestAsset();
         $doc = $asset->save($file_info);
+        var_dump($doc);
         $this->assertEquals($file_info['file']['name'],$doc['original_name']);
         $this->assertEquals($file_info['file']['type'],$doc['type']);
         $this->assertEquals($file_info['file']['size'],$doc['size']);
@@ -74,7 +79,7 @@ class Ox_AssetTest extends PHPUnit_Framework_TestCase {
 
 
     }
-
+    */
     public function testSaveNoFile()
     {
         $db = Ox_LibraryLoader::Db();

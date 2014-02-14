@@ -141,7 +141,8 @@ function isWeekend( $p_date ) {
 
 function getActiveTimeZone( $p_locationDoc = 0 ) {
     global $global_time_zone;
-    global $config_parser;
+    //global $config_parser;
+    $config_parser = Ox_LibraryLoader::Config_Parser();
 
     if (!isset($p_locationDoc['time_zone']) || !$p_locationDoc) {
         if ($global_time_zone) {

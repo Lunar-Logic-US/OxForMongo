@@ -15,6 +15,25 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+$appConfigFile = <<<APP_CONFIG_FILE
+<?php
+\$log_dir = '/tmp/';
+\$mongo_config = array(
+    'set_string_id' => TRUE,
+    'persistent' => TRUE,
+    'host'       => 'localhost',
+    'database'   => 'test',
+    'port'       => '27017',
+    'login'         => '',
+    'password'      => '',
+    'replicaset'    => '',
+);
+
+?>
+APP_CONFIG_FILE;
+
+require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '/boot.php');
+
 /**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
@@ -23,17 +42,17 @@ class OxLibraryLoaderTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        define ('DIR_FRAMEWORK',dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
-        define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
-        define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
-        define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
-        define ('DIR_APPLIB', DIR_APP . 'lib'. DIRECTORY_SEPARATOR);
-        define ("DIR_APPCONFIG", DIR_APP . 'config' . DIRECTORY_SEPARATOR);
-        define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
-        define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
+        //define ('DIR_FRAMEWORK',dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
+        //define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
+        //define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
+        //define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
+        //define ('DIR_APPLIB', DIR_APP . 'lib'. DIRECTORY_SEPARATOR);
+        //define ("DIR_APPCONFIG", DIR_APP . 'config' . DIRECTORY_SEPARATOR);
+        //define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
+        //define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
 
-        require_once(DIR_FRAMELIB.'Ox_Logger.php');
-        require_once(DIR_FRAMELIB.'Ox_LibraryLoader.php');
+        //require_once(DIR_FRAMELIB.'Ox_Logger.php');
+        //require_once(DIR_FRAMELIB.'Ox_LibraryLoader.php');
     }
 
     public function tearDown()

@@ -33,6 +33,7 @@ abstract class Ox_Asset
      *
      * @param $file_info array
      * @param $fieldName string
+     * @throws Ox_AssetException
      * @return array|null
      */
     public function save($file_info, $fieldName='file')
@@ -40,7 +41,7 @@ abstract class Ox_Asset
         $db = Ox_LibraryLoader::Db();
         $assets = $db->getCollection('assets');
         $tmp_name = $file_info[$fieldName]["tmp_name"];
-        if ($file_info[$fieldName]['error']!==0) {
+        if (isset($file_info[$fieldName]['error']) && $file_info[$fieldName]['error']!==0) {
             switch ($file_info[$fieldName]['error']) {
                 case UPLOAD_ERR_INI_SIZE:
                     Ox_Logger::logError('The uploaded file exceeds the upload_max_filesize directive in php.ini: ' . $file_info[$fieldName]['name']);

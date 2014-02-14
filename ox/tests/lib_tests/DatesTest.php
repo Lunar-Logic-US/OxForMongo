@@ -14,7 +14,25 @@
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+$appConfigFile = <<<APP_CONFIG_FILE
+<?php
+\$log_dir = '/tmp/';
+\$mongo_config = array(
+    'set_string_id' => TRUE,
+    'persistent' => TRUE,
+    'host'       => 'localhost',
+    'database'   => 'test',
+    'port'       => '27017',
+    'login'         => '',
+    'password'      => '',
+    'replicaset'    => '',
+);
 
+\$default_time_zone='UTC';
+
+?>
+APP_CONFIG_FILE;
+require_once(dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '/boot.php');
 /**
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
@@ -25,16 +43,16 @@ class DatesTest extends PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        define ('DIR_FRAMEWORK',dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
-        define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
-        define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
-        define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
-        define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
+        //define ('DIR_FRAMEWORK',dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR);
+        //define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
+        //define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
+        //define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
+        //define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
 
-        define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
-        define ('DIR_APPLIB', DIR_APP . 'lib'. DIRECTORY_SEPARATOR);
-        define('DIR_CONSTRUCT',DIR_APP . 'constructs' . DIRECTORY_SEPARATOR);
-        define('DIR_COMMON',DIR_CONSTRUCT . '_common' . DIRECTORY_SEPARATOR);
+        //define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
+        //define ('DIR_APPLIB', DIR_APP . 'lib'. DIRECTORY_SEPARATOR);
+        //define('DIR_CONSTRUCT',DIR_APP . 'constructs' . DIRECTORY_SEPARATOR);
+        //define('DIR_COMMON',DIR_CONSTRUCT . '_common' . DIRECTORY_SEPARATOR);
 
         require_once(DIR_FRAMELIB . 'Dates.php');
     }
@@ -204,10 +222,10 @@ class DatesTest extends PHPUnit_Framework_TestCase
             )
         );
 
+        //var_dump($date_range);die();
         $indexed_date_range = $date_range->getIndexedDateRange();
         $diff = array();
         arrayDiffAssocRecursive($expected, $indexed_date_range, $diff);
-        
         $this->assertTrue(empty($diff));
     }
 

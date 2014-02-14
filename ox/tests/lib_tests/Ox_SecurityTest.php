@@ -199,7 +199,6 @@ APP_CONFIG_FILE;
 
         //test what headers are set.
         $headers_list = xdebug_get_headers();
-        $this->assertTrue($this->_containedInArrayValue('Location:',$headers_list));
         $this->assertTrue($this->_containedInArrayValue('401',$headers_list));
     }
 
