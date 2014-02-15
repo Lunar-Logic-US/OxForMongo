@@ -49,12 +49,12 @@ class Ox_MongoCollection
 
     /**
      * Setup the collection and load the schema
-     * @param $p_mongoCollection
+     * @param MongoCollection $mongoCollection
      */
-    public function __construct($p_mongoCollection)
+    public function __construct(MongoCollection $mongoCollection)
     {
-        $this->_mongoCollection = $p_mongoCollection;
-        $this->_collectionName = $p_mongoCollection->getName();
+        $this->_mongoCollection = $mongoCollection;
+        $this->_collectionName = $mongoCollection->getName();
         $this->_schemaDirectory = DIR_APP . 'schemas' . DIRECTORY_SEPARATOR;
         $this->_loadSchema();
     }
@@ -87,7 +87,7 @@ class Ox_MongoCollection
      * Passes all non-defined calls to the MongoCollection Object
      * @param $name string
      * @param $params array
-     * @return mixed
+     * @return MongoCollection
      */
     public function __call($name, $params)
     {

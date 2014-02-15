@@ -256,9 +256,9 @@ class Ox_MongoSource
     }
 
     /**
-     * This setup this object o be able to return collections in the form $var->collection_name.
+     * This setup this object to be able to return collections in the form $var->collection_name.
      *
-     * @param $name
+     * @param string $name
      * @return Ox_MongoCollection
      */
     public  function __get($name)
