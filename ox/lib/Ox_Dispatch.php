@@ -107,7 +107,7 @@ class Ox_Dispatch
     /**
      * Loads all actions and routes in preparation for dispatch.
      */
-    private static function _loadRoutes()
+    public static function loadRoutes()
     {
         if (!self::$_initialized) {
             self::_init();
@@ -163,7 +163,7 @@ class Ox_Dispatch
             Ox_Logger::logDebug("Ox_Dispatch: session after update: " . print_r($_SESSION,1));
         }
 
-        self::_loadRoutes();
+        //self::_loadRoutes();
         //decode the URL
         $url_info = parse_url($_SERVER['REQUEST_URI']);
         if (self::DEBUG) {

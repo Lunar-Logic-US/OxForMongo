@@ -117,8 +117,8 @@ require_once(DIR_FRAMELIB . 'Ox_Asset.php');
 //TODO: make this passable to that all errors can be displayed at once.
 global $user;  //added for unit test which this needs to be forced in the global scope.
 
-//The config_parser must be first to get all of the settings for
-//this application for all other objects in the system.
+//The config_parser must be first to get all of the settings for this application for all other objects in the system.
+//app.php is read when we load the config_parser
 Ox_LibraryLoader::load('config_parser','Ox_ConfigPHPParser',FALSE);
 Ox_LibraryLoader::load('widget_handler','Ox_WidgetHandler');
 if (DEBUG_BOOT) Ox_Logger::logDebug("*****************Loading Page: " .$_SERVER['REQUEST_URI']);
@@ -127,11 +127,15 @@ Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
 Ox_LibraryLoader::load('hook','Ox_Hook',FALSE);
+
 //Router uses the Ox_Dispatch::CONFIG_WEB_BASE_NAME, must be after OxDispatch
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
-
-//asset must load after router...is used buildURL
+//Load after router, uses Oc_Router::buildURL
 Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
+
+//Loading routes.php in loadRoutes.  Loaded here to allow modules to overwrite the default routes.
+//Loaded after the Ox_Router as Actions will use Ox_Router::buildURL
+Ox_Dispatch::loadRoutes();
 
 if (file_exists(DIR_APPCONFIG . 'modules.php')) {
     if (DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading modules.php.");
@@ -145,6 +149,5 @@ if (file_exists(DIR_APPCONFIG . 'global.php')) {
 //---------------------------
 // Done loading defines and libraries. Pass off control to the dispatcher
 //---------------------------
-Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
 Ox_Dispatch::run();
 
