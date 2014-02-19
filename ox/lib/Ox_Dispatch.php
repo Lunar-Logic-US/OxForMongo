@@ -13,18 +13,29 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Boot
  */
+
+
+//TODO: refactor so these defines and require are better handled
+/**
+ * RegEx for the web root.
+ */
+define('WEB_ROOT','/^\/?$/');
+/**
+ * Name for the assembler file.
+ */
+define('ASSEMBLER_NAME','assembler.php');
+require_once(DIR_FRAMELIB . 'constructs/Ox_AssemblerConstruct.php');
 
 /**
  * Sets up the information needed for the router to run.
  *
+ * @package Ox_Boot
  */
-
-//TODO: refactor so these defines and require are better handled
-define('WEB_ROOT','/^\/?$/');
-define('ASSEMBLER_NAME','assembler.php');
-require_once(DIR_FRAMELIB . 'constructs/Ox_AssemblerConstruct.php');
-
 class Ox_Dispatch
 {
     const DEBUG = FALSE;

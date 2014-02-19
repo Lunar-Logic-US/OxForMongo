@@ -13,6 +13,10 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Schema
  */
 
 
@@ -46,6 +50,7 @@
  *     $schema->sanitize($wholeDocument);
  *     $schema->sanitizeField('fieldName',$value);
  * </code>
+ * @package Ox_Schema
  */
 abstract class Ox_Schema
 {
@@ -277,6 +282,8 @@ abstract class Ox_Schema
     //Setters
     //-------------------------------
     /**
+     * Sets if the schema should insert default values if variable is missing.
+     *
      * @param boolean $injectOnMissing
      */
     public function setInjectOnMissing($injectOnMissing)
@@ -285,6 +292,8 @@ abstract class Ox_Schema
     }
 
     /**
+     * Sets if the schema should replace to a default value if the value is invalid.
+     *
      * @param boolean $replaceOnInvalid
      */
     public function setReplaceOnInvalid($replaceOnInvalid)

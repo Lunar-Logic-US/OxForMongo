@@ -13,6 +13,10 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Widgets
  */
 
 /**
@@ -29,6 +33,7 @@
  * @property JS js
  * @property CSS css
  * @property HtmlTitle HtmlTitle
+ * @package Ox_Widgets
  */
 class Ox_WidgetHandler
 {

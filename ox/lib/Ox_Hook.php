@@ -13,18 +13,28 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Hook
  */
 
 /**
- * NOT COMPLETE - To allow for arbitrary hooks in code that can be use in plugins.
+ * Manages the hooks for Ox.
  *
- * This is intended for build plugin system that will need to hook into an existing code base.  This is not
+ * This is hook system that allows you to inject code into an existing code base.  This is not
  * meant for Ox but those applications built on Ox, For example e-commerce, shipping, payment systems, etc.
- *
+ * @package Ox_Hook
  */
 class Ox_Hook
 {
+    /**
+     * Enable/Disable Debugging for this object.
+     */
     const DEBUG = FALSE;
+    /**
+     * Name of the setting ID for the settings collection.
+     */
     const SETTING_ID = 'Ox_Hook';
 
     /**
@@ -54,6 +64,20 @@ class Ox_Hook
         return self::$_instance;
     }
 
+    /**
+     * Runs the init for a for "module" construct.
+     *
+     * This looks for the given construct, then the file inside that construct called hook.  Inside hook, there
+     * should be an obejct called <construct>Hook which has a static init function.  That is the method that will
+     * be called by this method.
+     *
+     * This is intended to give an easy way to spin up modules in the modules.php configuration file. For example:
+     * <code>
+     * Ox_Hook::initializeModuleConstruct('cms');
+     * Ox_Hook::initializeModuleConstruct('cart');
+     * </code>
+     * @param string $construct
+     */
     public static function initializeModuleConstruct($construct)
     {
         require_once(DIR_CONSTRUCT. $construct . DIRECTORY_SEPARATOR . 'hook.php');
@@ -65,44 +89,36 @@ class Ox_Hook
     /**
      * Register a function on a hook.
      *
-     * Example Hook:
+     * Example hook document:
      * <code>
      *  "hooks"{
      *       "menu":[
-     * {
-     * "file":"/home/jesse/web/ivy/cart/hook.php",
-     * "class":"cartHook",
-     * "function":"scripts",
-     * },
-     * {
-     * "file":"/home/jesse/web/ivy/cart/hook.php",
-     * "class":"ordersHook",
-     * "function":"scripts",
-     * }
-     * ],
-     * "orders":[
-     * {
-     * "file":"/home/jesse/web/ivy/cart/Orders/hook.php",
-     * "class":"ordersHook",
-     * "function":"scripts",
-     * }
-     * ],
-     * "home":[
-     * {
-     * "file":"/home/jesse/web/ivy/site/hook.php",
-     * "class":"siteHook",
-     * "function":"sidebar",
-     * }
-     * ]
-     * }
-     *</code>
+     *          {
+     *              "file":"/home/jesse/web/ivy/cart/hook.php",
+     *              "class":"cartHook",
+     *              "function":"scripts",
+     *          },
+     *          {
+     *              "file":"/home/jesse/web/ivy/cart/hook.php",
+     *              "class":"ordersHook",
+     *              "function":"scripts",
+     *          }
+     *      ],
+     *      "orders":[
+     *          {
+     *              "file":"/home/jesse/web/ivy/cart/Orders/hook.php",
+     *              "class":"ordersHook",
+     *              "function":"scripts",
+     *          }
+     *      ]
+     *  }
+     * </code>
      *
      * @param $name - The name of the hook, to be invoked in the execute function.
-     * @param $file
-     * @param $class
+     * @param $file - The physical address of the file that includes the hook class and method
+     * @param $class - The name of the class that has the hook method
      * @param $function - The function to call in the above mentioned construct
      * @param bool $replace - Add an additional hook if false or replace the existing hook(s) if true.
-     * @internal param $construct - The plugin where this hook is implemented
      */
     public static function register($name, $file, $class, $function, $replace=false)
     {
@@ -136,7 +152,9 @@ class Ox_Hook
     /**
      * Execute a registered a hook to be used.
      *
-     * $name - The name of the hook to invoke.
+     * @param string $name - The name of the hook to invoke.
+     * @param array $arguments
+     * @return mixed
      */
     public static function execute($name, $arguments=array())
     {
@@ -150,7 +168,7 @@ class Ox_Hook
                     require_once($hook['file']);
                     if(class_exists($hook['class'])){
                         if (self::DEBUG) Ox_Logger::logDebug("Ox_Hook: Firing hook $name - file: {$hook['file']} | class: {$hook['function']} | name: $name.");
-                        call_user_func_array(array($hook['class'],$hook['function']),$arguments);
+                        return call_user_func_array(array($hook['class'],$hook['function']),$arguments);
                     } else {
                         Ox_Logger::logError("Hook class ({$hook['class']}) not found for $name.");
                     }

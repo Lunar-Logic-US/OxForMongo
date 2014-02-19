@@ -13,12 +13,17 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Mongo
  */
 
 /**
  * Facade to the PHP MongoDB Collection and released Ox_Schema
  *
  * This adds validation and ID utility functions
+ * @package Ox_Mongo
  */
 class Ox_MongoCollection
 {
@@ -153,6 +158,8 @@ class Ox_MongoCollection
     }
 
     /**
+     * Return if the $doc is valid based on this schema.
+     *
      * @param array $doc
      * @return boolean
      */

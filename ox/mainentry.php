@@ -13,6 +13,9 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Boot
  */
 
 /**
@@ -20,10 +23,10 @@
  */
 
 
-/**
- * @contant DEBUG_BOOT boolean Turns on the debugging for this file (mainentry.php)
- */
 if (!defined('DEBUG_BOOT')) {
+    /**
+     * Turns on the debugging for this file (mainentry.php)
+     */
     define('DEBUG_BOOT',FALSE);
 }
 
@@ -31,63 +34,66 @@ if (!defined('DEBUG_BOOT')) {
  * These are constants that can be  originally set in the app/config/framework.php
  */
 
-/**
- * @constant DIR_FRAMEWORK Framework lib directory
- */
 if (!defined('DIR_FRAMELIB')) {
+    /**
+     * Framework library directory, can be set in framework.php
+     */
     define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
 }
 
-/**
- * @constant DIR_APPCONFIG This is the location
- */
 if (!defined('DIR_APPCONFIG')) {
+    /**
+     * Directory for the app configuration files, can be set in framework.php
+     */
     define ("DIR_APPCONFIG", DIR_APP . 'config' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant DIR_APPLIB The location of the Application's library directory (app/lib)
- */
 
 if (!defined('DIR_APPLIB')) {
+    /**
+     * Application's library directory (app/lib), can be set in framework.php
+     */
     define ("DIR_APPLIB", DIR_APP . 'lib' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant DIR_CONSTRUCT Application's construct directory (app/constructs)
- */
 if (!defined('DIR_CONSTRUCT')) {
+    /**
+     * Application's construct directory (app/constructs), can be set in framework.php
+     */
     define('DIR_CONSTRUCT',DIR_APP . 'constructs' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant DIR_COMMON Application's common (app/constructs/_common) directory
- */
 if (!defined('DIR_COMMON')) {
+    /**
+     * Application's common (app/constructs/_common) directory, can be set in framework.php
+     */
     define('DIR_COMMON',DIR_CONSTRUCT . '_common' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant DIR_LAYOUTS Application's layout s(app/constructs/_common/layouts) directory
- */
 if (!defined('DIR_LAYOUTS')) {
+    /**
+     * Application's layout s(app/constructs/_common/layouts) directory, can be set in framework.php
+     */
     define('DIR_LAYOUTS',DIR_COMMON . 'layouts' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant OX_FRAMEINTERFACE Framework interface locations
- */
 if (!defined('OX_FRAMEINTERFACE')) {
+    /**
+     * Framework interface locations, can be set in framework.php
+     */
     define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
 }
 
-/**
- * @constant OX_FRAME_DEFAULT Framework default user object location
- */
 if (!defined('OX_FRAME_DEFAULT')) {
+    /**
+     * Framework default user object location
+     */
     define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
 }
 if (!defined('OX_FRAME_EXCEPTIONS')) {
+    /**
+     * Framework default exceptions
+     */
     define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
 }
 

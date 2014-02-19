@@ -13,10 +13,15 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Logging_Writers
  */
 
 /**
  * Class to send log messages via IRC
+ * @package Ox_Logging_Writers
  */
 class IRCLogger implements Ox_LogWriter {
     /**
@@ -38,9 +43,13 @@ class IRCLogger implements Ox_LogWriter {
      * IRC username
      */
     private $nickname;
-    
+
     /**
      * Constructor sets member variables.
+     * @param $host
+     * @param $port
+     * @param $channel
+     * @param $nickname
      */
     public function __construct($host, $port, $channel, $nickname) {
         $this->host = $host;
@@ -48,9 +57,11 @@ class IRCLogger implements Ox_LogWriter {
         $this->channel = $channel;
         $this->nickname = $nickname;
     }
-    
+
     /**
      * Sends a message via host:port to the specified nickname on the specified channel.
+     * @param string $message
+     * @return mixed|void
      */
     public function log($message) {
         //First lets set the timeout limit to 0 so the page wont time out. 
@@ -97,9 +108,10 @@ class IRCLogger implements Ox_LogWriter {
             
         }
     }
-    
+
     /**
      * Abstraction of the actual command socket communication.
+     * @param string $cmd
      */
     private function sendCommand ($cmd) { 
         global $server; //Extends our $server array to this function 

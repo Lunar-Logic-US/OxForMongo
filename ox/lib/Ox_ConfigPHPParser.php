@@ -13,14 +13,19 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Configuration
  */
 
-/**
- * Interface and implementation for loading of app and framework config values.
- */
 
 require_once(OX_FRAMEINTERFACE  . 'Ox_ConfigParser.php');
 
+/**
+ * Interface and implementation for loading of app and framework config values.
+ * @package Ox_Configuration
+ */
 class Ox_ConfigPHPParser implements Ox_ConfigParser
 {
     /**
@@ -83,9 +88,11 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
     {
         return $this->getValue('app', $key);
     }
-    
+
     /**
      * Returns a configuration value from the framework array.
+     * @param string $key
+     * @return mixed
      */
     public function getFrameworkConfigValue($key)
     {

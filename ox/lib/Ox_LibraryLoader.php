@@ -13,17 +13,19 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- * This class is used to load the various library components of the system.  It can be used dynamically to load parts
- * of the system inside functions for methods.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_CodeLoading
  */
 
 require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
 
 /**
- * Class Ox_LibraryLoader
+ * Code loading system.
+ *
+ * This class is used to load the various library components of the system.  It can be used dynamically to load parts
+ * of the system inside functions for methods. Much of this has been designed to only load code when it is needed.
  *
  * Documentation for general magic methods that are included in Ox:
  * @method static Ox_Session Session
@@ -36,6 +38,7 @@ require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
  * @method static LocalAsset Assets_Helper
  * @method static Ox_Dispatch Dispatch
  * @method static Ox_User User
+ * @package Ox_CodeLoading
  */
 class Ox_LibraryLoader
 {
@@ -147,9 +150,10 @@ class Ox_LibraryLoader
      * This just loads a library from the default areas in the Ox/app tree or if
      * specified the path given.
      *
-     * @param $name
-     * @param null $path
-     * @throws Ox_Exception 
+     * @param string $name Name of the file to load without ".php"
+     * @param array $path Array of directory paths to look for the file
+     * @param bool $throw Should we throw an error if the file is not found.
+     * @throws Ox_Exception
      */
     public static function loadCode($name,$path=null,$throw=true)
     {
@@ -273,6 +277,10 @@ class Ox_LibraryLoader
 
     /**
      * Magic function to access static methods with arguments.
+     *
+     * @param $method_name Name of the missing method being call.
+     * @param $arguments Parameters passed to the method
+     * @return mixed
      */
     public static function __callStatic($method_name,$arguments)
     {
@@ -283,7 +291,9 @@ class Ox_LibraryLoader
     }
 
     /**
-     * Loads the class into memory.
+     * Loads the class into memory using PHP's autoload system.
+     *
+     * @param string $className Name of the class to try and load.
      */
     public static function autoLoad($className) {
         $path = array(

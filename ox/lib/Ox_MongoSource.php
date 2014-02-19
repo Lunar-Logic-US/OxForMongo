@@ -13,14 +13,12 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- * This is a convenience layer to the PECL object.
  *
  * @copyright Copyright (c) 2012 Lunar Logic LLC
  * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Mongo
  */
+
 require_once(DIR_FRAMELIB . 'mongo/Ox_MongoCollection.php');
 require_once(DIR_FRAMELIB . 'Ox_Schema.php');
 
@@ -28,6 +26,7 @@ require_once(DIR_FRAMELIB . 'Ox_Schema.php');
  * Wrapper around the Mongo class from the PHP driver
  *
  * Allow us to add helper functions and other wrapper classes as needed.
+ * @package Ox_Mongo
  */
 class Ox_MongoSource
 {
@@ -169,7 +168,9 @@ class Ox_MongoSource
     }
 
     /**
-     * @param string $db
+     * This allows real time selection of a different database in the mongo system.
+     *
+     * @param string $db The name of the database that you want to use.
      */
     public function selectDB($db){
         $this->connect();
@@ -181,8 +182,8 @@ class Ox_MongoSource
     /**
      * Shortcut function for runCommand
      *
-     * @param $command
-     * @return null
+     * @param string|array $command
+     * @return mixed
      * @throws Ox_MongoSourceException
      */
     public function run($command)

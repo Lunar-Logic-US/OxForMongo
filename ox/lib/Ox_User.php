@@ -13,6 +13,10 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
 
 /**
@@ -23,9 +27,7 @@
  * abstract methods which you must implement should you wish to override the default Ox_UserMongo class.
  * Before overriding the Ox_UserMongo, you may want to review the features to see if the additional
  * features you need can't be provided using the existing default classes.
- *
- * @copyright Copyright (c) 2012 Lunar Logic LLC
- * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
 abstract class Ox_User {
     /**
@@ -118,6 +120,11 @@ abstract class Ox_User {
         }
     }
 
+    /**
+     * Returns the user doc that came from the database.
+     *
+     * @return array
+     */
     public function getUserDoc(){
         return $this->user;
     }

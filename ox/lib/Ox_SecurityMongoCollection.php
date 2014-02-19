@@ -13,41 +13,21 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- *    Security class to control access to resources.
  *
- *    This class also serves as a user manager. This class interacts with
- *    'LBFSession' class to achieve user management functions.
- *
- *    EXAMPLE LOGIN CONSTRUCT
- *    $security = Ox_LibraryLoader::getResource('security');
- *    $security->login($_POST['username'],$_POST['password']);
- *    ------------------------------------------------------------
- *    EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria).
- *    $security = Ox_LibraryLoader::getResource('security');
- *    $security->setAuthenicationCriteria('subdomain',$subdomain);
- *    $security->login($_POST['username'],$_POST['password']);
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
 
 require_once(DIR_FRAMELIB . 'Ox_Security.php');
 
+/**
+ * Mongo Security class
+ *
+ * @package Ox_Security
+ */
 class Ox_SecurityMongoCollection extends Ox_Security
 {
-    /*
-    public function __construct() {
-        global $user;
-        $user_id=$this->loggedIn();
-        if($user_id) {
-            $user = $this->getUser(array('_id'=>new MongoId($user_id)));
-            if (self::DEBUG) {
-                Ox_Logger::logDebug('User:' . print_r($user,true));
-            }
-        }
-    }
-    */
-    
     /**
      * Returns a user by given filter and collection.
      *
@@ -56,20 +36,9 @@ class Ox_SecurityMongoCollection extends Ox_Security
      */
     public function getUser($filter, $collection='users')
     {
-        global $db;
+        $db= Ox_LibraryLoader::Db();;
         $users = $db->getCollection($collection);
         return $users->findOne($filter);
     }
     
-    /*
-    public function authenticateUser($user, $password)
-    {
-        $salt = substr($user['password'], 0, 6);
-        if($salt . sha1($salt . $password) == $user['password']) {
-            return true;
-        }
-        return false;
-        
-    }
-    */
 }

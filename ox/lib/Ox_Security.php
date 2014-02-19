@@ -13,28 +13,38 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
+
+
+require_once(DIR_FRAMELIB.'Ox_User.php');
 
 /**
  *    Security class to control access to resources.
  *    This class also serves as a user manager. This class interacts with
  *    Ox_Session and Ox_User classes to achieve user management functions.
- *
+ * <code>
  *    $user['roles'] = array('su','user','admin');
+ * </code>
  *
  *    EXAMPLE LOGIN CONSTRUCT
+ * <code>
  *    $security = Ox_LibraryLoader::getResource('security');
  *    $security->login($_POST['username'],$_POST['password']);
- *    ------------------------------------------------------------
- *    EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria).
- *    $security = Ox_LibraryLoader::getResource('security');
- *    $security->setAuthenicationCriteria('subdomain',$subdomain);
- *    $security->login($_POST['username'],$_POST['password']);
+ * </code>
  *
+ *    EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria).
+ * <code>
+ *    $security = Ox_LibraryLoader::getResource('security');
+ *    $security->setAuthenticationCriteria('subdomain',$subdomain);
+ *    $security->login($_POST['username'],$_POST['password']);
+ * </code>
+ *
+ * @package Ox_Security
  */
-
-require_once(DIR_FRAMELIB.'Ox_User.php');
-
 class Ox_Security
 {
     const DEBUG = FALSE;

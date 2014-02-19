@@ -13,13 +13,18 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Logging_Writers
  */
 
 /**
  * Write log messages to a file (default)
  *
  * Default location: /tmp/log/ox.log
- * 
+ *
+ * @package Ox_Logging_Writers
  */
 class Ox_FileLogWriter implements Ox_LogWriter
 {
@@ -28,9 +33,11 @@ class Ox_FileLogWriter implements Ox_LogWriter
      * Web server permission must be granted for this file or you'll see nasty errors.
      */
     private $log_file;
-    
+
     /**
      * Constructor initializes the file location.
+     * @param $file
+     * @throws Exception
      */
     public function __construct($file)
     {
@@ -51,6 +58,9 @@ HTML;
 
     /**
      * Writes a message to the file.
+     * @param string $p_message
+     * @throws Exception
+     * @return mixed|void
      */
     public function log($p_message)
     {

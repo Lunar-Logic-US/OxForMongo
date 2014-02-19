@@ -14,6 +14,15 @@
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * A system action that assembles like files together.
+ *
+ * This is the action handler for Assembler Constructs.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Widgets
+ */
 
 /**
  * Widget ClassNames
@@ -21,13 +30,17 @@
  * (or anywhere).
  *
  * To set:
- * global $widget_handler;
+ * <code>
+ * $widget_handler=Ox_LibraryLoader::Widget_Handler();
  * $widget_handler->ClassNames->set("home","body");
+ * </code>
  *
  * To display:
- * <?php WidgetHandler::ClassNames(); ?>
+ * <code>
+ * WidgetHandler::ClassNames();
+ * </code>
+ * @package Ox_Widgets
  */
-
 class ClassNames implements Ox_Widget {
     /**
      * Class names array
@@ -58,8 +71,7 @@ class ClassNames implements Ox_Widget {
     /**
      * Set the class names to be output in elements in the site layout.
      *
-     * @param $title
-     * @internal param bool $return_string
+     * @param $classNames
      * @return string
      */
     public function set($classNames) {

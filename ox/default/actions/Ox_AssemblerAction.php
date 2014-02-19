@@ -13,16 +13,17 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Actions
  */
 
 /**
  * A system action that assembles like files together.
  *
  * This is the action handler for Assembler Constructs.
- * TODO: Add more documentation here!!!!
- *
- * @copyright Copyright (c) 2012 Lunar Logic LLC
- * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Actions
  */
 class Ox_AssemblerAction implements Ox_Routable
 {
@@ -49,9 +50,10 @@ class Ox_AssemblerAction implements Ox_Routable
     /**
      * Action Setup
      *
-     * @param null $asm_dir
-     * @param null $asm_class
+     * @param string $asm_dir
+     * @param string $asm_class
      * @param array $map
+     * @param array $args
      */
     public function __construct($asm_dir = null, $asm_class = null, $map = array(),$args = array())
     {
@@ -161,12 +163,13 @@ class Ox_AssemblerAction implements Ox_Routable
 
     /**
      * Execute the proper method from the select assembler.
-     * 
+     *
      * @param string $path The path from the web browser.
      * @param string $file The file to be loaded.
      * @param string $asm_class The assembler class.
      * @param string $method The method called (from the path).
      * @param array $parsed_args The arguments included in the url.
+     * @throws Ox_RouterException
      * @return mixed
      */
     private function loadAndRunAssembler($path, $file, $asm_class, $method, $parsed_args)
@@ -218,11 +221,11 @@ class Ox_AssemblerAction implements Ox_Routable
     /**
      * Breaks apart the args and pass them to the method
      *
-     * This methed is faster than the straight call to call_user_func_array.
-     * .
-     * @param $assembler
-     * @param $method
-     * @param $args
+     * This method is faster than the straight call to call_user_func_array.
+     *
+     * @param Ox_AssemblerConstruct $assembler
+     * @param string $method
+     * @param array $args
      * @return bool
      */
     private function callAssemblerMethod($assembler, $method, $args)

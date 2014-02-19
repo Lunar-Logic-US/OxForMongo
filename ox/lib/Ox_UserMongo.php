@@ -14,8 +14,9 @@
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *    
- *    
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
 
 /**
@@ -29,19 +30,9 @@
  * Of course you can override this class should you have extensively complex requirements for
  * your authenticated user. If, however, you simply want to add something to make your security
  * more robust it's simple to add a property to the user using the security object from your
- * application instance of Ox (see example below with additional authentication criteria)
+ * application instance of Ox.
  *
- * EXAMPLE LOGIN CONSTRUCT
- * $security = Ox_LibraryLoader::getResource('security');
- * $security->login($_POST['username'],$_POST['password']);
- * ------------------------------------------------------------
- * EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria).
- * $security = Ox_LibraryLoader::getResource('security');
- * $security->setAuthenicationCriteria('subdomain',$subdomain);
- * $security->login($_POST['username'],$_POST['password']);
- *
- * @copyright Copyright (c) 2012 Lunar Logic LLC
- * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Security
  */
 class Ox_UserMongo extends Ox_User
 {

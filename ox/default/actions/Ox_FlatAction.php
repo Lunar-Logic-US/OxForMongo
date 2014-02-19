@@ -13,17 +13,19 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Actions
  */
 
 /**
  * This Routable Action allows you to build a directory of flat html files
- * that is directly passed (possibly insterted into a layout) back to these
+ * that is directly passed (possibly inserted into a layout) back to these
  * client browser.
  *
  * There is current NO security on these files.
- *
- * @copyright Copyright (c) 2012 Lunar Logic LLC
- * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Actions
  */
 class Ox_FlatAction implements Ox_Routable
 {
@@ -60,6 +62,7 @@ class Ox_FlatAction implements Ox_Routable
      *
      * This is called when the router has found a match and give controls to the action.
      * @param mixed[] $args
+     * @throws Ox_RouterException
      * @return mixed
      */
     public function go($args)

@@ -13,7 +13,13 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Sessions
  */
+
+require_once(DIR_FRAMELIB . 'session_managers/Ox_MongoSessionManager.php');
 
 /**
  * A thin wrapper around PHP's sessions.
@@ -21,10 +27,8 @@
  * This class handles session expiration after a time period of inactivity
  * specified per user role in the config app config file. If no limit is
  * specified, the default timeout time is set to 15 minutes.
+ * @package Ox_Sessions
  */
-
-require_once(DIR_FRAMELIB . 'session_managers/Ox_MongoSessionManager.php');
-
 class Ox_Session
 {
     const DEBUG = FALSE;
@@ -219,6 +223,9 @@ DEBUG;
 
     /**
      * Setter for session vars.
+     *
+     * @param string $key
+     * @param mixed $value
      */
     function set($key, $value)
     {

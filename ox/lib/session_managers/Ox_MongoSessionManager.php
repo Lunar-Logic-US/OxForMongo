@@ -1,5 +1,14 @@
 <?php
 /**
+ * Ox Mongo Session Manager
+ *
+ * @author	Corey Ballou
+ * @copyright	Corey Ballou (2010)
+ * @package Ox_Sessions
+ */
+/**
+ * Class to use a MongoDB database session.
+ *
  * This MongoDB session handler is intended to store any data you see fit.
  * One interesting optimization to note is the setting of the active flag
  * to 0 when a session has expired. The intended purpose of this garbage
@@ -7,14 +16,7 @@
  * all expired sessions. This should most likely be implemented as a cronjob
  * script.
  *
- * @author	Corey Ballou
- * @copyright	Corey Ballou (2010)
- *
- * 
- */
-
-/**
- * Class to use a MongoDB database session.
+ * @package Ox_Sessions
  */
 class Ox_MongoSessionManager
 {
@@ -413,7 +415,7 @@ class Ox_MongoSessionManager
         return 0;
     }
 
-    /*
+    /**
      * Creates a new session ID.
      *
      * @return boolean
@@ -435,7 +437,7 @@ class Ox_MongoSessionManager
         return $success;
     }
     
-    /*
+    /**
      * Stops the current session, destroying it.
      *
      * @return boolean
@@ -448,12 +450,15 @@ class Ox_MongoSessionManager
     }
 
     /**
-    * Create a global lock for the specified document.
-    *
-    * @author	Benson Wong (mostlygeek@gmail.com)
-    * @access	private
-    * @param	string	$id
-    */
+     * Create a global lock for the specified document.
+     *
+     * @author  Benson Wong (mostlygeek@gmail.com)
+     * @access  private
+     * @param  string $id
+     * @throws Exception
+     * @throws MongoCursorException
+     * @return bool
+     */
     private function _lock($id)
     {
 	global $logger;

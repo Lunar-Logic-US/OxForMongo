@@ -13,6 +13,10 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Widgets
  */
 
 /**
@@ -21,11 +25,14 @@
  * in a layout (or anywhere)
  *
  * To set:
- * global $widget_handler;
+ * $widget_handler=Ox_LibraryLoader::Widget_Handler();
  * $widget_handler->HtmlTitle->set("SewOn");
  *
  * To display:
- * <?php WidgetHandler::HtmlTitle(); ?>
+ * <code>
+ * WidgetHandler::HtmlTitle();
+ * </code>
+ * @package Ox_Widgets
  */
 
 class HtmlTitle implements Ox_Widget {

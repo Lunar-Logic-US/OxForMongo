@@ -13,12 +13,17 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Assets
  */
 
 /**
  * Contains classes to abstract saving and retrieval of assets.
  *
  * This class hierarchy assumes that files will be uploaded via a webform.
+ * @package Ox_Assets
  */
 abstract class Ox_Asset
 {

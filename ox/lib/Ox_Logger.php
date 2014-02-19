@@ -13,7 +13,18 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Logging
  */
+
+
+//search replace: $this->logger->log with Ox_Logger::log
+//search replace: $logger->log with Ox_Logger::log
+
+//Making this available for all user code
+require_once(OX_FRAMEINTERFACE  . 'Ox_LogWriter.php');
 
 /**
  * Class to facilitate logging.
@@ -30,14 +41,8 @@
  * done for backward compatibility
  *
  * TODO: Add config setting to set which logWriter is going to be used.
+ * @package Ox_Logging
  */
-
-//search replace: $this->logger->log with Ox_Logger::log
-//search replace: $logger->log with Ox_Logger::log
-
-//Making this available for all user code
-require_once(OX_FRAMEINTERFACE  . 'Ox_LogWriter.php');
-
 class Ox_Logger
 {
     const NONE    = 0;

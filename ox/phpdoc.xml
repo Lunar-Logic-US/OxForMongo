@@ -11,7 +11,7 @@
         <ignore>tests/*</ignore>
     </files>
     <transformations>
-        <template name="/home/m2calabr/Downloads/template/template.responsive-master/"/>
-        <!--<template name="new-black"/>-->
+        <!-- <template name="/home/m2calabr/Downloads/template/template.responsive-master/"/> -->
+        <!-- <template name="clean"/> -->
     </transformations>
 </phpdoc>
