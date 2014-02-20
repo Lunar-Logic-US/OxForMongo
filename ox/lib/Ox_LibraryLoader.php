@@ -26,52 +26,70 @@ require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
  *
  * This class is used to load the various library components of the system.  It can be used dynamically to load parts
  * of the system inside functions for methods. Much of this has been designed to only load code when it is needed.
+ * <br><br>
+ * There it can also load object that are expected to be used throughout the system.  These object are given a name so
+ * that the object can be easily overridden in the application setup. These are generally the user and security objects.
+ * <br><br>
+ * To load a system object you would use:<br>
+ * <pre><code>Ox_LibraryLoader::load('session','Ox_Session');
+ * </code></pre>
+ * <br><br>
+ * That object can then be access anywhere in Ox by doing:<br>
+ * <pre><code>$session = Ox_LibraryLoader::Session();
+ * // or call the method you need directly
+ * Ox_LibraryLoader::Session()->get('some session var');
+ * </code></pre>
+ * <br><br>
+ * This give an application a high degree of flexibility because it can override the session object by creating a new
+ * session object with the same interfaces.  So you could replace the standard Session object which uses PHP to a Mongo
+ * session object.
+ * <br><br>
+ * In order perform this you need have created the replacement class in app/lib and the filename would be the same as your
+ * class.  Then you would add to your app.php:<br>
+ * <pre><code>$class_overload = array (
+ *                         varName => YourOverridingClassName,
+ *                         'session' => 'TestSession',
+ * );
+ * </code></pre>
  *
- * Documentation for general magic methods that are included in Ox:
- * @method static Ox_Session Session
- * @method static Ox_MongoSource Db
- * @method static Ox_WidgetHandler Widget_Handler
- * @method static Ox_ConfigPHPParser Config_Parser
- * @method static Ox_Security Security
- * @method static Ox_Hook Hook
- * @method static Ox_Router Router
- * @method static LocalAsset Assets_Helper
- * @method static Ox_Dispatch Dispatch
- * @method static Ox_User User
  * @package Ox_CodeLoading
+ * @method static Ox_Session Session() Returns session resource.
+ * @method static Ox_MongoSource Db() Returns database resource.
+ * @method static Ox_WidgetHandler Widget_Handler() Returns widget handler resource
+ * @method static Ox_ConfigPHPParser Config_Parser() Returns configuration parser resource
+ * @method static Ox_Security Security() Returns security resource
+ * @method static Ox_Hook Hook() Returns hook resource
+ * @method static Ox_Router Router() Returns router resource
+ * @method static LocalAsset Assets_Helper() Returns asset resource
+ * @method static Ox_Dispatch Dispatch() Returns dispatch resource
+ * @method static Ox_User User() Returns user resource
  */
 class Ox_LibraryLoader
 {
+    /** Variable name to use in app.php. */
     const CONFIG_OVERLOAD_NAME = 'class_overload';
+    /** Display debug message or not. */
     const DEBUG = FALSE;
 
-    /**
-     * @var null  This holds a pointer to the config parser
-     */
+
+    /** @var array List of system objects. */
     private static $_resources = array();
 
-    /**
-     * @var null|Ox_ConfigPHPParser  This holds a pointer to the config parser
-     */
+    /** @var Ox_ConfigPHPParser Pointer to the config parser. */
     private static $_configParser = null;
     
-    /**
-     * @var array list of ox object names (index) and the class name that will be used (value)
-     * See Ox_LibraryLoader::load()
-     */
+    /** @var array List of overloaded system objects {@See Ox_LibraryLoader::load()}. */
     private static $_overloadList = array();
     
-    /**
-     * @var array This is the default search path to look for the php code.
-     * NOTE: The default loads the FRAMEWORK FIRST!!! See Ox_LibraryLoader::load().
-     */
+    /** @var array Default search path, note: loads FRAMEWORK FIRST */
     private static $_classPath = array(DIR_FRAMELIB,DIR_APPLIB);
 
 
     /**
-     * Add to the class path
+     * Add a path to the classPath.
+     *
      * @static
-     * @param $path
+     * @param string $path Path to add to the general class path.
      */
     public static function addPath($path)
     {
@@ -79,9 +97,10 @@ class Ox_LibraryLoader
     }
 
     /**
-     * Get the current class path
+     * Get the current class path.
+     *
      * @static
-     * @return array
+     * @return array Array of directory paths
      */
     public static function getPath()
     {
@@ -89,10 +108,9 @@ class Ox_LibraryLoader
     }
 
     /**
-     * TESTING ONLY: clear the config information
+     * Clear the config information TESTING ONLY.
      *
      * @static
-     * @return array
      */
     public static function clearConfig()
     {
@@ -101,12 +119,14 @@ class Ox_LibraryLoader
     }
 
     /**
-     * See if the configParser has been set or is available.
-     * If it is available, load the class overload settings.
+     * Is the configParser available.
+     *
+     * If the configParser is available return true and also load the class overload settings.  This solves
+     * the chicken and egg problem between needing the config parser, but it may not be loaded yet.
      *
      * @static
      * @return bool
-     * @throws Exception $e
+     * @throws Ox_Exception
      */
     private static function _getParser()
     {
@@ -129,11 +149,9 @@ class Ox_LibraryLoader
     }
 
     /**
-     * This call loads all of the php code in a directory.
+     * Loads all of the php code in the path.
      *
-     * This is useful for the default actions directories.
-     *
-     * @param String $path
+     * @param String $path Directory path to load all of the PHP files.
      */
     public static function loadAll($path)
     {
@@ -147,8 +165,10 @@ class Ox_LibraryLoader
     }
 
     /**
-     * This just loads a library from the default areas in the Ox/app tree or if
-     * specified the path given.
+     * Load code in page.
+     *
+     * This acts like an include but you can dynamically set the path to try and load the code.  The code is loaded from
+     * the first location it finds. You also have the option have an Ox_Exception thrown if the file can not be found.
      *
      * @param string $name Name of the file to load without ".php"
      * @param array $path Array of directory paths to look for the file
@@ -190,27 +210,30 @@ class Ox_LibraryLoader
     }
 
     /**
-     * This function loads a class for the system objects from the locations in the classPath.  Then it instantiates
+     * Load a system resource.
+     *
+     * Loads a class for the system objects from the locations in the classPath.  Then it instantiates
      * the class in a global variable of varName.  The class being loaded can be overwritten by setting
      * a variable in the app.php config file.
-     *
+     * <br><br>
      * It would look like:
-     * $class_overload = array (
-     *                         <varName> => <YourOveridingClassName>,
+     * <pre><code>$class_overload = array (
+     *                         varName => YourOverridingClassName,
      *                         'session' => 'TestSession',
-     * );
-     *
+     * );</code></pre>
+     * <br><br>
      * Notes:
-     *    The file should have the same name as the class and should be in the app/lib directory.
-     *    Application classes must not have the same name as the Ox classes for all classes in the Ox/lib directory
-     *
-     * TODO: Add a system to save all "system" objects in an array so you can request those objects from this loader.
+     * <ul>
+     * <li>The file should have the same name as the class and should be in the app/lib directory.</li>
+     * <li>Application classes must be unique.</li>
+     * <li>In order to be a singleton, the class must have method getInstance() to initialize it.</li>
+     * </ul>
      *
      * @static
-     * @param $varName
-     * @param $defaultClassName
-     * @param bool $singleton
-     * @throws Exception
+     * @param string $varName Name of the system resource
+     * @param string $defaultClassName Class name to load
+     * @param bool $singleton Is this a singleton.
+     * @throws Ox_Exception
      */
     public static function load($varName,$defaultClassName,$singleton=true)
     {
@@ -256,9 +279,13 @@ class Ox_LibraryLoader
 
     /**
      * Get a saved resource.
+     *
+     * This returns the associated object that has been loaded with Ox_LibraryLoader::load
+     *
+     * @see Ox_LibraryLoader::load
      * @static
-     * @param $name
-     * @return null
+     * @param string $name
+     * @return null|mixed The resource object
      */
     public static function getResource($name)
     {
@@ -276,10 +303,19 @@ class Ox_LibraryLoader
     }
 
     /**
-     * Magic function to access static methods with arguments.
+     * Get system resource.
      *
-     * @param $method_name Name of the missing method being call.
-     * @param $arguments Parameters passed to the method
+     * This uses the PHP magic function to access static methods with arguments.  This allows a clean syntax to get a
+     * system resource.
+     * <br><br>
+     * The following loads the session resource into the variable $session.
+     * <br>
+     * <pre><code>
+     * $session = Ox_LibraryLoader::Session();
+     * </code></pre>
+     *
+     * @param string $method_name Name of the missing method being call.
+     * @param array $arguments Parameters passed to the method
      * @return mixed
      */
     public static function __callStatic($method_name,$arguments)
@@ -291,9 +327,11 @@ class Ox_LibraryLoader
     }
 
     /**
-     * Loads the class into memory using PHP's autoload system.
+     * Hook for for PHP auto load.
      *
-     * @param string $className Name of the class to try and load.
+     * PHP will call this function when PHP can not file the find in the PHP path.
+     *
+     * @param string $className Class name.
      */
     public static function autoLoad($className) {
         $path = array(
@@ -307,7 +345,6 @@ class Ox_LibraryLoader
         }
         Ox_LibraryLoader::loadCode($className,$path,false);
     }
-
 }
 
 spl_autoload_register(array('Ox_LibraryLoader','autoLoad'),false);
