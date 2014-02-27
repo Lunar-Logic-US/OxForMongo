@@ -19,10 +19,6 @@
  * @package Ox_Logging
  */
 
-
-//search replace: $this->logger->log with Ox_Logger::log
-//search replace: $logger->log with Ox_Logger::log
-
 //Making this available for all user code
 require_once(OX_FRAMEINTERFACE  . 'Ox_LogWriter.php');
 
@@ -32,55 +28,58 @@ require_once(OX_FRAMEINTERFACE  . 'Ox_LogWriter.php');
  * There are three log levels available: MESSAGE, WARNING, ERROR and DEBUG. The
  * logger can be configured to react to one, all, or any combination of the
  * available logging levels.
- *
+ * <br><br>
  * In addition, one, or many logging levels can be associated with a specific
  * logger that implements the 'Logger' interface. The default is to set all
  * to 'FileLogger'.
- *
+ * <br><br>
  * This class is setup to currently run both as a pseudo singleton and a regular class.  This was
- * done for backward compatibility
- *
+ * done for backward compatibility.
+ * <br><br>
+ * Do log in your code:<pre><code>
+ * Ox_Logger::logDebug("Server URI: " .$_SERVER['REQUEST_URI']); //just a plain debug message
+ * Ox_Logger::logDebug($_SERVER); //print_r the variable into the log
+ * Ox_Logger::logError("Error in Request URI: " .$_SERVER['REQUEST_URI']); //log an error message
+ * </code></pre>
  * TODO: Add config setting to set which logWriter is going to be used.
  * @package Ox_Logging
  */
 class Ox_Logger
 {
+    //These are bit flags and types for setting what is written to the log
+    /** Log level None - Nothing is logged */
     const NONE    = 0;
+    /** Log level Message */
     const MESSAGE = 1;
+    /** Log level Warning */
     const WARNING = 2;
+    /** Log Level Error */
     const ERROR   = 4;
+    /** Log Level Debug */
     const DEBUG   = 8;
+
+    /** Default name for the ox log */
     const DEFAULT_FILENAME = 'ox.log';
+
+    /** Default log writer object */
     const LOG_WRITER = 'Ox_FileLogWriter';
 
-    /**
-     * Specify the directory of the log writers
-     */
+    /** Directory of the log writers */
     private static $_lib;
     
-    /**
-     * Specifies the level of the entry (e.g. notice, warning, error) see above.
-     */
+    /** Specifies the level of the entry (e.g. notice, warning, error) see above. */
     private static $_logLevel;
     
-    /**
-     * The format of to use for the timestamp.
-     */
+    /** Format of the timestamp. */
     private static $datetime_format = "\[d\/M\/Y:H:i:s\]";
     
-    /**
-     * An include path.
-     */
+    /** An include path. */
     private static $_classPath;
 
-    /**
-     * Track usage by marking initialization flag.
-     */
+    /** Track usage by marking initialization flag. */
     private static $_initialized=FALSE;
     
-    /**
-     * Error level handlers.
-     */
+    /** Error level handlers. */
     private static $_handlers = array(
         Ox_Logger::MESSAGE => null,
         Ox_Logger::WARNING => null,
@@ -89,9 +88,11 @@ class Ox_Logger
     );
 
     /**
-     * Constructor initializes the logger using optionally passed in parameters.
+     * Constructor.
      *
-     * @param String $log_file
+     * Initializes the logger using optionally passed in parameters.
+     *
+     * @param string $log_file
      * @param int $level
      */
     public function __construct($log_file=null, $level = 0)
@@ -115,14 +116,14 @@ class Ox_Logger
      * This can be run at any time that we need to send a message.  This means that you can just log a message
      * and this object will initialize itself.
      *
-     * @param null $logFile Name of the log file
-     * @param null $level
+     * @param null|string $logFile Name of the log file
+     * @param int $level
      * @return bool
      * @throws Exception
      */
     private static function _init($logFile=null, $level = null) {
         if (!self::$_initialized) {
-            global $config_parser;
+            $config_parser = Ox_LibraryLoader::Config_Parser();
             if (!isset($config_parser) && $logFile===null) {
                 return false;
             }
@@ -130,7 +131,6 @@ class Ox_Logger
             self::$_classPath = array(self::$_lib,DIR_APPLIB);
 
             self::$_initialized = TRUE;
-            global $config_parser;
             if (empty($logFile)) {
                 $logPath = $config_parser->getAppConfigValue('log_dir');
                 if (empty($logPath)) {
@@ -162,10 +162,10 @@ class Ox_Logger
     }
 
     /**
-     * Set the logger for a log message type
+     * Set the logger for a log message type.
      *
-     * @param $type
-     * @param $logger
+     * @param int $type
+     * @param Ox_LogWriter $logger
      */
     public static function setLogger($type, $logger)
     {
@@ -173,8 +173,8 @@ class Ox_Logger
     }
 
     /**
-     * Set the current log level
-     * @param $level
+     * Set the current log level.
+     * @param int $level
      */
     public static function setLevel($level)
     {
@@ -184,8 +184,8 @@ class Ox_Logger
     /**
      * Send the message to the correct logWriter
      *
-     * @param $level
-     * @param $p_message
+     * @param int $level
+     * @param string $p_message
      */
     private static function _logIt($level, $p_message)
     {
@@ -206,8 +206,8 @@ class Ox_Logger
     
     // Wrapper functions for the 4 log levels
     /**
-     * Send a message of type MESSAGE
-     * @param $message
+     * Send a message of type MESSAGE.
+     * @param string $message
      */
     public static function logMessage($message)
     {
@@ -216,7 +216,7 @@ class Ox_Logger
 
     /**
      * Send a message of type WARNING
-     * @param $message
+     * @param string $message
      */
     public static function logWarning($message)
     {
@@ -225,7 +225,7 @@ class Ox_Logger
 
     /**
      * Send a message of type ERROR
-     * @param $message
+     * @param string $message
      */
     public static function logError($message)
     {
@@ -234,7 +234,7 @@ class Ox_Logger
 
     /**
      * Send a message of type DEBUG
-     * @param $message
+     * @param string $message
      */
     public static function logDebug($message)
     {

@@ -23,44 +23,52 @@
 require_once(DIR_FRAMELIB.'Ox_User.php');
 
 /**
- *    Security class to control access to resources.
- *    This class also serves as a user manager. This class interacts with
- *    Ox_Session and Ox_User classes to achieve user management functions.
- * <code>
- *    $user['roles'] = array('su','user','admin');
- * </code>
+ * Security class to control access to resources.
  *
- *    EXAMPLE LOGIN CONSTRUCT
- * <code>
+ * This class also serves as a user manager. This class interacts with
+ * Ox_Session and Ox_User classes to achieve user management functions.
+ * <br><br>
+ * This object uses the User system resource for all of it checks against the user in the session. For most
+ * authenication systems, you only need to setup a new User object.  This can be done using the class override system
+ * in the Ox_LibraryLoader
+ * <br><br>
+ * This object expect roles by be a array of roles name like:
+ * <pre><code>
+ *    $security = Ox_LibraryLoader::Security();
+ *    $neededRoles = array('su','user','admin');
+ *    $security->checkPermission($neededRoles); //Checks the current user for the supplied roles.
+ * </code></pre>
+ * <br><br>
+ * <em>EXAMPLE LOGIN CONSTRUCT:</em><br>
+ * <pre><code>
  *    $security = Ox_LibraryLoader::getResource('security');
  *    $security->login($_POST['username'],$_POST['password']);
- * </code>
+ * </code></pre>
  *
- *    EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria).
- * <code>
+ * <em>EXAMPLE LOGIN CONSTRUCT (With additional authentication criteria):</em><br>
+ * <pre><code>
  *    $security = Ox_LibraryLoader::getResource('security');
- *    $security->setAuthenticationCriteria('subdomain',$subdomain);
+ *    $security->setAuthenticationCriteria('subDomain',$subDomain);
  *    $security->login($_POST['username'],$_POST['password']);
- * </code>
+ * </code></pre>
  *
  * @package Ox_Security
  */
 class Ox_Security
 {
+    /** Enable/Disable Debugging for this object. */
     const DEBUG = FALSE;
     
-    /**
-     * The user object for the current session.
-     */
+    /** User object for the current session. */
     protected $user;
     
-    /**
-     * The session.
-     */
+    /** The session */
     protected $session;
 
     /**
      * Load the system user object.
+     *
+     * This initalizes the sytem
      */
     function __construct(){
         Ox_LibraryLoader::load('user','Ox_UserMongo',false);

@@ -23,7 +23,7 @@
 /**
  * Abstract class for creating schemas.
  *
- * <code>
+ * <pre><code>
  * class NewSchema extends Ox_Schema
  * {
  *     public function __construct() {
@@ -32,7 +32,7 @@
  *          );
  *      }
  * }
- * </code>
+ * </code></pre>
  * What I want:
  *
  * To test for required
@@ -41,8 +41,8 @@
  *
  * Scheme definition is one of:
  *      field => array ( '__validator => <Must from interface Ox_Validoator> , '__required' => <true | false>, '__default' => <simple type> )
- *      object => array( '__required, 'blah', ',)
- *      array =>  array( __required, _fields) '
+ *      object => array( '__required', 'blah')
+ *      array =>  array( '__required', _fields)
  *
  * Examples of use:
  * <code>

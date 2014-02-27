@@ -49,6 +49,7 @@ require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
  * <pre><code>$class_overload = array (
  *                         varName => YourOverridingClassName,
  *                         'session' => 'TestSession',
+ *                         'user' => 'MyAppUser',
  * );
  * </code></pre>
  *
