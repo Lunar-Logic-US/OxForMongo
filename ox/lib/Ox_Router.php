@@ -33,34 +33,41 @@
  */
 class Ox_Router
 {
-    /**
-     * Enable/Disable Debugging for this object.
-     */
+    /** Enable/Disable Debugging for this object. */
     const DEBUG = FALSE;
 
-    /**
-     * The domain variable name to use in the app.php file.
-     */
+    /** The domain variable name to use in the app.php file. */
     const DOMAIN_APP_CONFIG = 'domain';
 
-    /**
-     * List of routes registered.
-     * @var array
-     */
+    /** @var array List of routes registered. */
     private static $_routes = array();
  
     /**
      * Register a route.
      *
-     * @param $regex
-     * @param $action
+     * This adds to the list of routes that will be evaluated when the route method is call.  (Which is called from
+     * dispatch.)  The routes for an app are generally set in config/app.php.  It will also be called as part of a
+     * Ox_Hook::initializeModuleConstruct call to setup routes for a module.
+     *
+     * For example:
+     * <pre><code>Ox_Router::add('/^\/login.*', new Ox_AssemblerAction(null, 'users', array('index'=>'login')));
+     * </code></pre>
+     *
+     * @param string $regex
+     * @param Ox_Routable $action
      */
     public static function add($regex, $action) {
         self::$_routes[$regex] = $action;
     }
 
+    public static function addTop($regex, $action) {
+        $newRoute = array($regex=>$action);
+        self::$_routes = array_merge($newRoute,self::$_routes);
+        //self::$_routes[$regex] = $action;
+    }
+
     /**
-     * Return all route for inspection for unit testing
+     * Return all routes for inspection for unit testing
      *
      * @static
      * @return array
@@ -71,8 +78,15 @@ class Ox_Router
 
 
     /**
-     * Route based on the url and registered routes.
-     * @param $request_url
+     * Route program execution.
+     *
+     * Figures out which action get control of the execution.  This is based on the regex that is part of the route
+     * information. If a route can not be found return a 404 message.
+     * Note: you can set a path for the URL in the config/app.php
+     *
+     * <pre><code>$errorPage = "/error/e404";
+     * </code></pre>
+     * @param string $request_url
      */
     public static function route($request_url)
     {
@@ -99,6 +113,7 @@ class Ox_Router
         if(!$routed) {
             // Couldn't find a route. Log and return message.
             Ox_Logger::logWarning('Could not route ' . $request_url);
+            //@TODO why aren't we returning an actual 404 header????
             //header("HTTP/1.0 404 Not Found");
             if (!isset($errorMessage)) {
                $errorMessage = "Route not found for:  {$request_url}";
@@ -109,18 +124,17 @@ class Ox_Router
                 $_POST['errorMessage']=$errorMessage;
                 self::route($path['404']);
             } else {
-                //die($path['404'].$request_url);
                 echo "<div class=\"error404\"><h1>404 Error</h1> <p>$errorMessage</p></div>";
             }
         }
     }
 
     /**
-     * Redirect to the give url
+     * Redirect to the given url
      *
-     * @param $url
-     * @param null $params
-     * @param null $headers
+     * @param string $url
+     * @param null|array $params
+     * @param null|array $headers
      */
     public static function redirect($url, $params = null, $headers = null)
     {
@@ -142,6 +156,7 @@ class Ox_Router
             </html>
             <?php
         } else {
+            //The location header is a 302 redirect.. so can only be used by itself,
             header('Location: ' . $url);
         }
     }
@@ -169,23 +184,13 @@ class Ox_Router
         }
         $config = Ox_LibraryLoader::config_parser();
         $webDir = $config->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
-        /*OLD
-        if(!preg_match('/^http/',$url) && !empty($webDir)){
-            if ($buildFQURL) {
-                $url = self::getProtocol() . self::getDomain() . $webDir.$url;
-            } else {
-                $url = $webDir.$url;
-            }
-        }
-        OLD*/
-        //NEW - edit to allow fully qualified url's without a web directory defined.
+        //Allow fully qualified url's without a web directory defined.
         if(!empty($webDir)){
             $url = $webDir.$url;
         }
         if(!preg_match('/^http/',$url) && $buildFQURL){
             $url = self::getProtocol() . self::getDomain() . $webDir.$url;
         }
-        //NEW
         return $url = $url.$param_str;
     }
 
@@ -209,7 +214,7 @@ class Ox_Router
 
     /**
      * Returns the currently used protocol string for creating a Fully qualified URL
-     * @return string
+     * @return string  The protocol that use used on the HTTP request.
      */
     public static function getProtocol()
     {

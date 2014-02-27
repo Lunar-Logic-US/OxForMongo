@@ -28,27 +28,16 @@
  */
 class Ox_Hook
 {
-    /**
-     * Enable/Disable Debugging for this object.
-     */
+    /** Enable/Disable Debugging for this object. */
     const DEBUG = FALSE;
-    /**
-     * Name of the setting ID for the settings collection.
-     */
+
+    /** Name of the setting ID for the settings collection. */
     const SETTING_ID = 'Ox_Hook';
 
-    /**
-     * Singleton instance
-     *
-     * @var null
-     */
+    /** @var null|Ox_Hook Singleton instance */
     private static $_instance = NULL;
 
-    /**
-     * List of the hooks that have been registered.
-     *
-     * @var array
-     */
+    /** @var array List of the hooks that have been registered. */
     private $_hook_list = array();
 
     /**
@@ -68,7 +57,7 @@ class Ox_Hook
      * Runs the init for a for "module" construct.
      *
      * This looks for the given construct, then the file inside that construct called hook.  Inside hook, there
-     * should be an obejct called <construct>Hook which has a static init function.  That is the method that will
+     * should be an object called <construct>Hook which has a static init function.  That is the method that will
      * be called by this method.
      *
      * This is intended to give an easy way to spin up modules in the modules.php configuration file. For example:
@@ -90,7 +79,7 @@ class Ox_Hook
      * Register a function on a hook.
      *
      * Example hook document:
-     * <code>
+     * <pre><code>
      *  "hooks"{
      *       "menu":[
      *          {
@@ -112,19 +101,19 @@ class Ox_Hook
      *          }
      *      ]
      *  }
-     * </code>
+     * </code></pre>
      *
-     * @param $name - The name of the hook, to be invoked in the execute function.
-     * @param $file - The physical address of the file that includes the hook class and method
-     * @param $class - The name of the class that has the hook method
-     * @param $function - The function to call in the above mentioned construct
-     * @param bool $replace - Add an additional hook if false or replace the existing hook(s) if true.
+     * @param string $name - The name of the hook, to be invoked in the execute function.
+     * @param string $file - The physical address of the file that includes the hook class and method
+     * @param string $class - The name of the class that has the hook method
+     * @param string $method - The method to call in given class
+     * @param bool $replace - Add an additional hook if false or replace the existing hook(s) if true. NOT IMPLEMENTED
      */
-    public static function register($name, $file, $class, $function, $replace=false)
+    public static function register($name, $file, $class, $method, $replace=false)
     {
-        if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": $name - file: {$file} | class: {$class} | function: $function.");
+        if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": $name - file: {$file} | class: {$class} | function: $method.");
         $update = array('$addToSet'=>array(
-            $name=>array("file"=>$file, "class"=>$class, "function"=>$function)
+            $name=>array("file"=>$file, "class"=>$class, "function"=>$method)
         ));
         /*
         if ($replace) {
@@ -154,7 +143,7 @@ class Ox_Hook
      *
      * @param string $name - The name of the hook to invoke.
      * @param array $arguments
-     * @return mixed
+     * @return mixed Returns whatever the called method gives us.
      */
     public static function execute($name, $arguments=array())
     {
