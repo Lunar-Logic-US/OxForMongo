@@ -21,75 +21,62 @@
 
 
 //TODO: refactor so these defines and require are better handled
-/**
- * RegEx for the web root.
- */
+/** RegEx for the web root. */
 define('WEB_ROOT','/^\/?$/');
-/**
- * Name for the assembler file.
- */
+
+/** Name for the assembler file. */
 define('ASSEMBLER_NAME','assembler.php');
 require_once(DIR_FRAMELIB . 'constructs/Ox_AssemblerConstruct.php');
 
 /**
- * Sets up the information needed for the router to run.
+ * Set the environment for routing.
+ *
+ * This does basic url handling and make sure all the routes are setup.  Run is called when as the next step
+ * in the boot process.  It is called from mainentry.php.
+ * <br><br>
+ * If you are unit testing you can skip the dispatch by calling the Ox_Dispatch::skipRun() method.
  *
  * @package Ox_Boot
  */
 class Ox_Dispatch
 {
+    /** Enable/Disable Debugging for this object. */
     const DEBUG = FALSE;
-    /**
-     * Flag to disable dispatch.
-     */
-    private static $_skipRun = FALSE;
-    
-    /**
-     * Flag to indicate initialization status
-     */
-    private static $_initialized = FALSE;
-    
-    /**
-     * The path of the default actions.
-     */
-    private static $_dirDefaultActions;
-    
-    /**
-     * The path to the application defined actions.
-     */
-    private static $_dirAppActions;
-    
-    /**
-     * The path to application routes.
-     * @var array
-     */
-    private static $_appRoutes;
 
-    /**
-     * The base of the URL to strip off if the app is in a sub directory.
-     * @var string
-     */
-    private static $_appWebBase='';
-
+    /** Variable name in app.php for web base directory ie: $web_base_dir = "/ox_app" */
     const CONFIG_WEB_BASE_NAME = 'web_base_dir';
 
+    /** @var boolean Flag to disable routing. */
+    private static $_skipRun = FALSE;
+    
+    /** @var boolean Initialization status */
+    private static $_initialized = FALSE;
+    
+    /** @var string Path of the default actions. */
+    private static $_dirDefaultActions;
+    
+    /** @var string Path to the application defined actions. */
+    private static $_dirAppActions;
+    
+    /** @var array Full path and name to route file. */
+    private static $_appRoutes;
+
+    /** @var string Base of the URL to strip off if the app is in a sub directory. */
+    private static $_appWebBase='';
+
+
 
     /**
-     * Set the skip flag to allow the dispatch to run.  This is for unit testing.
+     * Allow the dispatch to run.  For unit testing.
      * @static
      */
-    public static function allowRun()
-    {
-        self::$_skipRun=FALSE;
-    }
+    public static function allowRun() { self::$_skipRun=FALSE; }
+
     /**
-     * Set the skip flag to allow the stop dispatch from running.  This is for unit testing.
+     * Stop dispatch from running.  For unit testing.
      * @static
      */
-    public static function skipRun()
-    {
-        self::$_skipRun=TRUE;
-    }
+    public static function skipRun() { self::$_skipRun=TRUE; }
 
     /**
      * Initialization routine sets local static vars.
@@ -105,7 +92,9 @@ class Ox_Dispatch
     }
 
     /**
-     * Loads all actions and routes in preparation for dispatch.
+     * Loads all actions and routes.
+     *
+     * This loads all of the need actions and routes in preparation for dispatching.  The route.php is loaded here.
      */
     public static function loadRoutes()
     {
@@ -144,7 +133,30 @@ class Ox_Dispatch
     }
 
     /**
-     * Executes the dispatch by routing to a page in your web app.
+     *
+     * @uses $_SERVER['REQUEST_URI']
+     * @return string URL path
+     */
+    public static function getURL()
+    {
+        //decode the URL
+        $url_info = parse_url($_SERVER['REQUEST_URI']);
+        if (self::DEBUG) {
+            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
+        }
+
+        // Strip off part of the url as needed
+        $url = $url_info['path'];
+        if (substr($url, 0, strlen(self::$_appWebBase)) == self::$_appWebBase) {
+            $url = substr($url, strlen(self::$_appWebBase), strlen($url) );
+        }
+        return $url;
+    }
+
+    /**
+     * Dispatch the request.
+     *
+     * Get the path part of the URL and removed the web base as needed.  Then send the path request to be routed.
      */
     public static function run()
     {
@@ -163,7 +175,7 @@ class Ox_Dispatch
             Ox_Logger::logDebug("Ox_Dispatch: session after update: " . print_r($_SESSION,1));
         }
 
-        //self::_loadRoutes();
+        /*
         //decode the URL
         $url_info = parse_url($_SERVER['REQUEST_URI']);
         if (self::DEBUG) {
@@ -175,6 +187,8 @@ class Ox_Dispatch
         if (substr($url, 0, strlen(self::$_appWebBase)) == self::$_appWebBase) {
             $url = substr($url, strlen(self::$_appWebBase), strlen($url) );
         }
+        */
+        $url = self::getURL();
 
         if (self::DEBUG) {
             Ox_Logger::logDebug("Ox_Dispatch: Dispatching path (After Trim): " . $url);
