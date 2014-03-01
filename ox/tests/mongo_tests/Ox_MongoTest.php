@@ -93,7 +93,6 @@ class Ox_MongoTest extends PHPUnit_Framework_TestCase {
     public function isArrayInMongo($fieldName)
     {
         $result = $this->_db->execute('db.mongotest.find("Array.isArray(this.a)").count();');
-        var_dump($result);
         if ($result['retval']>0) {
             return true;
         }
