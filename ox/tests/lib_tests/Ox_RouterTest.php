@@ -121,9 +121,6 @@ PHP;
 
     public function testRouteWithArguments()
     {
-        //define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
-
-
         $testClass = 'TestAction';
         $fileData=<<<PHP
 <?php
@@ -136,11 +133,11 @@ class $testClass implements Ox_Routable
 
 }
 PHP;
-        $fileName = DIR_APP."{$testClass}.php";
+        $fileName = DIR_APP."/lib/{$testClass}.php";
         file_put_contents($fileName,$fileData);
-
         require_once($fileName);
-        Ox_Router::add('/^testroute(\d*)\/?(\d*)$/',new TestAction());
+
+        Ox_Router::addTop('/^testroute(\d*)\/?(\d*)$/',new TestAction());
         Ox_Router::route('testroute555/666');
         $this->assertTrue(defined('ROUTE_SUCCESS'));
         $args = explode('|',ROUTE_SUCCESS);
@@ -153,10 +150,6 @@ PHP;
 
     public function testRouteMissing()
     {
-        //define ('DIR_APP',dirname(dirname(__FILE__)) . '/tmp/');
-        //define ('DIR_APPLIB', DIR_APP . 'lib'. DIRECTORY_SEPARATOR);
-        //define ("DIR_APPCONFIG", DIR_APP . 'config' . DIRECTORY_SEPARATOR);
-
         $testClass = 'TestAction';
         $fileData=<<<PHP
 <?php
@@ -179,6 +172,57 @@ PHP;
 
         unlink($fileName);
     }
-}
 
-?>
+    public function testRemove()
+    {
+        $testRoute = '/newroute/';
+        //make sure newroute is not in the list
+        $routeList = Ox_Router::getAll();
+        $this->assertFalse(array_key_exists($testRoute,$routeList));
+
+        //Add it to the list.
+        Ox_Router::add($testRoute,new Ox_AssetAction());
+        $routeList = Ox_Router::getAll();
+        $this->assertTrue(array_key_exists($testRoute,$routeList));
+
+        //remove it from the list.
+        Ox_Router::remove($testRoute);
+        $routeList = Ox_Router::getAll();
+        $this->assertFalse(array_key_exists($testRoute,$routeList));
+    }
+
+    public function testRemoveDefaults()
+    {
+        //Get the current list and make sure they are there
+        $routeList = Ox_Router::getAll();
+        $this->assertTrue(array_key_exists(WEB_ROOT,$routeList));
+        $this->assertTrue(array_key_exists(WEB_ASSET_ROUTE,$routeList));
+        $this->assertTrue(array_key_exists(WEB_DEFAULT_ROUTE,$routeList));
+        //Remove all of the default routes.
+        Ox_Router::remove(WEB_ROOT);
+        Ox_Router::remove(WEB_ASSET_ROUTE);
+        Ox_Router::remove(WEB_DEFAULT_ROUTE);
+        //routerList should now be empty.
+        $routeList = Ox_Router::getAll();
+        $this->assertFalse(array_key_exists(WEB_ROOT,$routeList));
+        $this->assertFalse(array_key_exists(WEB_ASSET_ROUTE,$routeList));
+        $this->assertFalse(array_key_exists(WEB_DEFAULT_ROUTE,$routeList));
+    }
+
+    public function testAddTop()
+    {
+        $testRoute = '/newroute/';
+        $routeList = Ox_Router::getAll();
+        //make sure the first element is not our test route.
+        reset($routeList);
+        $first_key = key($routeList);
+        $this->assertNotEquals($testRoute,$first_key);
+
+        //Add the testroute to the top
+        Ox_Router::addTop($testRoute,new Ox_AssetAction());
+        $routeList = Ox_Router::getAll();
+        reset($routeList);
+        $first_key = key($routeList);
+        $this->assertEquals($testRoute,$first_key);
+    }
+}

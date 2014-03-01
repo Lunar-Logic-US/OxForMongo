@@ -48,7 +48,7 @@ class Ox_Router
      * This adds to the list of routes that will be evaluated when the route method is call.  (Which is called from
      * dispatch.)  The routes for an app are generally set in config/app.php.  It will also be called as part of a
      * Ox_Hook::initializeModuleConstruct call to setup routes for a module.
-     *
+     * <br><br>
      * For example:
      * <pre><code>Ox_Router::add('/^\/login.*', new Ox_AssemblerAction(null, 'users', array('index'=>'login')));
      * </code></pre>
@@ -60,10 +60,38 @@ class Ox_Router
         self::$_routes[$regex] = $action;
     }
 
+
+    /**
+     * Register a route at top.
+     *
+     * This performs the same function as add but adds the route to the top of the list to be checked.
+     * <br><br>
+     * For example:
+     * <pre><code>Ox_Router::addTop('/^\/login.*', new Ox_AssemblerAction(null, 'users', array('index'=>'login')));
+     * </code></pre>
+     *
+     * @param string $regex
+     * @param Ox_Routable $action
+     */
     public static function addTop($regex, $action) {
         $newRoute = array($regex=>$action);
         self::$_routes = array_merge($newRoute,self::$_routes);
         //self::$_routes[$regex] = $action;
+    }
+
+    /**
+     * Remove a route.
+     *
+     * Removes the route from the the list of routes to check.
+     * <br><br>
+     * For example:
+     * <pre><code>Ox_Router::remove('/^\/login.*');
+     * </code></pre>
+     *
+     * @param string $regex
+     */
+    public static function remove($regex) {
+        unset(self::$_routes[$regex]);
     }
 
     /**
@@ -112,9 +140,8 @@ class Ox_Router
 
         if(!$routed) {
             // Couldn't find a route. Log and return message.
-            Ox_Logger::logWarning('Could not route ' . $request_url);
-            //@TODO why aren't we returning an actual 404 header????
-            //header("HTTP/1.0 404 Not Found");
+            Ox_Logger::logWarning(__CLASS__ . ' - '. __FUNCTION__ .  ': Could not route:' . $request_url);
+            header("HTTP/1.0 404 Not Found");
             if (!isset($errorMessage)) {
                $errorMessage = "Route not found for:  {$request_url}";
             }
@@ -226,23 +253,4 @@ class Ox_Router
             return $protocol;
     }
 
-    /**
-     * I am not sure this function is being used. TODO: See if this should be removed.
-     * @param $uri
-     * @param $prefix
-     */
-    public static function trimPrefix($uri,$prefix)
-    {
-        //decode the URL
-        $url_info = parse_url($uri);
-        if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
-        }
-
-        // Strip off part of the uri as needed
-        $url = $url_info['path'];
-        if (substr($url, 0, strlen($prefix)) == $prefix) {
-            $url = substr($url, strlen($prefix), strlen($url) );
-        }
-    }
 }
