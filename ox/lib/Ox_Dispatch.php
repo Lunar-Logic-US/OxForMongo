@@ -19,10 +19,12 @@
  * @package Ox_Boot
  */
 
-
-//TODO: refactor so these defines and require are better handled
 /** RegEx for the web root. */
 define('WEB_ROOT','/^\/?$/');
+/** RegEx for the assests. */
+define('WEB_ASSET_ROUTE','/^\/assets\/([\w -]*\.\w{0,5})$/');
+/** RegEx Default. */
+define('WEB_DEFAULT_ROUTE','/^\/(\w*)(\/\w*)?(\/[\w.\-_]*)?(\/[\w.\-_]*)?(\/[\w.\-_]*)?(\/\w*)?(\/\d*)?$/');
 
 /** Name for the assembler file. */
 define('ASSEMBLER_NAME','assembler.php');
@@ -64,8 +66,6 @@ class Ox_Dispatch
     /** @var string Base of the URL to strip off if the app is in a sub directory. */
     private static $_appWebBase='';
 
-
-
     /**
      * Allow the dispatch to run.  For unit testing.
      * @static
@@ -88,7 +88,6 @@ class Ox_Dispatch
         self::$_dirAppActions = DIR_APP . 'actions' . DIRECTORY_SEPARATOR;
         self::$_appRoutes = DIR_APP . 'config' . DIRECTORY_SEPARATOR . 'routes.php';
         self::$_appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(self::CONFIG_WEB_BASE_NAME);
-
     }
 
     /**
@@ -105,21 +104,9 @@ class Ox_Dispatch
         //Load the default Ox actions
         Ox_LibraryLoader::loadAll(self::$_dirDefaultActions);
 
-        // TODO: change to make easier
-        // This should be changed to make it easier for applications to override default actions.  For example,
-        // these routes could go into a separate routing array that only gets checked if all user patterns fall
-        // through.  Otherwise in order to override these patterns, the application must know the exact regex
-        // string to use to override it, and this can lead to needing two or more router->add lines per regex --
-        // one to override the default and another to catch the other patterns that the default regex would not
-        // catch.
         Ox_Router::add(WEB_ROOT, new Ox_FlatAction());
-
-        Ox_Router::add('/^\/assets\/([\w -]*\.\w{0,5})$/', new Ox_AssetAction());
-        Ox_Router::add('/^\/assets\/(\w*)\/(\d*)\/(\d*)$/', new Ox_AssemblerAction(DIR_CONSTRUCT . 'asm/assets_asm/',
-            'AssetsAssembler'));
-        Ox_Router::add('/^\/assets(\/\w*)?$/', new Ox_AssemblerAction(DIR_CONSTRUCT . 'asm/assets_asm/',
-            'AssetsAssembler'));
-        Ox_Router::add('/^(\w+)\/(\w+)$/', new Ox_AssemblerAction());
+        Ox_Router::add(WEB_ASSET_ROUTE, new Ox_AssetAction());
+        Ox_Router::add(WEB_DEFAULT_ROUTE, new Ox_AssemblerAction());
 
         //Load all app actions in the app actions directory
         if (is_dir(self::$_dirAppActions)) {
@@ -133,19 +120,22 @@ class Ox_Dispatch
     }
 
     /**
+     * Gets URL Path
+     *
+     * Get the URL Path modified as need to be able to route our web call.
      *
      * @uses $_SERVER['REQUEST_URI']
      * @return string URL path
      */
-    public static function getURL()
+    public static function getURLPath()
     {
-        //decode the URL
+        //Decode the URL
         $url_info = parse_url($_SERVER['REQUEST_URI']);
         if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
+            Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": Path from URL: " . $url_info['path'] . " | App web Base: " . self::$_appWebBase);
         }
 
-        // Strip off part of the url as needed
+        //Strip off part of the url as needed
         $url = $url_info['path'];
         if (substr($url, 0, strlen(self::$_appWebBase)) == self::$_appWebBase) {
             $url = substr($url, strlen(self::$_appWebBase), strlen($url) );
@@ -160,39 +150,20 @@ class Ox_Dispatch
      */
     public static function run()
     {
-        if (self::$_skipRun) {
-            return false;
-        }
-        if (!self::$_initialized) {
-            self::_init();
-        }
+        if (self::$_skipRun) { return false; }
+        if (!self::$_initialized) { self::_init(); }
 
-        // Do timeout checking--if timeout exceeded, end session, else, update
-        // last activity time.
-        global $session;
-        $session->update();
+        // Do timeout checking--if timeout exceeded, end session, else, update last activity time.
+        Ox_LibraryLoader::Session()->update();
         if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_Dispatch: session after update: " . print_r($_SESSION,1));
+            Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": session after update: " . print_r($_SESSION,1));
         }
 
-        /*
-        //decode the URL
-        $url_info = parse_url($_SERVER['REQUEST_URI']);
-        if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_Dispatch: Before Trim: " . $url_info['path'] . " Trim string: " . self::$_appWebBase);
-        }
-
-        // Strip off part of the url as needed
-        $url = $url_info['path'];
-        if (substr($url, 0, strlen(self::$_appWebBase)) == self::$_appWebBase) {
-            $url = substr($url, strlen(self::$_appWebBase), strlen($url) );
-        }
-        */
-        $url = self::getURL();
+        $urlPath = self::getURLPath();
 
         if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_Dispatch: Dispatching path (After Trim): " . $url);
+            Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": Url Path Before Routing: " . $urlPath);
         }
-        Ox_Router::route($url);
+        Ox_Router::route($urlPath);
     }
 }
