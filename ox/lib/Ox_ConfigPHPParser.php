@@ -23,24 +23,19 @@
 require_once(OX_FRAMEINTERFACE  . 'Ox_ConfigParser.php');
 
 /**
- * Interface and implementation for loading of app and framework config values.
+ * Interface and implementation for loading of app configurations values.
+ *
  * @package Ox_Configuration
  */
 class Ox_ConfigPHPParser implements Ox_ConfigParser
 {
-    /**
-     * The file to parse.
-     */
+    /** @var string The file to parse. */
     private $file;
     
-    /**
-     * Configuration directory path.
-     */
+    /** @var string Configuration directory path. */
     private $config_dir;
     
-    /**
-     * The configuration array.
-     */
+    /** @var array Configuration array. */
     private $config = array();
     
     /**

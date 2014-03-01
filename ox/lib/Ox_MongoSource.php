@@ -30,37 +30,19 @@ require_once(DIR_FRAMELIB . 'Ox_Schema.php');
  */
 class Ox_MongoSource
 {
-    /**
-     * Enable/Disable Debugging for this object.
-     */
+    /** Enable/Disable Debugging for this object. */
     const DEBUG = false;
 
-    /**
-     * The configure we use to setup the connection
-     * @var array
-     */
+    /** @var array Configure we use to setup the connection */
     private $_config;
 
-    /**
-     * Connect to Mongo
-     * @var Mongo
-     */
+    /** @var Mongo|MongoClient Connection to Mongo */
     private $_connection;
 
-    /**
-     * Database Instance
-     *
-     * @var MongoDB
-     * @access protected
-     */
+    /** @var MongoDB Database Instance */
     private $_db = false;
 
-    /**
-     * Mongo Driver Version
-     *
-     * @var string
-     * @access protected
-     */
+    /**  @var string Mongo Driver Version */
     private $_driverVersion = Mongo::VERSION;
 
     /**
@@ -154,7 +136,6 @@ class Ox_MongoSource
                         if (!$return || !$return['ok']) {
                             Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
                             throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
-                            return false;
                         }
                 }
             }
@@ -194,7 +175,6 @@ class Ox_MongoSource
                 $this->error = 'Bad JSON: ' . $command;
                 Ox_Logger::logError($this->error);
                 throw new Ox_MongoSourceException('MongodbSource::run ' . $this->error,'RunFailed');
-                return null;
             }
             $command = $command_object;
         }
@@ -257,7 +237,9 @@ class Ox_MongoSource
     }
 
     /**
-     * This setup this object to be able to return collections in the form $var->collection_name.
+     * Magic function to getCollection
+     *
+     * Return collections in the form $var->collection_name.
      *
      * @param string $name
      * @return Ox_MongoCollection

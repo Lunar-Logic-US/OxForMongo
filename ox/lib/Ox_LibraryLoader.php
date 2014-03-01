@@ -31,17 +31,20 @@ require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
  * that the object can be easily overridden in the application setup. These are generally the user and security objects.
  * <br><br>
  * To load a system object you would use:<br>
- * <pre><code>Ox_LibraryLoader::load('session','Ox_Session');
+ * <pre><code>Ox_LibraryLoader::load('SystemResourceName','ResourceClass');
+ * Ox_LibraryLoader::load('AnotherName','AnotherClass');
  * </code></pre>
  * <br><br>
  * That object can then be access anywhere in Ox by doing:<br>
- * <pre><code>$session = Ox_LibraryLoader::Session();
+ * <pre><code>$session = Ox_LibraryLoader::SystemResourceName();
+ * $session = Ox_LibraryLoader::AnotherName();
  * // or call the method you need directly
- * Ox_LibraryLoader::Session()->get('some session var');
+ * Ox_LibraryLoader::SystemResourceName()->methodBar('test');
+ * Ox_LibraryLoader::AnotherName()->methodFoo();
  * </code></pre>
  * <br><br>
- * This give an application a high degree of flexibility because it can override the session object by creating a new
- * session object with the same interfaces.  So you could replace the standard Session object which uses PHP to a Mongo
+ * This give an application a high degree of flexibility because it can override the system resources by creating a new
+ * object with the same interfaces.  So you could replace the standard Session object which uses PHP to a Mongo
  * session object.
  * <br><br>
  * In order perform this you need have created the replacement class in app/lib and the filename would be the same as your

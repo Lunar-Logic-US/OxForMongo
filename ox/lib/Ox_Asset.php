@@ -23,6 +23,7 @@
  * Contains classes to abstract saving and retrieval of assets.
  *
  * This class hierarchy assumes that files will be uploaded via a webform.
+ *
  * @package Ox_Assets
  */
 abstract class Ox_Asset
@@ -30,10 +31,10 @@ abstract class Ox_Asset
     /**
      * Save the document info into the database and return it.
      *
-     * Inherited object should all this to save the information into the database.
-     * <code>
+     * Inherited object should add this to save the information into the database.
+     * <pre><code>
      * $doc = parent::save($file_info);
-     * </code>
+     * </code></pre>
      * You then use the information in $doc to the actual save.
      *
      * @param $file_info array

@@ -24,56 +24,39 @@
 
 
 if (!defined('DEBUG_BOOT')) {
-    /**
-     * Turns on the debugging for this file (mainentry.php)
-     */
+    /** Turns on the debugging for this file (mainentry.php) */
     define('DEBUG_BOOT',FALSE);
 }
 
-/**
- * These are constants that can be  originally set in the app/config/framework.php
- */
-
+//These are constants that can be originally set in the app/config/framework.php
 if (!defined('DIR_FRAMELIB')) {
-    /**
-     * Framework library directory, can be set in framework.php
-     */
+    /** Framework library directory, can be set in framework.php */
     define ('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DIRECTORY_SEPARATOR );
 }
 
 if (!defined('DIR_APPCONFIG')) {
-    /**
-     * Directory for the app configuration files, can be set in framework.php
-     */
+    /** Directory for the app configuration files, can be set in framework.php */
     define ("DIR_APPCONFIG", DIR_APP . 'config' . DIRECTORY_SEPARATOR);
 }
 
 
 if (!defined('DIR_APPLIB')) {
-    /**
-     * Application's library directory (app/lib), can be set in framework.php
-     */
+    /** Application's library directory (app/lib), can be set in framework.php */
     define ("DIR_APPLIB", DIR_APP . 'lib' . DIRECTORY_SEPARATOR);
 }
 
 if (!defined('DIR_CONSTRUCT')) {
-    /**
-     * Application's construct directory (app/constructs), can be set in framework.php
-     */
+    /** Application's construct directory (app/constructs), can be set in framework.php */
     define('DIR_CONSTRUCT',DIR_APP . 'constructs' . DIRECTORY_SEPARATOR);
 }
 
 if (!defined('DIR_COMMON')) {
-    /**
-     * Application's common (app/constructs/_common) directory, can be set in framework.php
-     */
+    /** Application's common (app/constructs/_common) directory, can be set in framework.php */
     define('DIR_COMMON',DIR_CONSTRUCT . '_common' . DIRECTORY_SEPARATOR);
 }
 
 if (!defined('DIR_LAYOUTS')) {
-    /**
-     * Application's layout s(app/constructs/_common/layouts) directory, can be set in framework.php
-     */
+    /** Application's layout s(app/constructs/_common/layouts) directory, can be set in framework.php */
     define('DIR_LAYOUTS',DIR_COMMON . 'layouts' . DIRECTORY_SEPARATOR);
 }
 
