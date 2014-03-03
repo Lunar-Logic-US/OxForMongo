@@ -103,17 +103,16 @@ class Ox_Dispatch
         //TODO: change this so that actions are only loaded when needed.
         //Load the default Ox actions
         Ox_LibraryLoader::loadAll(self::$_dirDefaultActions);
-
-        Ox_Router::add(WEB_ROOT, new Ox_FlatAction());
-        Ox_Router::add(WEB_ASSET_ROUTE, new Ox_AssetAction());
-        Ox_Router::add(WEB_DEFAULT_ROUTE, new Ox_AssemblerAction());
-
         //Load all app actions in the app actions directory
         if (is_dir(self::$_dirAppActions)) {
             Ox_LibraryLoader::loadAll(self::$_dirAppActions);
         }
 
-        //Add application routes
+        Ox_Router::add(WEB_ROOT, new Ox_FlatAction());
+        Ox_Router::add(WEB_ASSET_ROUTE, new Ox_AssetAction());
+        Ox_Router::add(WEB_DEFAULT_ROUTE, new Ox_AssemblerAction());
+
+        //Add application routes so they are loaded at the top.
         if (file_exists(self::$_appRoutes)) {
             require_once(self::$_appRoutes);
         }
