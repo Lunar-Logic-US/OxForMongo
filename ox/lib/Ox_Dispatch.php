@@ -110,7 +110,7 @@ class Ox_Dispatch
 
         Ox_Router::add(WEB_ROOT, new Ox_FlatAction());
         Ox_Router::add(WEB_ASSET_ROUTE, new Ox_AssetAction());
-        Ox_Router::add(WEB_DEFAULT_ROUTE, new Ox_AssemblerAction());
+        //Ox_Router::add(WEB_DEFAULT_ROUTE, new Ox_AssemblerAction());
 
         //Add application routes so they are loaded at the top.
         if (file_exists(self::$_appRoutes)) {
