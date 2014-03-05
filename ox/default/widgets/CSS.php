@@ -42,9 +42,14 @@ class CSS implements Ox_Widget {
      * Storage var for the list of CSS filenames.
      */
     private $_css_file_list = array();
+    /*
+     * Added for site overrides.
+     */
+    private $_css_override_list = array();
 
     /**
-     * Create link tags for the list of css files.
+     * Create link tags for the list of css files.  Files specified in the override
+     * list will be added after files specified using the normal add functions.
      *
      * @param bool $return_string
      * @return string
@@ -54,6 +59,17 @@ class CSS implements Ox_Widget {
 
         $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         foreach ($this->_css_file_list as $css_file => $css_options) {
+            $media = '';
+            if (isset($css_options['media']) && $css_options['media']!==FALSE) {
+                $media = " media=\"{$css_options['media']}\" ";
+            }
+            $file = $css_file;
+
+            $directory = $appWebBase . $css_options['directory'];
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
+        }
+
+        foreach ($this->_css_override_list as $css_file => $css_options) {
             $media = '';
             if (isset($css_options['media']) && $css_options['media']!==FALSE) {
                 $media = " media=\"{$css_options['media']}\" ";
@@ -110,5 +126,18 @@ class CSS implements Ox_Widget {
      */
     public function add($file,$media=FALSE,$directory='/css/'){
         $this->add_to_bottom($file,$media,$directory);
+    }
+
+    /**
+     * Add override file to the bottom of the override list.
+     *
+     * @param $file
+     * @param bool $media
+     * @param string $directory
+     */
+    public function add_override($file,$media=FALSE,$directory='/css/') {
+        $new = array($file => array('media'=>$media,'directory'=>$directory));
+        //This will overwrite if the same file is used twice.
+        $this->_css_override_list = array_merge($this->_css_override_list,$new);
     }
 }
