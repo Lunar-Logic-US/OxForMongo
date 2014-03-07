@@ -137,6 +137,9 @@ class Ox_AssemblerAction implements Ox_Routable
             // It's template time!
             if($assembler->template && file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $assembler->template . '.php')) {
                 $assembler->renderTemplate($template_file);
+            } else if(file_exists($template_file = $assembler->template)) {
+                // covers cases where the template may contain a fully-qualified file name
+                $assembler->renderTemplate($template_file);
             } else if(file_exists($template_file = $this->asm_dir . DIRECTORY_SEPARATOR . $method . '.php')) {
                 $assembler->renderTemplate($template_file);
             }
