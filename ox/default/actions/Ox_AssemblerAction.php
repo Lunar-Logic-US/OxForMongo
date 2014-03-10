@@ -55,12 +55,28 @@ class Ox_AssemblerAction implements Ox_Routable
      * @param array $map
      * @param array $args
      */
+
+
+    /**
+    * Copy old values in the event of multiple passes through the "go" method.
+    *
+    */
+    protected $original_asm_args; // Perhaps this should go in Ox_Routable, since that holds the write-able data.
+    protected $original_asm_dir;
+    protected $original_asm_class;
+    protected $original_method_map;
+
     public function __construct($asm_dir = null, $asm_class = null, $map = array(),$args = array())
     {
         $this->asm_dir = $asm_dir;
         $this->asm_class = $asm_class;
         $this->method_map = $map;
         $this->asm_args = $args;
+
+        $this->original_asm_dir = $asm_dir;
+        $this->original_asm_class = $asm_class;
+        $this->original_method_map = $map;
+        $this->original_asm_args = $args;
     }
 
     /**
