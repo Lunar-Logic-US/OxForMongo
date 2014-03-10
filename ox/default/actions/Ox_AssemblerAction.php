@@ -90,6 +90,15 @@ class Ox_AssemblerAction implements Ox_Routable
         if (self::DEBUG) Ox_Logger::logDebug('Ox_AssemblerAction::go - Actions Args:' . print_r($args,true));
         // Used for deep linking if login required.
         $full_path = array_shift($args); // $match[0] from the preg_match in router
+
+
+        $this->asm_dir = $this->original_asm_dir;
+        $this->asm_class = $this->original_asm_class;
+        $this->method_map = $this->original_method_map;
+        $this->asm_args = $this->original_asm_args;
+
+
+
         if(!$this->asm_class) {
             $this->asm_class = array_shift($args);
         }
