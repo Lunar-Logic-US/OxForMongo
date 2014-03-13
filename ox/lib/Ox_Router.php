@@ -41,7 +41,10 @@ class Ox_Router
 
     /** @var array List of routes registered. */
     private static $_routes = array();
- 
+
+    /** @var array List of routes registered. */
+    private static $_defaultRoute = array();
+
     /**
      * Register a route.
      *
@@ -78,6 +81,19 @@ class Ox_Router
         self::$_routes = array_merge($newRoute,self::$_routes);
         //self::$_routes[$regex] = $action;
     }
+
+    /**
+     * Set the default route.
+     *
+     * Note there can only be one default -- catchall route
+     * @param $regex
+     * @param $action
+     */
+    public static function defaultRoute($regex, $action) {
+        $newRoute = array($regex=>$action);
+        self::$_defaultRoute = $newRoute;
+    }
+
 
     /**
      * Remove a route.
@@ -120,7 +136,8 @@ class Ox_Router
     {
         $routed = false;
         $errorMessage = null;
-        foreach(self::$_routes as $regex => $obj) {
+        $routesToTry = array_merge(self::$_routes, self::$_defaultRoute);
+        foreach($routesToTry as $regex => $obj) {
             if(self::DEBUG)  Ox_Logger::logDebug("Routing:" . $request_url . ' : regex : ' . $regex);
             if(preg_match($regex, $request_url, $matches)) {
                 if(self::DEBUG)  Ox_Logger::logDebug('Route Match: ' . print_r($matches,1));
