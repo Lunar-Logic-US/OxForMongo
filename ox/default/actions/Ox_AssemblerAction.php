@@ -55,12 +55,28 @@ class Ox_AssemblerAction implements Ox_Routable
      * @param array $map
      * @param array $args
      */
+
+
+    /**
+    * Copy old values in the event of multiple passes through the "go" method.
+    *
+    */
+    protected $original_asm_args; // Perhaps this should go in Ox_Routable, since that holds the write-able data.
+    protected $original_asm_dir;
+    protected $original_asm_class;
+    protected $original_method_map;
+
     public function __construct($asm_dir = null, $asm_class = null, $map = array(),$args = array())
     {
         $this->asm_dir = $asm_dir;
         $this->asm_class = $asm_class;
         $this->method_map = $map;
         $this->asm_args = $args;
+
+        $this->original_asm_dir = $asm_dir;
+        $this->original_asm_class = $asm_class;
+        $this->original_method_map = $map;
+        $this->original_asm_args = $args;
     }
 
     /**
@@ -74,6 +90,15 @@ class Ox_AssemblerAction implements Ox_Routable
         if (self::DEBUG) Ox_Logger::logDebug('Ox_AssemblerAction::go - Actions Args:' . print_r($args,true));
         // Used for deep linking if login required.
         $full_path = array_shift($args); // $match[0] from the preg_match in router
+
+
+        $this->asm_dir = $this->original_asm_dir;
+        $this->asm_class = $this->original_asm_class;
+        $this->method_map = $this->original_method_map;
+        $this->asm_args = $this->original_asm_args;
+
+
+
         if(!$this->asm_class) {
             $this->asm_class = array_shift($args);
         }
