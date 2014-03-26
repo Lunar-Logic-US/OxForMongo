@@ -143,14 +143,13 @@ class Ox_Router
                 if(self::DEBUG)  Ox_Logger::logDebug('Route Match: ' . print_r($matches,1));
                 if(self::DEBUG) Ox_Logger::logDebug($request_url . ' matched ' . $regex);
                 try {
+                    // First come, first serve. One action per request.
                     $obj->go($matches);
+                    $routed = true;
                 } catch (Ox_RouterException $e){
                     $routed = false;
                     $errorMessage = $e->getMessage();
-                    break;
                 }
-                $routed = true;
-                // First come, first serve. One action per request.
                 break;
             }
         }
@@ -164,6 +163,9 @@ class Ox_Router
             }
             $config_parser = Ox_LibraryLoader::getResource('config_parser');
             $path = $config_parser->getAppConfigValue('errorPage');
+            if(self::DEBUG)  Ox_Logger::logDebug(__CLASS__ . ' - '. __FUNCTION__ . ": ErrorPages: " . print_r($path,true));
+            //Do we have an error page and make sure we don't create a redirect loop...
+            //are we having an error on the page we redirected to?
             if (isset($path['404']) && $path['404'] != $request_url) {
                 $_POST['errorMessage']=$errorMessage;
                 self::route($path['404']);
