@@ -34,7 +34,7 @@
 class Ox_Router
 {
     /** Enable/Disable Debugging for this object. */
-    const DEBUG = FALSE;
+    const DEBUG = TRUE;
 
     /** The domain variable name to use in the app.php file. */
     const DOMAIN_APP_CONFIG = 'domain';
@@ -130,18 +130,18 @@ class Ox_Router
      *
      * <pre><code>$errorPage = "/error/e404";
      * </code></pre>
-     * @param string $request_url
+     * @param string $requestUrl
      */
-    public static function route($request_url)
+    public static function route($requestUrl)
     {
         $routed = false;
         $errorMessage = null;
         $routesToTry = array_merge(self::$_routes, self::$_defaultRoute);
         foreach($routesToTry as $regex => $obj) {
-            if(self::DEBUG)  Ox_Logger::logDebug("Routing:" . $request_url . ' : regex : ' . $regex);
-            if(preg_match($regex, $request_url, $matches)) {
+            if(self::DEBUG)  Ox_Logger::logDebug("Routing:" . $requestUrl . ' : regex : ' . $regex);
+            if(preg_match($regex, $requestUrl, $matches)) {
                 if(self::DEBUG)  Ox_Logger::logDebug('Route Match: ' . print_r($matches,1));
-                if(self::DEBUG) Ox_Logger::logDebug($request_url . ' matched ' . $regex);
+                if(self::DEBUG) Ox_Logger::logDebug($requestUrl . ' matched ' . $regex);
                 try {
                     // First come, first serve. One action per request.
                     $obj->go($matches);
@@ -156,22 +156,32 @@ class Ox_Router
 
         if(!$routed) {
             // Couldn't find a route. Log and return message.
-            Ox_Logger::logWarning(__CLASS__ . ' - '. __FUNCTION__ .  ': Could not route:' . $request_url);
-            header("HTTP/1.0 404 Not Found");
+            Ox_Logger::logWarning(__CLASS__ . ' - '. __FUNCTION__ .  ': Could not route:' . $requestUrl);
             if (!isset($errorMessage)) {
-               $errorMessage = "Route not found for:  {$request_url}";
+               $errorMessage = "Route not found for:  {$requestUrl}";
             }
+            self::error404($errorMessage,$requestUrl);
+        }
+    }
+
+    public static function error404($message,$requestUrl,$errorConstruct=null)
+    {
+        header("HTTP/1.0 404 Not Found");
+        if (empty($errorConstruct)) {
             $config_parser = Ox_LibraryLoader::getResource('config_parser');
             $path = $config_parser->getAppConfigValue('errorPage');
-            if(self::DEBUG)  Ox_Logger::logDebug(__CLASS__ . ' - '. __FUNCTION__ . ": ErrorPages: " . print_r($path,true));
-            //Do we have an error page and make sure we don't create a redirect loop...
-            //are we having an error on the page we redirected to?
-            if (isset($path['404']) && $path['404'] != $request_url) {
-                $_POST['errorMessage']=$errorMessage;
-                self::route($path['404']);
-            } else {
-                echo "<div class=\"error404\"><h1>404 Error</h1> <p>$errorMessage</p></div>";
+            if (isset($path['404']) && $path['404'] != $requestUrl) {
+                $errorConstruct = $path['404'];
             }
+        }
+
+        //Do we have an error page and make sure we don't create a redirect loop...
+        //Are we having an error on the page we redirected to?
+        if (isset($errorConstruct) && $errorConstruct != $requestUrl) {
+            $_POST['errorMessage']=$message;
+            self::route($errorConstruct);
+        } else {
+            echo "<div class=\"error404\"><h1>404 Error</h1> <p>$message</p></div>";
         }
     }
 
