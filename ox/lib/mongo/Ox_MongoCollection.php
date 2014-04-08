@@ -69,11 +69,13 @@ class Ox_MongoCollection
     // ------------------------------------
 
     /**
-     * Find doc with _id of string|MongoId of p_id
-     * @param $id string|MongoId|array
+     * Find doc with id
+     *
+     * @param string|MongoId|array $id
+     * @param array $fieldsToRetrieve
      * @return array|null
      */
-    public function findById($id)
+    public function findById($id,array $fieldsToRetrieve=array())
     {
         if ($id instanceof MongoId) {
             $mongoId = $id;
@@ -85,7 +87,7 @@ class Ox_MongoCollection
             $mongoId = $id;
         }
         
-        return $this->_mongoCollection->findOne(array('_id' => $mongoId));
+        return $this->_mongoCollection->findOne(array('_id' => $mongoId),$fieldsToRetrieve);
     }
 
     /**
