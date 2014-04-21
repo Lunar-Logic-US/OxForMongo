@@ -240,12 +240,21 @@ class Ox_Router
         }
         $config = Ox_LibraryLoader::config_parser();
         $webDir = $config->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
-        //Allow fully qualified url's without a web directory defined.
-        if(!empty($webDir)){
-            $url = $webDir.$url;
-        }
-        if(!preg_match('/^http/',$url) && $buildFQURL){
-            $url = self::getProtocol() . self::getDomain() . $webDir.$url;
+        //Only process if we don't have a FQURL
+        if(preg_match('/^http/',$url)) {
+            //We gave a fully qualified URL already!
+            //No need to append the webdir
+            //It is already a FQURL so nothing to do there
+            //Just pass through.
+        } else {
+            //add the web directory if set.
+            if(!empty($webDir)){
+                $url = $webDir.$url;
+            }
+            //set it to the FQURL if requested.
+            if ($buildFQURL){
+                $url = self::getProtocol() . self::getDomain() . $url;
+            }
         }
         return $url = $url.$param_str;
     }

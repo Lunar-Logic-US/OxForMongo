@@ -87,10 +87,9 @@ JS;
             }
 
             $file = $js_file;
-            $directory = $appWebBase . $js_options['directory'];
-
-
-            $output .= "<script src=\"{$directory}{$file}\"{$type}{$charset}></script>\n";
+            $url = Ox_Router::buildURL($js_options['directory'].$file);
+            //$directory = $appWebBase . $js_options['directory'];
+            $output .= "<script src=\"{$url}\"{$type}{$charset}></script>\n";
         }
         
         if (count($this->_js_script_list)) {
