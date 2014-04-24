@@ -29,6 +29,7 @@
  * @method static null|string js
  * @method static null|string css
  * @method static null|string HtmlTitle
+ * @method static null|string HtmlMeta
  * @property ClassNames ClassNames
  * @property JS js
  * @property CSS css
