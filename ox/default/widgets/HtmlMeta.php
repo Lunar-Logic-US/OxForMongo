@@ -62,11 +62,11 @@ class HtmlMeta implements Ox_Widget {
     public function render($return_string = FALSE) {
         $output = '';
         foreach ($this->_metaTags as $tag => $value) {
-            if ($tag == 'title') {
+            if ($tag == 'title' && !empty($value)) {
                 $output .=  "<title>{$value}</title>\n";
-            } elseif ($tag == 'canonical') {
+            } elseif ($tag == 'canonical'  && !empty($value)) {
                 $output .=  "<link rel=\"$tag\" href=\"{$value}\"/>\n";
-            } else {
+            } elseif (!empty($value)) {
                 $output .=  "<meta name=\"$tag\" content=\"{$value}\"/>\n";
             }
         }
