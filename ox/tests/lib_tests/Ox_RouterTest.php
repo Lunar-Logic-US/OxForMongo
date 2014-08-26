@@ -197,16 +197,13 @@ PHP;
         $routeList = Ox_Router::getAll();
         $this->assertTrue(array_key_exists(WEB_ROOT,$routeList));
         $this->assertTrue(array_key_exists(WEB_ASSET_ROUTE,$routeList));
-        $this->assertTrue(array_key_exists(WEB_DEFAULT_ROUTE,$routeList));
         //Remove all of the default routes.
         Ox_Router::remove(WEB_ROOT);
         Ox_Router::remove(WEB_ASSET_ROUTE);
-        Ox_Router::remove(WEB_DEFAULT_ROUTE);
         //routerList should now be empty.
         $routeList = Ox_Router::getAll();
         $this->assertFalse(array_key_exists(WEB_ROOT,$routeList));
         $this->assertFalse(array_key_exists(WEB_ASSET_ROUTE,$routeList));
-        $this->assertFalse(array_key_exists(WEB_DEFAULT_ROUTE,$routeList));
     }
 
     public function testAddTop()
