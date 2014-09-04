@@ -273,4 +273,20 @@ class Ox_MongoSource
         return true;
     }
 
+    /**
+     * Emulates the Old MongoId constructor (pre-1.4 Mongo PHP driver)
+     *
+     * @param $str
+     * @return MongoId
+     */
+    public static function newMongoIdCompatible($str){
+        try {
+            $mongoId = new MongoId($str);
+        } catch (Exception $e) {
+            //if we have a bad id return a new mongo id
+            $mongoId = new MongoId();
+        }
+        return $mongoId;
+    }
+
 }

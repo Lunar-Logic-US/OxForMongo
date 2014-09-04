@@ -15,6 +15,11 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Requires pecl xdebug (sudo pecl install xdebug; sudo service apache2 restart)
+ * http://xdebug.org/docs/install
+ */
+
 /**
  *
  * @runTestsInSeparateProcesses
@@ -198,7 +203,7 @@ APP_CONFIG_FILE;
         $security->secureResource('/',$required,'index', $user);
 
         //test what headers are set.
-        $headers_list = xdebug_get_headers();
+         $headers_list = xdebug_get_headers();
         $this->assertTrue($this->_containedInArrayValue('401',$headers_list));
     }
 

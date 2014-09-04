@@ -64,9 +64,39 @@ class Ox_MongoCollection
         $this->_loadSchema();
     }
 
+    /**
+     * Take a string, array, MongoId return proper MongoId.
+     *
+     * @param string|MongoId|array $idIn
+     * @return MongoId
+     */
+    public static function normalizeId($idIn)
+    {
+        //General case  if idIn is a mongoId or if it is just a string
+        $normalizedId = $idIn;
+
+        if (is_array($idIn) && isset($idIn['_id'])) {
+            //We have been given a whole record and
+            $normalizedId = $idIn['_id'];
+        } elseif (is_string($idIn) && preg_match('/^[0-9A-F]{24}\z/i',$idIn)) {
+            //we have the string representation of a MongoId, make a mongoID
+            //We do the regex and the try because we do not know which version of the
+            //PHP Mongo driver that we will be dealing with.
+            try {
+                $normalizedId = new MongoId($idIn);
+            } catch (Exception $e) {
+                //do nothing it must be a string _id
+                //Really we should not get here, because of the regex.
+            }
+        }
+
+        return $normalizedId;
+    }
+
     // ------------------------------------
     // MongoCollection Facade
     // ------------------------------------
+
 
     /**
      * Find doc with id
@@ -77,17 +107,23 @@ class Ox_MongoCollection
      */
     public function findById($id,array $fieldsToRetrieve=array())
     {
-        if ($id instanceof MongoId) {
-            $mongoId = $id;
-        } else if (is_array($id)) {
-            $mongoId = $id['_id'];
-        } elseif (is_string($id) && preg_match('/^[0-9A-F]{24}\z/i',$id)) {
-            $mongoId = new MongoId($id);
-        } else {
-            $mongoId = $id;
-        }
-        
+        $mongoId = self::normalizeId($id);
         return $this->_mongoCollection->findOne(array('_id' => $mongoId),$fieldsToRetrieve);
+    }
+
+    /**
+     * Update a doc with id
+     *
+     * @param string | MongoID $id
+     * @param array $updateArray
+     * @param array $options
+     * @return mixed
+     */
+    public function updateById($id,array $updateArray,array $options=array())
+    {
+        $mongoId = self::normalizeId($id);
+        $criteria = array('_id'=>$mongoId);
+        return $this->_mongoCollection->update($criteria,$updateArray,$options);
     }
 
     /**
