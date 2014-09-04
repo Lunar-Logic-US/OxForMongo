@@ -113,10 +113,15 @@ class Ox_Security
      * @param bool $redirect
      * @return bool
      */
-    public function login($username,$password, $redirect=true)
+    public function login($username, $password, $redirect=true)
     {
-        //$this->logout(); //kill any current user
-        $this->user->set('username',$username);
+        $name_field = Ox_LibraryLoader::config_parser()->getAppConfigValue('security_username_field');
+        if(strlen($name_field)) {
+            $this->user->set($name_field,$username);
+        } else {
+            $this->user->set('username',$username);
+        }
+
         if ($this->user->load()) {
             if($this->authenticateUser($this->user->getPassword(),$password)){
                 $this->loginUser();
