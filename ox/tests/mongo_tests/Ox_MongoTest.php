@@ -168,4 +168,180 @@ class Ox_MongoTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(Ox_MongoSource::isMongoArray($fromDB['a']));
     }
 
+    public function testUnDotIndexNoDot()
+    {
+        $value = 'aStringValue';
+        $test = 'prop';
+        $expectedResult = array(
+                'prop' => $value,
+        );
+
+        $normalized = Ox_MongoSource::unDot($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+
+
+
+
+    public function testUnDotIndexWithOneDot()
+    {
+        $value = 'aStringValue';
+        $test = 'array.index';
+        $expectedResult = array(
+            'array' => array(
+                'index' => $value,
+            )
+        );
+
+        $normalized = Ox_MongoSource::unDot($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+    public function testUnDotIndexWithTwoDots()
+    {
+        $value = 'aStringValue';
+        $test = 'array.prop1.prop2';
+        $expectedResult = array(
+            'array' => array(
+                'prop1' => array(
+                    'prop2'=>$value,
+                ),
+            )
+        );
+
+        $normalized = Ox_MongoSource::unDot($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+
+
+    public function testUnDotArray()
+    {
+        $value = 'aStringValue';
+        $test = array(
+            'prop1.subprop1' => 'value#1',
+            'prop1.subprop2' => 'value#2',
+        );
+        $expectedResult = array(
+            'prop1' => array(
+                'subprop1' =>'value#1',
+                'subprop2' =>'value#2'
+            ),
+        );
+
+        $normalized = Ox_MongoSource::unDotArray($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+
+    public function testUnDotArray2()
+    {
+        $value = 'aStringValue';
+        $test = array(
+            'prop1.subprop1' => 'value#1',
+            'prop1.subprop2' => 'value#2',
+            'prop2.subprop1' => 'valuea#1',
+            'prop2.subprop2' => 'valuea#2',
+            'prop2.subprop3' => 'valuea#3',
+        );
+        $expectedResult = array(
+            'prop1' => array(
+                'subprop1' =>'value#1',
+                'subprop2' =>'value#2'
+            ),
+            'prop2' => array(
+                'subprop1' =>'valuea#1',
+                'subprop2' =>'valuea#2',
+                'subprop3' =>'valuea#3'
+            ),
+        );
+
+        $normalized = Ox_MongoSource::unDotArray($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+
+
+    public function testUnDotArray3()
+    {
+        $value = 'aStringValue';
+        $test = array(
+            'prop1.subprop1' => 'value#1',
+            'prop1.subprop2' => 'value#2',
+            'prop2.subprop1' => 'valuea#1',
+            'prop2.subprop2' => 'valuea#2',
+            'prop2.subprop3' => 'valuea#3',
+            'prop3.subprop1.subsub1' => 'valueab#1',
+        );
+        $expectedResult = array(
+            'prop1' => array(
+                'subprop1' =>'value#1',
+                'subprop2' =>'value#2'
+            ),
+            'prop2' => array(
+                'subprop1' =>'valuea#1',
+                'subprop2' =>'valuea#2',
+                'subprop3' =>'valuea#3'
+            ),
+            'prop3' => array(
+                'subprop1' => array(
+                    'subsub1' => 'valueab#1',
+                )
+            )
+        );
+
+        $normalized = Ox_MongoSource::unDotArray($test,$value);
+        /*
+        print "----------------------------\n";
+        var_dump($test);
+        print "~~~~~~~~~~~\n";
+        var_dump($normalized);
+        print "~~~~~~~~~~~\n";
+        var_dump($expectedResult);
+        print "----------------------------\n";
+        */
+        $this->assertEquals($expectedResult,$normalized);
+    }
+
 }

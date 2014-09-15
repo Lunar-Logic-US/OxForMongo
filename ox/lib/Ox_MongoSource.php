@@ -289,4 +289,63 @@ class Ox_MongoSource
         return $mongoId;
     }
 
+
+    /**
+     * @param $arrayOfDottedNotation
+     * @return array
+     */
+    public static function unDotArray($arrayOfDottedNotation)
+    {
+        $tempArray = array();
+        foreach ($arrayOfDottedNotation as $property => $value) {
+            $splitString = explode('.',$property);
+            $noPeriod = (count($splitString) < 2);
+            if ($noPeriod) {
+                $tempArray[$property]  =  $value;
+            } else {
+                $first = array_shift($splitString);
+                $rest = implode('.',$splitString);
+                //get all of the results for this property
+                $tempArray[$first][]  =  self::unDot($rest,$value);
+
+            }
+        }
+        //Ungroup the results to all be in under a property.
+        $returnArray = array();
+        foreach($tempArray as $property => $arrayValue) {
+            foreach ($arrayValue as $subKey => $value) {
+                foreach ($value as $k=> $v) {
+                    $returnArray[$property][$k] = $v;
+                }
+
+            }
+        }
+        return $returnArray;
+    }
+
+    /**
+     * Take a mongo string Id and turn into an array object
+     *
+     * We drill down to the bottom left of the array structure and build it on the way out.
+     *
+     * @param string $str
+     * @param $value
+     * @return array
+     */
+    public static function unDot($str,$value)
+    {
+        $splitString = explode('.',$str);
+        //explode should return a least an array of 1
+        $noPeriod = (count($splitString) < 2);
+        if ($noPeriod) {
+            //build an array with what we got.
+            return array($str=>$value);
+        } else {
+            $first = array_shift($splitString);
+            $rest = implode('.',$splitString);
+            //split off this "level" and then do the rest.
+            return array($first=>self::unDot($rest,$value));
+        }
+    }
+
 }
