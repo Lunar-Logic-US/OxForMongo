@@ -43,7 +43,7 @@ class Ox_MongoSource
     private $_db = false;
 
     /**  @var string Mongo Driver Version */
-    private $_driverVersion = Mongo::VERSION;
+    private $_driverVersion;
 
     /**  @var string Mongo Database Version */
     private $_databaseVersion;
@@ -117,13 +117,13 @@ class Ox_MongoSource
             );
         }
         try{
-            $host = $this->createConnectionName($this->_config, $this->_driverVersion);
+            $host = $this->createConnectionName($this->_config, $this->driverVersion());
 
             if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
                 $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
-            } else if ($this->_driverVersion >= '1.3.0') {
+            } else if ($this->driverVersion() >= '1.3.0') {
                 $this->_connection = new MongoClient($host);
-            } else if ($this->_driverVersion >= '1.2.0') {
+            } else if ($this->driverVersion() >= '1.2.0') {
                 $this->_connection = new Mongo($host);
             } else {
                 $this->_connection = new Mongo($host, true, $this->_config['persistent']);
@@ -134,7 +134,7 @@ class Ox_MongoSource
             }
 
             if ($this->_db = $this->_connection->selectDB($this->_config['database'])) {
-                if (!empty($this->_config['login']) && $this->_driverVersion < '1.2.0') {
+                if (!empty($this->_config['login']) && $this->driverVersion() < '1.2.0') {
                     $return = $this->_db->authenticate($this->_config['login'], $this->_config['password']);
                         if (!$return || !$return['ok']) {
                             Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
@@ -353,17 +353,27 @@ class Ox_MongoSource
 
     /**
      * Get the PHP Mongo driver version
+     *
      * @return string
      */
     public function driverVersion()
     {
+        if(!$this->_driverVersion){
+            if(class_exists('MongoClient')) {
+                $this->_driverVersion = MongoClient::VERSION;
+            } elseif(class_exists('Mongo')) {
+                $this->_driverVersion = Mongo::VERSION;
+            } else {
+                if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": Unable to find MongoClient or Mongo class.");
+            }
+        }
         return $this->_driverVersion;
     }
 
     /**
      * Get the Mongo database version.
-     * Note: this function makes a database call.
-     * @return [type] [description]
+     *
+     * @return string
      */
     public function databaseVersion()
     {

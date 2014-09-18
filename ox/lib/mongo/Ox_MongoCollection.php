@@ -254,7 +254,7 @@ class Ox_MongoCollection
      *
      * @param  string|array    $keys
      * @param  array           $options
-     * @return bool
+     * @return array
      */
     public function ensureIndex($keys, array $options = array())
     {
@@ -269,27 +269,29 @@ class Ox_MongoCollection
     }
 
     /**
-     * PHP's MongoCollection::deleteIndex() seems to be broken, so we emulate it here with Mongo's name.
+     * Add dropIndex to PHP.
+     * Wrapper function for deleteIndex()
      *
      * @param  string $indexName   Name of the index to drop
-     * @return bool                Result of the operation, from Mongo
+     * @return array               Result of the operation, from Mongo
      */
     public function dropIndex($indexName)
+    {
+        return $this->deleteIndex($indexName);
+    }
+
+    /**
+     * Replacement for PHP's deleteIndex().
+     * The native deleteIndex() appears to be broken.
+     *
+     * @param  string $indexName   Name of the index to drop
+     * @return array                Result of the operation, from Mongo
+     */
+    public function deleteIndex($indexName)
     {
         $db = new Ox_MongoSource();
         $result = $db->run(array("deleteIndexes" => $this->_collectionName, "index" => $indexName));
         return $result;
-    }
-
-    /**
-     * Wrapper function
-     *
-     * @param  string $indexName   Name of the index to drop
-     * @return bool                Result of the operation, from Mongo
-     */
-    public function deleteIndex($indexName)
-    {
-        return $this->dropIndex($indexName);
     }
 
 }
