@@ -46,5 +46,15 @@ class Ox_MongoSourceTest extends PHPUnit_Framework_TestCase {
 
     }
 
+    public function testDriverVersion()
+    {
+        $db = new Ox_MongoSource();
+        $this->assertTrue(is_string($db->driverVersion()));
+    }
+
+    public function testDatabaseVersion()
+    {
+        $db = new Ox_MongoSource();
+        $this->assertTrue(is_string($db->databaseVersion()));
+    }
 }
- 

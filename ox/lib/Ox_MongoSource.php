@@ -45,6 +45,9 @@ class Ox_MongoSource
     /**  @var string Mongo Driver Version */
     private $_driverVersion = Mongo::VERSION;
 
+    /**  @var string Mongo Database Version */
+    private $_databaseVersion;
+
     /**
      * List of created collections.
      *
@@ -346,6 +349,29 @@ class Ox_MongoSource
             //split off this "level" and then do the rest.
             return array($first=>self::unDot($rest,$value));
         }
+    }
+
+    /**
+     * Get the PHP Mongo driver version
+     * @return string
+     */
+    public function driverVersion()
+    {
+        return $this->_driverVersion;
+    }
+
+    /**
+     * Get the Mongo database version.
+     * Note: this function makes a database call.
+     * @return [type] [description]
+     */
+    public function databaseVersion()
+    {
+        if(!$this->_databaseVersion){
+            $mongo_info = $this->run(array('buildinfo'=>true));
+            $this->_databaseVersion = $mongo_info['version'];
+        }
+        return $this->_databaseVersion;
     }
 
 }

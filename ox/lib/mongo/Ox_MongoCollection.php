@@ -248,4 +248,48 @@ class Ox_MongoCollection
 
     */
 
+    /**
+     * Provide compatibility for the ensureIndex() method provided by Mongo, but not by PHP's Mongo driver.
+     * Creates an index on the specified field(s) if it does not already exist.
+     *
+     * @param  string|array    $keys
+     * @param  array           $options
+     * @return bool
+     */
+    public function ensureIndex($keys, array $options = array())
+    {
+        if(method_exists($this->_mongoCollection, 'createIndex')){
+            $result = $this->_mongoCollection->createIndex($keys, $options); //createIndex() is the new PHP-Mongo method. Prefer this.
+        } elseif(method_exists($this->_mongoCollection, 'ensureIndex')){
+            $result = $this->_mongoCollection->ensureIndex($keys, $options);
+        } else {
+            $result = 0; //error, no method found
+        }
+        return $result;
+    }
+
+    /**
+     * PHP's MongoCollection::deleteIndex() seems to be broken, so we emulate it here with Mongo's name.
+     *
+     * @param  string $indexName   Name of the index to drop
+     * @return bool                Result of the operation, from Mongo
+     */
+    public function dropIndex($indexName)
+    {
+        $db = new Ox_MongoSource();
+        $result = $db->run(array("deleteIndexes" => $this->_collectionName, "index" => $indexName));
+        return $result;
+    }
+
+    /**
+     * Wrapper function
+     *
+     * @param  string $indexName   Name of the index to drop
+     * @return bool                Result of the operation, from Mongo
+     */
+    public function deleteIndex($indexName)
+    {
+        return $this->dropIndex($indexName);
+    }
+
 }
