@@ -224,7 +224,7 @@ class Ox_AssemblerAction implements Ox_Routable
                 $required_roles = $assembler->default_roles;
             }
             if($security->secureResource($path, $required_roles, $method)) {
-                if(self::DEBUG) Ox_Logger::logDebug('Ox_AssemblerAction::loadAndRunAssembler - calling method: ' . $method);
+                if(self::DEBUG) Ox_Logger::logDebug("Ox_AssemblerAction::loadAndRunAssembler - calling method:  {$asm_class}->{$method}");
                 //call_user_func_Array can be slow
                 //call_user_func_array(array( $assembler, $method), $parsed_args);
                 if (!method_exists($assembler,$method)) {
