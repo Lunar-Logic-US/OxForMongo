@@ -34,7 +34,7 @@
 class Ox_Router
 {
     /** Enable/Disable Debugging for this object. */
-    const DEBUG = TRUE;
+    const DEBUG = FALSE;
 
     /** The domain variable name to use in the app.php file. */
     const DOMAIN_APP_CONFIG = 'domain';
