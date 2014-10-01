@@ -20,8 +20,7 @@
  *
  * @contant DIR_FRAMEWORK Framework directory
  */
-/*
+
 if (!defined('DIR_FRAMEWORK')) {
-    define ("DIR_FRAMEWORK",'/someplace/ox//');
+    define ("DIR_FRAMEWORK",'/home/project/ox/');
 }
-*/
