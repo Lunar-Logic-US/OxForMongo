@@ -228,9 +228,9 @@ pecl install xdebug
 
 
 echo "***************************** Installing Mongo *****************************"
-#apt-get install mongodb-10gen
+apt-get install mongodb-10gen
 # MongoDB driver, has to be after PHP Pear install
-#pecl install mongo-1.3.7
+pecl install mongo-1.3.7
 
 
 # Rock Mongo http://localhost:8080/rock
