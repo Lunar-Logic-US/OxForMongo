@@ -136,6 +136,7 @@ class Ox_Security
             }
             
         }
+        $this->user->unload();
         return false;
     }
 
