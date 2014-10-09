@@ -63,6 +63,13 @@ abstract class Ox_User {
      * The user is loaded from the dababase into the user property from the settings in the user property.
      */
     abstract public function load();
+    
+    /**
+     * Unload a user.
+     *
+     * Clear out the currently loaded user. Ox_Security relies on this to prevent leakage.
+     */
+    abstract public function unload();
 
     /**
      * Returns an array of the user's roles.
