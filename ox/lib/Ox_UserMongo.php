@@ -84,6 +84,13 @@ class Ox_UserMongo extends Ox_User
 	    }
 	    return false;
     }
+	
+	/**
+	 * Unload a user
+	 */
+	public function unload() {
+		$this->user = array();
+	}
 
     /**
      * Returns an array of the user's roles.
