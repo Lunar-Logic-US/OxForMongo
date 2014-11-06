@@ -51,7 +51,7 @@ class MongoIdValidator extends Ox_Validator {
      *
      * @return string
      */
-    public function getError()
+    public function getError($fieldName)
     {
         // TODO: Implement getError() method.
     }

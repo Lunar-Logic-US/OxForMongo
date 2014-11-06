@@ -78,7 +78,7 @@ class Ox_RegExValidator extends  Ox_Validator
      * 
      * @return string
      */
-    public function getError(){
+    public function getError($fieldName){
         return $this->failMessage;
     }
 
