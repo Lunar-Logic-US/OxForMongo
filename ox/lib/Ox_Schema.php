@@ -195,7 +195,7 @@ abstract class Ox_Schema
             if (is_array($fieldValue) && Ox_MongoSource::isMongoArray($fieldValue)) {
                 //must test each element of the array (as an object)
                 if ($this->_schema[$fieldName]['__schema']->_type!= self::TYPE_ARRAY) {
-                    $this->_errors[] = "Expected and array, but got an object in field: $fieldName";
+                    $this->_errors[] = "Expected an array, but got an object in field: $fieldName";
                 }
                 foreach ($fieldValue as $arrayObject) {
                     $this->isFieldValid($fieldName,$arrayObject,$doc);
@@ -230,8 +230,8 @@ abstract class Ox_Schema
             $v = $this->_schema[$fieldName]['__validator'];
             $passes = $v->isValid($fieldValue);
             if(!$passes) {
-                $vError = $v->getError();
-                $this->_errors[] = "Field $fieldName failed validation. $vError Value: " . print_r($fieldValue,1);
+                $vError = $v->getError($fieldName);
+                $this->_errors[] = $vError ? $vError : "Field $fieldName failed validation. $vError Value: " . print_r($fieldValue,1);    
             }
         }
         if (isset($this->_schema[$fieldName]['__schema']) ) {
@@ -361,8 +361,8 @@ abstract class Ox_Schema
             $s = $this->_schema[$fieldName]['__schema'];
             return $s->sanitize($fieldValue);
         }
+        //TODO should error here instead of quietly returning unsanitized value maybe
         return $fieldValue;
-
     }
 
     /**

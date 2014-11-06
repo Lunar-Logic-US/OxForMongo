@@ -88,7 +88,7 @@ abstract class Ox_Validator {
      *
      * @return string
      */
-    abstract public function getError();
+    abstract public function getError($fieldName);
 
     /**
      * Returns a cleaned version of the value that can be saved to the database
