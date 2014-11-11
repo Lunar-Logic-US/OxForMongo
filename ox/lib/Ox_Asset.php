@@ -94,6 +94,24 @@ abstract class Ox_Asset
     }
 
     /**
+     * Format the given bytes in a human readable manner, converting to B, KB, MB, GB, and TB as needed.
+     * 
+     * @param $bytes The number of bytes to format
+     * @param $precision The precision of the resulting number
+     * @return string Representation of the formatted size ("4.5 MB", "3.43 KB", etc...)
+     */
+    public static function formatBytes($bytes, $precision = 2) { 
+        $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+    
+        $bytes = max($bytes, 0); 
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+        $pow = min($pow, count($units) - 1); 
+        $bytes /= pow(1024, $pow);
+    
+        return round($bytes, $precision) . ' ' . $units[$pow]; 
+    }
+
+    /**
      * Return URL for the given asset
      * @param $asset
      * @return string
