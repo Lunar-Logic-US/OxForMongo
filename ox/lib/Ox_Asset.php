@@ -28,6 +28,8 @@
  */
 abstract class Ox_Asset
 {
+    protected $asset_collection = 'assets';
+
     /**
      * Save the document info into the database and return it.
      *
@@ -39,10 +41,11 @@ abstract class Ox_Asset
      *
      * @param $file_info array
      * @param $fieldName string
+     * @param $extra_fields array Additional fields for the asset that can overwrite the asset doc if needed.
      * @throws Ox_AssetException
      * @return array|null
      */
-    public function save($file_info, $fieldName='file')
+    public function save($file_info, $fieldName = 'file', array $extra_fields = array())
     {
         $db = Ox_LibraryLoader::Db();
         $assets = $db->getCollection('assets');
@@ -77,11 +80,15 @@ abstract class Ox_Asset
         }
 
         $md5_file = md5_file($tmp_name);
-        $doc = array('original_name'=>$file_info[$fieldName]['name'],
-                              'type'=>$file_info[$fieldName]['type'],
-                              'size'=>$file_info[$fieldName]['size'],
-                              'md5'=> $md5_file
-                            );
+        $doc = array(
+            'original_name'=>$file_info[$fieldName]['name'],
+            'type'=>$file_info[$fieldName]['type'],
+            'size'=>$file_info[$fieldName]['size'],
+            'md5'=> $md5_file
+        );
+        if($extra_fields !== null && !empty($extra_fields)) {
+            array_merge($doc, $extra_fields);
+        }
         $assets->insert($doc);
         return $doc;
     }
