@@ -150,8 +150,7 @@ class LocalAsset extends Ox_Asset
 
             $length = $offsetLast - $offsetFirst+1; //Offsets start a 0, so need to +1 for length
             $data_size = $length;
-        }
-        else {
+        } else {
             $partial_content = false;
             $offsetFirst = 0;
             $length = $file_size;
@@ -208,6 +207,5 @@ class LocalAsset extends Ox_Asset
         echo $buffer;
         flush();
         exit(0);
-
     }
 }

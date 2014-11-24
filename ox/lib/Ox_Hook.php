@@ -47,7 +47,7 @@ class Ox_Hook
      */
     public static function getInstance()
     {
-        if (is_null(self::$_instance)) {
+        if(is_null(self::$_instance)) {
             self::$_instance = new self();
         }
         return self::$_instance;
@@ -67,75 +67,34 @@ class Ox_Hook
      * </code>
      * @param string $construct
      */
-    public static function initializeModuleConstruct($construct)
+    public function initializeModuleConstruct($construct)
     {
         require_once(DIR_CONSTRUCT. $construct . DIRECTORY_SEPARATOR . 'hook.php');
         $hookObjectName = $construct . 'Hook';
         $hookObjectName::init();
     }
 
-
     /**
-     * Register a function on a hook.
-     *
-     * Example hook document:
-     * <pre><code>
-     *  "hooks"{
-     *       "menu":[
-     *          {
-     *              "file":"/home/jesse/web/ivy/cart/hook.php",
-     *              "class":"cartHook",
-     *              "function":"scripts",
-     *          },
-     *          {
-     *              "file":"/home/jesse/web/ivy/cart/hook.php",
-     *              "class":"ordersHook",
-     *              "function":"scripts",
-     *          }
-     *      ],
-     *      "orders":[
-     *          {
-     *              "file":"/home/jesse/web/ivy/cart/Orders/hook.php",
-     *              "class":"ordersHook",
-     *              "function":"scripts",
-     *          }
-     *      ]
-     *  }
-     * </code></pre>
+     * Register a function on a hook.  Hooks are registered on Ox execution.
      *
      * @param string $name - The name of the hook, to be invoked in the execute function.
      * @param string $file - The physical address of the file that includes the hook class and method
      * @param string $class - The name of the class that has the hook method
      * @param string $method - The method to call in given class
-     * @param bool $replace - Add an additional hook if false or replace the existing hook(s) if true. NOT IMPLEMENTED
      */
-    public static function register($name, $file, $class, $method, $replace=false)
+    public function register($name, $file, $class, $method)
     {
-        if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": $name - file: {$file} | class: {$class} | function: $method.");
-        $update = array('$addToSet'=>array(
-            $name=>array("file"=>$file, "class"=>$class, "function"=>$method)
-        ));
-        /*
-        if ($replace) {
-            $update = array('$set'=>array(
-                $name=>array(array("file"=>$file, "class"=>$class, "function"=>$function))
-            ));
+        if(self::DEBUG) {
+            Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": $name - file: {$file} | class: {$class} | function: $method.");
         }
-        */
-        if (!empty($update)) {
-            if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": Updating DB: " . print_r($update,1));
-            $db = Ox_LibraryLoader::Db();
-            //$status = $db->settings->insert(array('_id'=>'Ox_Hook',$name=>array()));
-
-            $status = $db->settings->update(
-                array('_id'=>self::SETTING_ID),
-                $update,
-                array('upsert'=>true)
-            );
-
-            if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": Update Status: " . print_r($status,1));
+        if(!isset($this->_hook_list[$name])) {
+            $this->_hook_list[$name] = array();
         }
-        
+        $this->_hook_list[$name][] = array(
+            "file" => $file,
+            "class" => $class,
+            "function" => $method
+        );
     }
 
     /**
@@ -143,28 +102,43 @@ class Ox_Hook
      *
      * @param string $name - The name of the hook to invoke.
      * @param array $arguments
-     * @return mixed Returns whatever the called method gives us.
+     * @param boolean $multipleReturns If true gathers the return values from each hook and returns them as an unkeyed array.  If false returns the value from the lasst hook called.  Defaults to false.
+     * @return mixed Returns whatever the called method gives us, either as an array if $multipleReturns, or a single value from the last hook called.  Returns null if no hooks were registered or if no return values were ever created.
      */
-    public static function execute($name, $arguments=array())
+    public function execute($name, $arguments = array(), $multipleReturns = false)
     {
-        if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": Executing Hook: " .$name);
-        $db = Ox_LibraryLoader::Db();
-        $settings = $db->settings->findById(self::SETTING_ID );
-        $output='';
-        if(isset($settings[$name]) && is_array($settings[$name])){
-            foreach($settings[$name] as $hook){
-                if(file_exists($hook['file'])){
-                    require_once($hook['file']);
-                    if(class_exists($hook['class'])){
-                        if (self::DEBUG) Ox_Logger::logDebug("Ox_Hook: Firing hook $name - file: {$hook['file']} | class: {$hook['function']} | name: $name.");
-                        return call_user_func_array(array($hook['class'],$hook['function']),$arguments);
-                    } else {
-                        Ox_Logger::logError("Hook class ({$hook['class']}) not found for $name.");
+        if(self::DEBUG) {
+            Ox_Logger::logDebug(__CLASS__ . '-' .  __FUNCTION__ . ": Executing Hook: " . $name);
+        }
+        $output = array();
+
+        if(!count($this->_hook_list)) {
+            return null;
+        }
+        if(!array_key_exists($name, $this->_hook_list)) {
+            return null;
+        }
+
+        foreach($this->_hook_list[$name] as $hook) {
+            if(file_exists($hook['file'])) {
+                require_once($hook['file']);
+                if(class_exists($hook['class'])) {
+                    if(self::DEBUG) {
+                        Ox_Logger::logDebug("Ox_Hook: Firing hook $name - file: {$hook['file']} | class: {$hook['function']} | name: $name.");
                     }
+                    $output[] = call_user_func_array(array($hook['class'], $hook['function']), $arguments);
                 } else {
-                    Ox_Logger::logError("Hook file ({$hook['file']}) not found for $name.");
+                    Ox_Logger::logError("Hook class ({$hook['class']}) not found for $name.");
                 }
+            } else {
+                Ox_Logger::logError("Hook file ({$hook['file']}) not found for $name.");
             }
+        }
+
+        if($multipleReturns) {
+            return $output;
+        } else {
+            return array_pop($output);
         }
     }
 }
