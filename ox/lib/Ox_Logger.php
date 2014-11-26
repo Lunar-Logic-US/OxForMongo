@@ -149,7 +149,13 @@ class Ox_Logger
                 $logFile = $logPath . $logName;
             }
             if ($level === null) {
-                $level = (int) $config_parser->getAppConfigValue('log_level');
+                $level = $config_parser->getAppConfigValue('log_level');
+                // No log level set? Default to all levels
+                if($level === null) {
+                    $level = self::allLogLevels();
+                } else {
+                    $level = (int) $level;
+                }
             }
             self::$_logLevel = $level;
             $writer = self::LOG_WRITER;
@@ -192,13 +198,13 @@ class Ox_Logger
         //only run if we are initialized
         if (self::_init()) {
             $message = print_r( $p_message, 1 );
-            if($level == Ox_Logger::MESSAGE) {
+            if(($level & self::$_logLevel) == Ox_Logger::MESSAGE) {
                 self::$_handlers[Ox_Logger::MESSAGE]->log(self::_getFormattedTimestamp().' MESSAGE '.$message);
-            } elseif($level == Ox_Logger::WARNING) {
+            } elseif(($level & self::$_logLevel) == Ox_Logger::WARNING) {
                 self::$_handlers[Ox_Logger::WARNING]->log(self::_getFormattedTimestamp().' WARNING '.$message);
-            } elseif($level == Ox_Logger::ERROR) {
+            } elseif(($level & self::$_logLevel) == Ox_Logger::ERROR) {
                 self::$_handlers[Ox_Logger::ERROR]->log(self::_getFormattedTimestamp().' ERROR '.$message);
-            } elseif($level == Ox_Logger::DEBUG) {
+            } elseif(($level & self::$_logLevel) == Ox_Logger::DEBUG) {
                 self::$_handlers[Ox_Logger::DEBUG]->log(self::_getFormattedTimestamp().' DEBUG '.$message);
             }
         }
