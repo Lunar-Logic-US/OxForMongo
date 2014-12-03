@@ -38,7 +38,7 @@ class Ox_Hook
     private static $_instance = NULL;
 
     /** @var array List of the hooks that have been registered. */
-    private $_hook_list = array();
+    private static $_hook_list = array();
 
     /**
      * Instantiate the singleton.
@@ -82,15 +82,15 @@ class Ox_Hook
      * @param string $class - The name of the class that has the hook method
      * @param string $method - The method to call in given class
      */
-    public function register($name, $file, $class, $method)
+    public static function register($name, $file, $class, $method)
     {
         if(self::DEBUG) {
             Ox_Logger::logDebug(__CLASS__ .'-'. __FUNCTION__ .": $name - file: {$file} | class: {$class} | function: $method.");
         }
-        if(!isset($this->_hook_list[$name])) {
-            $this->_hook_list[$name] = array();
+        if(!isset(self::$_hook_list[$name])) {
+            self::$_hook_list[$name] = array();
         }
-        $this->_hook_list[$name][] = array(
+        self::$_hook_list[$name][] = array(
             "file" => $file,
             "class" => $class,
             "function" => $method
@@ -105,21 +105,21 @@ class Ox_Hook
      * @param boolean $multipleReturns If true gathers the return values from each hook and returns them as an unkeyed array.  If false returns the value from the lasst hook called.  Defaults to false.
      * @return mixed Returns whatever the called method gives us, either as an array if $multipleReturns, or a single value from the last hook called.  Returns null if no hooks were registered or if no return values were ever created.
      */
-    public function execute($name, $arguments = array(), $multipleReturns = false)
+    public static function execute($name, $arguments = array(), $multipleReturns = false)
     {
         if(self::DEBUG) {
             Ox_Logger::logDebug(__CLASS__ . '-' .  __FUNCTION__ . ": Executing Hook: " . $name);
         }
         $output = array();
 
-        if(!count($this->_hook_list)) {
+        if(!count(self::$_hook_list)) {
             return null;
         }
-        if(!array_key_exists($name, $this->_hook_list)) {
+        if(!array_key_exists($name, self::$_hook_list)) {
             return null;
         }
 
-        foreach($this->_hook_list[$name] as $hook) {
+        foreach(self::$_hook_list[$name] as $hook) {
             if(file_exists($hook['file'])) {
                 require_once($hook['file']);
                 if(class_exists($hook['class'])) {

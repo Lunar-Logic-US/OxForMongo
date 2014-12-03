@@ -70,7 +70,8 @@ class Ox_Security
      *
      * This initalizes the sytem
      */
-    function __construct(){
+    function __construct()
+    {
         Ox_LibraryLoader::load('user','Ox_UserMongo',false);
         $this->user =  Ox_LibraryLoader::User();
         $this->session = Ox_LibraryLoader::Session();
@@ -173,13 +174,17 @@ class Ox_Security
      */
     public function checkPermission($needed_roles, $user_roles=null)
     {
+        // Covers single-role permissions
         if(!is_array($needed_roles)) {
             $needed_roles =  array($needed_roles);
         }
-        if ($user_roles===null || !is_array($user_roles)){
+
+        // Check for default user roles
+        if($user_roles === null || !is_array($user_roles)) {
             $user_roles = $this->getUserRoles();
         }
-        // Corner case
+
+        // Corner case.  isPublic will handle overridden roles arrays gracefully, so we're good.
         if($this->isPublic($needed_roles)) {
             return true;
         }
@@ -187,6 +192,11 @@ class Ox_Security
         // Corner case
         if(in_array('su', $user_roles)) {
             return true;
+        }
+
+        // Does anyone want to override before we move on to roles-based permissions?
+        if(array_key_exists('object', $needed_roles)) {
+            return $required_roles['object']->{$required_roles['function']}(Ox_Dispatch::getURLPath(), $needed_roles, 'checkPermission', $this->user);
         }
 
         // General case

@@ -87,8 +87,9 @@ abstract class Ox_Asset
             'md5'=> $md5_file
         );
         if($extra_fields !== null && !empty($extra_fields)) {
-            array_merge($doc, $extra_fields);
+            $doc = array_merge($doc, $extra_fields);
         }
+
         $assets->insert($doc);
         return $doc;
     }
