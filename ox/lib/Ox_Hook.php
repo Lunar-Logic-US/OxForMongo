@@ -137,8 +137,8 @@ class Ox_Hook
 
         if($multipleReturns) {
             return $output;
-        } else {
-            return array_pop($output);
         }
+
+        return array_pop($output);
     }
 }

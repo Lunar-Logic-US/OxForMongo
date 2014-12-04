@@ -194,12 +194,22 @@ class Ox_Security
             return true;
         }
 
-        // Does anyone want to override before we move on to roles-based permissions?
-        if(array_key_exists('object', $needed_roles)) {
-            return $required_roles['object']->{$required_roles['function']}(Ox_Dispatch::getURLPath(), $needed_roles, 'checkPermission', $this->user);
+        // Corner case
+        if(in_array('authenticated', $needed_roles)) {
+            if($this->loggedIn()) {
+                return true;
+            }
         }
 
-        // General case
+        // Does anyone want to override before we move on to roles-based permissions?
+        if(array_key_exists('object', $needed_roles)) {
+            if(method_exists($needed_roles['object'], $needed_roles['function'])) {
+                return $needed_roles['object']->{$needed_roles['function']}(Ox_Dispatch::getURLPath(), __METHOD__, $needed_roles['object']->user);
+            }
+            throw new Ox_SecurityException(__CLASS__ . '::' . __METHOD__ . ' - Method does not exist: "' . $needed_roles['function'] . '"', 'Class or Function does not exist.');
+        }
+
+        // General case, single role
         $intersect = array_intersect($user_roles, $needed_roles);
         if(!empty($intersect)) {
             return true;
