@@ -48,7 +48,7 @@ abstract class Ox_Asset
     public function save($file_info, $fieldName = 'file', array $extra_fields = array())
     {
         $db = Ox_LibraryLoader::Db();
-        $assets = $db->getCollection('assets');
+        $assets = $db->getCollection($this->asset_collection);
         $tmp_name = $file_info[$fieldName]["tmp_name"];
         if (isset($file_info[$fieldName]['error']) && $file_info[$fieldName]['error']!==0) {
             switch ($file_info[$fieldName]['error']) {
@@ -87,8 +87,9 @@ abstract class Ox_Asset
             'md5'=> $md5_file
         );
         if($extra_fields !== null && !empty($extra_fields)) {
-            array_merge($doc, $extra_fields);
+            $doc = array_merge($doc, $extra_fields);
         }
+
         $assets->insert($doc);
         return $doc;
     }
@@ -126,5 +127,4 @@ abstract class Ox_Asset
     public abstract function getAsset($uri);
 }
 
-require_once('asset_managers/Ox_LocalAsset.php');
-
+require_once(DIR_FRAMELIB . 'asset_managers' . DIRECTORY_SEPARATOR . 'Ox_LocalAsset.php');

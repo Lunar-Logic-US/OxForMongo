@@ -84,7 +84,6 @@ if (!defined('OX_FRAME_EXCEPTIONS')) {
 //Initialize Base Objects
 //---------------------------
 require_once(OX_FRAMEINTERFACE  . 'Ox_Routable.php');
-
 require_once(DIR_FRAMELIB . 'Ox_LibraryLoader.php');
 require_once(DIR_FRAMELIB . 'Ox_Logger.php');
 Ox_LibraryLoader::loadAll(OX_FRAME_EXCEPTIONS);
@@ -109,7 +108,7 @@ Ox_LibraryLoader::load('session','Ox_Session');
 Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
-Ox_LibraryLoader::load('hook','Ox_Hook',FALSE);
+Ox_LibraryLoader::load('hook','Ox_Hook',TRUE);
 
 //Router uses the Ox_Dispatch::CONFIG_WEB_BASE_NAME, must be after OxDispatch
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
@@ -120,15 +119,20 @@ Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
 //Loaded after the Ox_Router as Actions will use Ox_Router::buildURL
 Ox_Dispatch::loadRoutes();
 
-if (file_exists(DIR_APPCONFIG . 'modules.php')) {
+// Load default project configuration files if they exist
+if(file_exists(DIR_APPCONFIG . 'modules.php')) {
     if (DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading modules.php.");
     require_once (DIR_APPCONFIG . 'modules.php');
 }
-if (file_exists(DIR_APPCONFIG . 'global.php')) {
+if(file_exists(DIR_APPCONFIG . 'hook.php')) {
+    if(DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading hook.php.");
+    require_once(DIR_APPCONFIG . 'hook.php');
+}
+
+if(file_exists(DIR_APPCONFIG . 'global.php')) {
     if (DEBUG_BOOT) Ox_Logger::logDebug("Main Page loading global.php.");
     require_once (DIR_APPCONFIG . 'global.php');
 }
-
 //---------------------------
 // Done loading defines and libraries. Pass off control to the dispatcher
 //---------------------------

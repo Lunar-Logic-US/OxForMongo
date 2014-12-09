@@ -297,11 +297,11 @@ class Ox_LibraryLoader
         if (array_key_exists($name,self::$_resources)) {
             if (self::DEBUG) Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
             return self::$_resources[$name];
-        }  elseif (array_key_exists(strtolower($name),self::$_resources)) {
+        } elseif (array_key_exists(strtolower($name),self::$_resources)) {
             if (self::DEBUG) Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
             $name = strtolower($name);
             return self::$_resources[$name];
-        }else {
+        } else {
             return null;
         }
     }
