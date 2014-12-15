@@ -109,6 +109,7 @@ Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
 Ox_LibraryLoader::load('hook','Ox_Hook',TRUE);
+Ox_LibraryLoader::load('mailer','Ox_Mail',FALSE);
 
 //Router uses the Ox_Dispatch::CONFIG_WEB_BASE_NAME, must be after OxDispatch
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
