@@ -72,9 +72,9 @@ class Ox_LibraryLoader
 {
     /** Variable name to use in app.php. */
     const CONFIG_OVERLOAD_NAME = 'class_overload';
+
     /** Display debug message or not. */
     const DEBUG = FALSE;
-
 
     /** @var array List of system objects. */
     private static $_resources = array();
@@ -188,23 +188,36 @@ class Ox_LibraryLoader
         } else {
             $searchPath = $path;
         }
-
         $name .= '.php';
+        $fileName='';
+        if (strpos($name,'\\')===false) {
+            $fileNameToTest = $name;
+        } else {
+            //we have a class in a namespace
+            $nameParts = explode('\\',$name);
+            $fileName = array_pop($nameParts);
+            $fileNameToTest = $fileName;
+        }
+
+
         foreach ($searchPath as $path) {
-            $fileNameToTest = $path . $name;
-            if (is_file($fileNameToTest) ) {
-                $fileToLoad = $fileNameToTest;
+            //add namespace compatibility
+            $fullPath = $path . $fileNameToTest;
+            if (is_file($fullPath) ) {
+                $fileToLoad = $fullPath;
                 break;
             }
-            $fileNameToTest = $path . strtolower($name);
-            if (is_file($fileNameToTest)) {
-                $fileToLoad = $fileNameToTest;
+
+            $fullPath = $path . strtolower($name);
+            if (is_file($fullPath)) {
+                $fileToLoad = $fullPath;
                 break;
             }
         }
 
         if (empty($fileToLoad) && $throw) {
-            throw new Ox_Exception("Error: Can not find library {$name} in path: " . implode(';',$searchPath),'Ox_Loader::NotFound');
+            $test = strpos($name,"\\");
+            throw new Ox_Exception("Error: Can not find library {$name} ($test | $fileName) in path: " . implode(';',$searchPath),'Ox_Loader::NotFound');
         }
         //Try/Catch does not work on require or includes.
         if (!empty($fileToLoad))
@@ -293,12 +306,15 @@ class Ox_LibraryLoader
      */
     public static function getResource($name)
     {
-        if (self::DEBUG) Ox_Logger::logDebug("Ox_LibraryLoader - Resources: " . print_r(self::$_resources,1));
+        //We have the special case that we can not do any debugging here if we are
+        //loading the config_parser.  Otherwise we will be in a loop between Ox_Logger and
+        //here.
+        if (self::DEBUG && strtolower($name)!=='config_parser') Ox_Logger::logDebug("Ox_LibraryLoader - Resources: " . print_r(self::$_resources,1));
         if (array_key_exists($name,self::$_resources)) {
-            if (self::DEBUG) Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
+            if (self::DEBUG && strtolower($name)!=='config_parser') Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
             return self::$_resources[$name];
         } elseif (array_key_exists(strtolower($name),self::$_resources)) {
-            if (self::DEBUG) Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
+            if (self::DEBUG && strtolower($name)!=='config_parser') Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource: $name");
             $name = strtolower($name);
             return self::$_resources[$name];
         } else {
@@ -324,9 +340,6 @@ class Ox_LibraryLoader
      */
     public static function __callStatic($method_name,$arguments)
     {
-        if (self::DEBUG) {
-            Ox_Logger::logDebug("Ox_LibraryLoader - Getting resource of static: $method_name");
-        }
         return self::getResource($method_name);
     }
 
@@ -349,6 +362,7 @@ class Ox_LibraryLoader
         }
         Ox_LibraryLoader::loadCode($className,$path,false);
     }
+
 }
 
 spl_autoload_register(array('Ox_LibraryLoader','autoLoad'),false);
