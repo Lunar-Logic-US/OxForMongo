@@ -150,14 +150,14 @@ class Ox_AssemblerConstruct
      */
     protected function _subAssembly($subConstruct,$args)
     {
-        array_unshift($args,'dummy-full-path');
-        if (count($args)<1) {
-            $args[]= 'index';
-        }
-        if (empty($args[1])) {
-            $args[1]= 'index';
-        }
-        //var_dump($args);
+        
+        /**
+         * Needed for deep linking of secured resourcese via the 'r' GET
+         * parameter, e.g. requesting the secured resource /home/dashboard and
+         * getting redirected to /users/login?r=%2Fhome%2Fdashboard
+         */
+        array_unshift($args,$_SERVER['REQUEST_URI']);
+        
         $action = new Ox_AssemblerAction($this->dir . DIRECTORY_SEPARATOR .$subConstruct,$subConstruct);
         $action->go($args);
         exit(0);
