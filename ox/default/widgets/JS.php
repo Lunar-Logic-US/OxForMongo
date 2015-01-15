@@ -47,6 +47,10 @@ class JS implements Ox_Widget {
      */
     private $_js_jQuery_ready_list = array();
     /**
+     * @var array Array of javascript code to put in the load area.
+     */
+    private $_js_jQuery_load_list = array();
+    /**
      * @var array Array of javascript that does not need to be in a document ready area.
      */
     private $_js_script_list = array();
@@ -113,6 +117,19 @@ JS;
             $output .= "});\n";
             $output .= "</script>\n";
         }
+        
+        if (count($this->_js_jQuery_load_list)) {
+            $output .= "<script>\n";
+            $output .= '$(window).load(function() {' . "\n";
+            foreach ($this->_js_jQuery_load_list as $id => $script) {
+                $output .= "    //<!-- Script ID: {$id} -->\n";
+                $output .= "    " . $script;
+                $output .= "\n";
+            }
+            $output .= "});\n";
+            $output .= "</script>\n";
+        }
+
 
 
         if ($return_string === FALSE) {
@@ -201,7 +218,7 @@ JS;
     }
 
     /**
-     * Adds the given script string to the list that will be output in the document.ready() when the render is called.
+     * Adds the given script string to the list that will be output in the $(document).ready() when the render is called.
      *
      * @param string $id
      * @param string $script
@@ -210,6 +227,18 @@ JS;
         $new = array($id=>$script);
         //This will overwrite if the same script id is used twice.
         $this->_js_jQuery_ready_list = array_merge($this->_js_jQuery_ready_list,$new);
+    }
+    
+    /**
+     * Adds the given script string to the list that will be output in the $(window).load() when the render is called.
+     *
+     * @param string $id
+     * @param string $script
+     */
+    public function addjQueryLoad ($id,$script) {
+        $new = array($id=>$script);
+        //This will overwrite if the same script id is used twice.
+        $this->_js_jQuery_load_list = array_merge($this->_js_jQuery_load_list,$new);
     }
     
 }
