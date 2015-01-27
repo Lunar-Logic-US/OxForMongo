@@ -56,7 +56,7 @@ class LocalAsset extends Ox_Asset
         if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], DIR_UPLOAD . $doc['_id']->__tostring())) {
             Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
         } else {
-            Ox_Logger::logError('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
+            Ox_Logger::logError('Failed to move ' . $file_info[$fieldName]['name'] . ' to ' . DIR_UPLOAD . $doc['_id']->__tostring());
         }
         return $doc;
     }
