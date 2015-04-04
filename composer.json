@@ -1,6 +1,7 @@
 {
     "name" : "m2calabr/OxForMongo",
     "description" : "lightweight php framework that uses MongoDB",
+    "version": "dev-Composer-Namespace",
     "authors": [
         {
             "name": "Michael Calabrese",
