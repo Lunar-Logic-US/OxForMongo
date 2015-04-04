@@ -20,7 +20,7 @@
  */
 
 
-require_once(DIR_FRAMELIB.'Ox_User.php');
+require_once(DIR_FRAMELIB . 'Ox_User.php');
 
 /**
  * Security class to control access to resources.
