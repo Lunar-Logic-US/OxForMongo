@@ -1,0 +1,24 @@
+{
+    "authors": [
+        {
+            "name": "Michael Calabrese",
+            "email": "michael.calabrese@lunarlogic.com",
+            "homepage": "http://lunarlogic.com",
+            "role": "Developer"
+        },
+        {
+          "name": "Rendahl Weishar",
+          "email": "rendahl.weishar@lunarlogic.com",
+          "homepage": "http://lunarlogic.com",
+          "role": "Developer"
+        }
+    ],
+    "repositories": [
+    ],
+    "require": {
+    },
+    "autoload": {
+        "psr-4": [
+        ]
+    }
+}
