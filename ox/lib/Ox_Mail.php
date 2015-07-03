@@ -19,11 +19,14 @@ class Ox_Mail implements Ox_Mailer {
 	 *
 	 * @return array $result
 	 */
-    public function sendMail($from, $to, $subject, $messageInHtml=null, $messageInText=null) {
+    public function sendMail($from, $to, $subject, $messageInHtml=null, $messageInText=null, $replyTo=null) {
     	$result = array();
+      if(is_null($replyTo)) {
+        $replyTo = $from;
+      }
     	
         $headers = "From: " . $from . "\r\n";
-        $headers .= "Reply-To: ". $from . "\r\n";
+        $headers .= "Reply-To: ". $replyTo . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         
         if(!is_null($messageInHtml)) {
