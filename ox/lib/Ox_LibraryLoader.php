@@ -365,4 +365,6 @@ class Ox_LibraryLoader
 
 }
 
+//Load any composer autoload
+Ox_LibraryLoader::loadCode('autoload',array(DIR_APP . 'vendor/'),false);
 spl_autoload_register(array('Ox_LibraryLoader','autoLoad'),false);

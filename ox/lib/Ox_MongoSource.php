@@ -316,11 +316,13 @@ class Ox_MongoSource
         //Ungroup the results to all be in under a property.
         $returnArray = array();
         foreach($tempArray as $property => $arrayValue) {
-            foreach ($arrayValue as $subKey => $value) {
-                foreach ($value as $k=> $v) {
-                    $returnArray[$property][$k] = $v;
-                }
+            if (is_array($arrayValue)) {
+                foreach ($arrayValue as $subKey => $value) {
+                    foreach ($value as $k=> $v) {
+                        $returnArray[$property][$k] = $v;
+                    }
 
+                }
             }
         }
         return $returnArray;
