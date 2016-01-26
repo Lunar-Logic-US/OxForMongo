@@ -60,7 +60,48 @@ class LocalAsset extends Ox_Asset
         }
         return $doc;
     }
-
+    
+    public function saveFromUrl($url)
+    {
+        // Generate a MongoId to use as the filename
+        $_id = new MongoId();
+        // Parse the URL for a file extension
+        $parsedUrl = parse_url($url);
+        $remotePath = $parsedUrl['path'];
+        $pathParts = pathinfo($remotePath);
+        $extension = isset($pathParts['extension']) ? $pathParts['extension'] : '';
+        // Generate the destination (in the assets folder)
+        $destination = DIR_UPLOAD . $_id->__tostring(); // . '.' . $extension;
+        
+        // Copy the remote file to the assets folder
+        if ( copy($url, $destination) ) {
+            // Successful file copy:
+            // Calculate the original filename from the URL
+            $originalName = isset($pathParts['basename']) ? $pathParts['basename'] : '';
+            // Build $doc
+            $doc = array(
+                '_id'=>          $_id,
+                'original_name'=>$originalName,
+                'type'=>         mime_content_type($destination),
+                'size'=>         filesize($destination),
+                'md5'=>          md5_file($destination)
+            );
+            // Save asset entry to the DB
+            $db = Ox_LibraryLoader::Db();
+            $assets = $db->getCollection($this->asset_collection);
+            $assets->insert($doc);
+            // Log the success
+            Ox_Logger::logMessage('Remote image copied: ' . $url . ' -> ' . $destination);
+        } else {
+            // Unsuccessful file copy:
+            $doc = array();
+            // Log the failure
+            Ox_Logger::logError('Failed to copy remote image: ' . $url . ' -> ' . $destination);
+        }
+        
+        return $doc;
+    }
+    
     /**
      * Return URL for the given asset
      * @param $asset
