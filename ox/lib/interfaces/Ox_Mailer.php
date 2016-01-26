@@ -14,5 +14,5 @@ interface Ox_Mailer {
     *
     * @return array $result
     */
-    public function sendMail($from, $to, $subject, $messageInHtml, $messageInText);
+    public function sendMail($from, $to, $subject, $messageInHtml, $messageInText, $replyTo);
 }
