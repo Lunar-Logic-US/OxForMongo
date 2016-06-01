@@ -127,6 +127,20 @@ class LocalAsset extends Ox_Asset
     {
         $db = Ox_LibraryLoader::Db();
 
+        /**
+         * Partial file processing fails for certain file types.
+         * This list will exclude them from being considered when processing HTTP Range.
+         * 
+         * Perhaps video needs to be excluded as well, unsure at this time.
+         */
+        $excludeFromHTTPRange = array(
+            'audio/mp3',
+            'audio/mpeg',
+            'audio/x-mpeg',
+            'audio/x-mpeg-3',
+            'audio/mpeg3',
+        );
+
         //$uri = Ox_Router::trimPrefix($uri,Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         $base_filename = pathinfo($uri, PATHINFO_FILENAME);
 
@@ -148,7 +162,7 @@ class LocalAsset extends Ox_Asset
         //Process a partial file request from the client.
         //-------------------------------------------------------------------------
 
-        if (isset($_SERVER['HTTP_RANGE'])) {
+        if (isset($_SERVER['HTTP_RANGE']) && !in_array($asset['type'], $excludeFromHTTPRange)) {
             $partial_content = true;
             $range = $_SERVER['HTTP_RANGE'];
             if (preg_match('/^bytes/',$_SERVER['HTTP_RANGE'])) {
