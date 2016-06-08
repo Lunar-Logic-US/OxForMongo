@@ -25,6 +25,10 @@
  */
 class LocalAsset extends Ox_Asset
 {
+    /**
+     * Turns on object debug logging.
+     */
+    const DEBUG = FALSE;
 
     /**
      * Saved uri path
@@ -159,20 +163,25 @@ class LocalAsset extends Ox_Asset
             }
             $range = explode("-", $range);
 
-            if (strlen($range[0])==0 && isset($range[1]) ) {
+            // Future-proof in case explode doesn't always create empty array element.
+            if (!isset($range[1])){
+                $range[1] = "";
+            }
+
+            if (strlen($range[0])==0 && strlen($range[1]) > 0) {
                 // -1000
-                Ox_Logger::logDebug('LocalAsset::getAsset range[0] empty | [1] set: ');
+                if (self::DEBUG) Ox_Logger::logDebug('LocalAsset::getAsset range[0] empty | [1] set: ');
                 $offsetLast = $file_size -1;
                 $offsetFirst = $file_size-intval($range[0]);
                 if ($offsetFirst<0) $offsetFirst=0;
-            } elseif (strlen($range[0])>0 && !isset($range[1])) {
+            } elseif (strlen($range[0])>0 && strlen($range[1]) == 0) {
                 // 1000-
-                Ox_Logger::logDebug('LocalAsset::getAsset range[0] NOT empty | [1] NOT set: ');
+                if (self::DEBUG) Ox_Logger::logDebug('LocalAsset::getAsset range[0] NOT empty | [1] NOT set: ');
                 $offsetFirst = intval($range[0]);
                 $offsetLast = $file_size-1;
             } else {
                 // 0-1000
-                Ox_Logger::logDebug('LocalAsset::getAsset GENERAL CASE: ');
+                if (self::DEBUG) Ox_Logger::logDebug('LocalAsset::getAsset GENERAL CASE: ');
                 $offsetFirst = intval($range[0]);
                 $offsetLast = intval($range[1]);
             }
