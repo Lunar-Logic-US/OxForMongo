@@ -201,6 +201,10 @@ class Ox_LibraryLoader
 
 
         foreach ($searchPath as $path) {
+            // Ensure the path ends with a directory separator.
+            if (DIRECTORY_SEPARATOR !== substr($path, -1)) {
+                $path = $path . DIRECTORY_SEPARATOR;
+            }
             //add namespace compatibility
             $fullPath = $path . $fileNameToTest;
             if (is_file($fullPath) ) {
