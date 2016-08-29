@@ -101,8 +101,9 @@ class Ox_MongoSource
         if ($this->_db !== false) {
             return true;
         }
-        if($mongo_config=$config_parser->getAppConfigValue('mongo_config')) {
+        if($mongo_config=$config_parser->getSysConfigValue('mongo_config')) {
             $this->_config = $mongo_config;
+
         } else {
             // Default config
             $this->_config = array(

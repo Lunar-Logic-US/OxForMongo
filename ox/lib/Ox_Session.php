@@ -122,7 +122,7 @@ class Ox_Session
 
             session_start();
         }  else {
-            $mongo_config=$config_parser->getAppConfigValue('mongo_config');
+            $mongo_config=$config_parser->getSysConfigValue('mongo_config');
             if (self::DEBUG) Ox_Logger::logDebug('Session: MONGO');
                 $this->_uses_mongo = TRUE;
                 $calculated_config = array(

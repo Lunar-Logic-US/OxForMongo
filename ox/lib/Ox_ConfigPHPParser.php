@@ -49,7 +49,7 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
         $files = scandir($config_dir);
         foreach($files as $file) {
             if(preg_match('/^.*\.php$/', $file)) {
-                if(!in_array($file, array('routes.php', 'global.php', 'framework.php','modules.php', 'hook.php'))) {
+                if(!in_array($file, array('system.php', 'routes.php', 'global.php', 'framework.php','modules.php', 'hook.php'))) {
                     $this->file = $file;
                     $this->inspectFile();
                 }
@@ -82,6 +82,17 @@ class Ox_ConfigPHPParser implements Ox_ConfigParser
     public function getAppConfigValue($key)
     {
         return $this->getValue('app', $key);
+    }
+
+    /**
+     * Returns a configuration value from the system array.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getSysConfigValue($key)
+    {
+        return $this->getValue('system', $key);
     }
 
     /**
