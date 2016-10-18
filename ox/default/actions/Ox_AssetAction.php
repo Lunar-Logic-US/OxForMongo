@@ -40,6 +40,7 @@ class Ox_AssetAction implements Ox_Routable
      */
     public function go($args)
     {
+        session_write_close();
         $filename = $args[1];
         $assets_helper = Ox_LibraryLoader::assets_helper();
         $assets_helper->getAsset($filename);
