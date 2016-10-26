@@ -87,14 +87,15 @@ class Ox_Security
      */
     public function authenticateUser($passwordFromDatabase,$password)
     {
-        if (is_array($passwordFromDatabase) ) {
-            //backward compatibility
+        if(!is_string($password)) return false;
+        if (is_array($passwordFromDatabase) )
             $passwordFromDatabase = $passwordFromDatabase['password'];
-        }
+        if(!is_string($passwordFromDatabase)) return false;
         $salt = substr($passwordFromDatabase, 0, 6);
-        if($salt . sha1($salt . $password) == $passwordFromDatabase) {
+        if (!is_string($salt)) return false;
+        if (!(strlen($salt)===6)) return false;
+        if($salt . sha1($salt . $password) === $passwordFromDatabase)
             return true;
-        }
         return false;
     }
 
