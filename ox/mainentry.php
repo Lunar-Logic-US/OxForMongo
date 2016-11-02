@@ -137,5 +137,9 @@ if(file_exists(DIR_APPCONFIG . 'global.php')) {
 //---------------------------
 // Done loading defines and libraries. Pass off control to the dispatcher
 //---------------------------
-Ox_Dispatch::run();
-
+if (defined('OX_SKIPRUN') && OX_SKIPRUN === true) {
+    // Useful for unit testing, etc.
+    Ox_Logger::logDebug("Ox_Dispatch::run() skipped because OX_SKIPRUN is set true.");
+} else {
+    Ox_Dispatch::run();
+}
