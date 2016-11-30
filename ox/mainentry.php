@@ -117,7 +117,18 @@ Ox_LibraryLoader::load('config_parser','Ox_ConfigPHPParser',FALSE);
 Ox_LibraryLoader::load('widget_handler','Ox_WidgetHandler');
 if (DEBUG_BOOT) Ox_Logger::logDebug("*****************Loading Page: " .$_SERVER['REQUEST_URI']);
 Ox_LibraryLoader::load('session','Ox_Session');
-Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
+
+// see if config wants a different database handler.
+global $config_parser;
+$db_handler = 'Ox_MongoSource';
+if(isset($config_parser)) {
+    $temp = $config_parser->getAppConfigValue('database_handler');
+    if($temp !== null) {
+        $db_handler = $temp;
+    }
+}
+Ox_LibraryLoader::load('db',$db_handler,FALSE);
+
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
