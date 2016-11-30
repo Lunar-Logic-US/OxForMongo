@@ -90,7 +90,7 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
                 }
 
                 /* Certificate Authority the remote server certificate must be signed by */
-                $context_information["cafile"] = $this->_config['private_key_file'];
+                $context_information['ssl']['cafile'] = $this->_config['private_key_file'];
                 $ctx = stream_context_create($context_information);
 
                 $this->_connection = new MongoClient($host, array('ssl'=>true), $ctx);
