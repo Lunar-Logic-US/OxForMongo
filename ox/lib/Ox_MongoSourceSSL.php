@@ -84,9 +84,10 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
                     /* Verify the server certificate has not expired */
                         "verify_expiry"     => true, /* Only available in the MongoDB PHP Driver */
                 ));
-                if(empty($this->_config['private_key_file']) || file_exists($this->_config['private_key_file'])) {
+                if(empty($this->_config['private_key_file']) || !file_exists($this->_config['private_key_file'])) {
                     Ox_Logger::logError("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
                     throw new Ox_MongoSourceException("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
+                    return false;
                 }
 
                 /* Certificate Authority the remote server certificate must be signed by */
@@ -98,12 +99,12 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
                 //TODO: Write support for this driver version.
                 Ox_Logger::logError("MongoDB SSL is not supported on this version of the MongoDB driver");
                 throw new Ox_MongoSourceException("MongoDB SSL is not supported on this version of the MongoDB driver");
-                $this->_connection = new Mongo($host);
+                return false;
             } else {
                 //TODO: Write support for this driver version.
                 Ox_Logger::logError("MongoDB SSL is not supported on this version of the MongoDB driver");
                 throw new Ox_MongoSourceException("MongoDB SSL is not supported on this version of the MongoDB driver");
-                $this->_connection = new Mongo($host, true, $this->_config['persistent']);
+                return false;
             }
 
             if (isset($this->_config['slaveok'])) {
@@ -113,11 +114,11 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
             if ($this->_db = $this->_connection->selectDB($this->_config['database'])) {
                 if (!empty($this->_config['login']) && $this->_driverVersion < '1.2.0') {
                     $return = $this->_db->authenticate($this->_config['login'], $this->_config['password']);
-                        if (!$return || !$return['ok']) {
-                            Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
-                            throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
-                            return false;
-                        }
+                    if (!$return || !$return['ok']) {
+                        Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
+                        throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
+                        return false;
+                    }
                 }
             }
 
