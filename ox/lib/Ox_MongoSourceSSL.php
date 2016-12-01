@@ -94,7 +94,7 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
                 $context_information['ssl']['cafile'] = $this->_config['private_key_file'];
                 $ctx = stream_context_create($context_information);
 
-                $this->_connection = new MongoClient($host, array('ssl'=>true), $ctx);
+                $this->_connection = new MongoClient($host, array('ssl'=>true), array('context'=> $ctx));
             } else if ($this->_driverVersion >= '1.2.0') {
                 //TODO: Write support for this driver version.
                 Ox_Logger::logError("MongoDB SSL is not supported on this version of the MongoDB driver");
