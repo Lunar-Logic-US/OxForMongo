@@ -67,7 +67,7 @@ class Ox_Hook
      * </code>
      * @param string $construct
      */
-    public function initializeModuleConstruct($construct)
+    public static function initializeModuleConstruct($construct)
     {
         require_once(DIR_CONSTRUCT. $construct . DIRECTORY_SEPARATOR . 'hook.php');
         $hookObjectName = $construct . 'Hook';
