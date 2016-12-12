@@ -113,9 +113,15 @@ class Ox_Hook
         $output = array();
 
         if(!count(self::$_hook_list)) {
+            if(self::DEBUG) {
+                Ox_Logger::logDebug('Ox_Hook: Returning null due to empty self::$_hook_list');
+            }
             return null;
         }
         if(!array_key_exists($name, self::$_hook_list)) {
+            if(self::DEBUG) {
+                Ox_Logger::logDebug('Ox_Hook: Returning null, can\'t find hook "' . $name . '" in self::$_hook_list');
+            }
             return null;
         }
 
@@ -126,7 +132,7 @@ class Ox_Hook
                     if(self::DEBUG) {
                         Ox_Logger::logDebug("Ox_Hook: Firing hook $name - file: {$hook['file']} | class: {$hook['function']} | name: $name.");
                     }
-                    $output[] = call_user_func_array(array($hook['class'], $hook['function']), $arguments);
+                    $output[] = call_user_func_array(array($hook['class'], $hook['function']), array($arguments));
                 } else {
                     Ox_Logger::logError("Hook class ({$hook['class']}) not found for $name.");
                 }
