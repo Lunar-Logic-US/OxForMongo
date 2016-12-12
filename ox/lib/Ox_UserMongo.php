@@ -75,16 +75,19 @@ class Ox_UserMongo extends Ox_User
         if (self::DEBUG) Ox_Logger::logMessage("User::load");
         $db = Ox_LibraryLoader::getResource('db');
         if (isset($this->user) && !empty($this->user)) {
-            
+
             $collection = $this->userCollection;
-            $this->user = $db->$collection->findOne($this->user);
+            // case insensitive user match
+            $user = $this->user['email'];
+            $filter = array('email' => array('$regex' => new MongoRegex("/^$user/i")));
+            $this->user = $db->$collection->findOne($filter);
         }
         if (isset($this->user) && !empty($this->user)) {
 	        return true;
 	    }
 	    return false;
     }
-	
+
 	/**
 	 * Unload a user
 	 */
