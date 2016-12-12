@@ -40,13 +40,13 @@ class Ox_MongoSource
      * The configure we use to setup the connection
      * @var array
      */
-    private $_config;
+    protected $_config;
 
     /**
      * Connect to Mongo
      * @var Mongo
      */
-    private $_connection;
+    protected $_connection;
 
     /**
      * Database Instance
@@ -54,7 +54,7 @@ class Ox_MongoSource
      * @var MongoDB
      * @access protected
      */
-    private $_db = false;
+    protected $_db = false;
 
     /**
      * Mongo Driver Version
@@ -62,7 +62,7 @@ class Ox_MongoSource
      * @var string
      * @access protected
      */
-    private $_driverVersion = Mongo::VERSION;
+    protected $_driverVersion = Mongo::VERSION;
 
     /**
      * List of created collections.
@@ -70,7 +70,7 @@ class Ox_MongoSource
      * Need to maintain collection state.
      * @var array
      */
-    private $_collectionCache = array();
+    protected $_collectionCache = array();
 
     /**
      * Create connection URI.
