@@ -66,34 +66,39 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
         try{
             $host = $this->createConnectionName($this->_config, $this->_driverVersion);
 
-            if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
+            /*if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
                 $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
-            } else if ($this->_driverVersion >= '1.3.0') {
-                //$context_information = array(
-                    //"ssl" => array(
-                        /* Disable self signed certificates */
-                        //"allow_self_signed" => false,
+            } else */
+            if ($this->_driverVersion >= '1.3.0') {
+                if(empty($this->_config['private_key_file'])) {
+                    $this->_connection = new MongoClient($host, array('ssl'=>true));
+                } else {
+                    if(!file_exists($this->_config['private_key_file'])) {
+                        Ox_Logger::logError("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
+                        throw new Ox_MongoSourceException("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
+                        return false;
+                    }
+                    $context_information = array(
+                        "ssl" => array(
+                            /* Disable self signed certificates */
+                            "allow_self_signed" => false,
 
-                        /* Verify the peer certificate against our provided Certificate Authority root certificate */
-                        //"verify_peer"       => true, /* Default to false pre PHP 5.6 */
+                            /* Verify the peer certificate against our provided Certificate Authority root certificate */
+                            "verify_peer"       => true, /* Default to false pre PHP 5.6 */
 
-                        /* Verify the peer name (e.g. hostname validation) */
-                        /* Will use the hostname used to connec to the node */
-                        //"verify_peer_name"  => true,
+                            /* Verify the peer name (e.g. hostname validation) */
+                            /* Will use the hostname used to connec to the node */
+                            "verify_peer_name"  => true,
 
-                    /* Verify the server certificate has not expired */
-                        //"verify_expiry"     => true, /* Only available in the MongoDB PHP Driver */
-                //));
-                /*if(empty($this->_config['private_key_file']) || !file_exists($this->_config['private_key_file'])) {
-                    Ox_Logger::logError("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
-                    throw new Ox_MongoSourceException("SSL certificate file " . $this->_config['private_key_file'] . " does not exist.");
-                    return false;
+                        /* Verify the server certificate has not expired */
+                            "verify_expiry"     => true, /* Only available in the MongoDB PHP Driver */
+                    ));
+
+                    /* Certificate Authority the remote server certificate must be signed by */
+                    $context_information['ssl']['cafile'] = $this->_config['private_key_file'];
+                    $ctx = stream_context_create($context_information);
+                    $this->_connection = new MongoClient($host, array('ssl'=>true), array('context'=> $ctx));
                 }
-
-                /* Certificate Authority the remote server certificate must be signed by */
-                //$context_information['ssl']['cafile'] = $this->_config['private_key_file'];
-                //$ctx = stream_context_create($context_information);
-                $this->_connection = new MongoClient($host, array('ssl'=>true));//, array('context'=> $ctx));
             } else if ($this->_driverVersion >= '1.2.0') {
                 //TODO: Write support for this driver version.
                 Ox_Logger::logError("MongoDB SSL is not supported on this version of the MongoDB driver");
