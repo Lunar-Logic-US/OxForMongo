@@ -86,14 +86,44 @@ class Ox_MongoSource
             $host = "mongodb://";
         }
 
-        $hostname = $config['host'] . ':' . $config['port'];
+        if(!empty($config['replicaset']) && $version >= '1.3.0' && !$this->validateReplicaSet($config['replicaset'])) {
+            throw new Ox_MongoSourceException('Incorrect replicaset format in app.php');
+            return false;
+        }
+
+        $hosts = array($config['host'] . ':' . $config['port']);
+        $replicaset_option = '';
+
+        if(!empty($config['replicaset'])) {
+            foreach($config['replicaset']['members'] as $member) {
+                $hosts[] = $member['host'] . ':' . $member['port'];
+            }
+            $replicaset_option = '?replicaSet=' . $config['replicaset']['name'];
+        }
+
+        $hostname = implode(',', $hosts);
         if(empty($config['login'])){
-            $host .= $hostname;
+            $host .= $hostname . '/' . $replicaset_option;
         } else {
-            $host .= $config['login'] .':'. $config['password'] . '@' . $hostname . '/'. $config['database'];
+            $host .= $config['login'] .':'. $config['password'] . '@' . $hostname . '/'. $config['database'] . $replicaset_option;
         }
 
         return $host;
+    }
+
+    public function validateReplicaSet($replicaset)
+    {
+        if(count($replicaset) !== 2 || !isset($replicaset['members']) || !isset($replicaset['name'])) {
+            return false;
+        }
+
+        foreach($replicaset['members'] as $member) {
+            if(empty($member['host']) || empty($member['port'])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -135,14 +165,16 @@ class Ox_MongoSource
         try{
             $host = $this->createConnectionName($this->_config, $this->_driverVersion);
 
-            if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
-                $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
-            } else if ($this->_driverVersion >= '1.3.0') {
+            if ($this->_driverVersion >= '1.3.0') {
                 $this->_connection = new MongoClient($host);
-            } else if ($this->_driverVersion >= '1.2.0') {
-                $this->_connection = new Mongo($host);
             } else {
-                $this->_connection = new Mongo($host, true, $this->_config['persistent']);
+                if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
+                    $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
+                } else if ($this->_driverVersion >= '1.2.0') {
+                    $this->_connection = new Mongo($host);
+                } else {
+                    $this->_connection = new Mongo($host, true, $this->_config['persistent']);
+                }
             }
 
             if (isset($this->_config['slaveok'])) {
