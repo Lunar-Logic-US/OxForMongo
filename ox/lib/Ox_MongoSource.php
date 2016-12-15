@@ -86,7 +86,7 @@ class Ox_MongoSource
             $host = "mongodb://";
         }
 
-        if(!empty($config['replicaset']) && $version >= '1.3.0' && !$this->validateReplicaSet($config['replicaset'])) {
+        if(isset($config['replicaset']) && $version >= '1.3.0' && !$this->validateReplicaSet($config['replicaset'])) {
             throw new Ox_MongoSourceException('Incorrect replicaset format in app.php');
             return false;
         }
@@ -94,7 +94,7 @@ class Ox_MongoSource
         $hosts = array($config['host'] . ':' . $config['port']);
         $replicaset_option = '';
 
-        if(!empty($config['replicaset'])) {
+        if(isset($config['replicaset'])) {
             foreach($config['replicaset']['members'] as $member) {
                 $hosts[] = $member['host'] . ':' . $member['port'];
             }
@@ -113,7 +113,7 @@ class Ox_MongoSource
 
     public function validateReplicaSet($replicaset)
     {
-        if(count($replicaset) !== 2 || !isset($replicaset['members']) || !isset($replicaset['name'])) {
+        if(count($replicaset) !== 2 || !is_array($replicaset['members']) || empty($replicaset['name'])) {
             return false;
         }
 
@@ -182,9 +182,9 @@ class Ox_MongoSource
             }
 
             if ($this->_db = $this->_connection->selectDB($this->_config['database'])) {
-                if (!empty($this->_config['login']) && $this->_driverVersion < '1.2.0') {
+                if (isset($this->_config['login']) && $this->_driverVersion < '1.2.0') {
                     $return = $this->_db->authenticate($this->_config['login'], $this->_config['password']);
-                        if (!$return || !$return['ok']) {
+                        if (empty($return) || empty($return['ok'])) {
                             Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
                             throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
                             return false;
@@ -281,7 +281,7 @@ class Ox_MongoSource
     public function getCollection($collection)
     {
         $this->connect();
-        if (!isset($this->_collectionCache[$collection])) {
+        if (empty($this->_collectionCache[$collection])) {
             $this->_collectionCache[$collection] = new Ox_MongoCollection( $this->_db->$collection );
         }
         return $this->_collectionCache[$collection];
