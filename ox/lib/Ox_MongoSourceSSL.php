@@ -116,9 +116,9 @@ class Ox_MongoSourceSSL extends Ox_MongoSource
             }
 
             if ($this->_db = $this->_connection->selectDB($this->_config['database'])) {
-                if (!empty($this->_config['login']) && $this->_driverVersion < '1.2.0') {
+                if (isset($this->_config['login']) && $this->_driverVersion < '1.2.0') {
                     $return = $this->_db->authenticate($this->_config['login'], $this->_config['password']);
-                    if (!$return || !$return['ok']) {
+                    if (empty($return) || empty($return['ok'])) {
                         Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
                         throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
                         return false;
