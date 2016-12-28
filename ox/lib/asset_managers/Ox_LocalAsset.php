@@ -51,9 +51,9 @@ class LocalAsset extends Ox_Asset
      * @param $fieldName string
      * @return array|bool|null (the uploaded asset record)
      */
-    public function save($file_info,$fieldName='file')
+    public function save($file_info, $fieldName = 'file', array $extra_fields = array())
     {
-        $doc = parent::save($file_info,$fieldName);
+        $doc = parent::save($file_info, $fieldName, $extra_fields);
         if(empty($doc)) {
             return false;
         }
