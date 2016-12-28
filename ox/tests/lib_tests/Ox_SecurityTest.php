@@ -96,6 +96,11 @@ APP_CONFIG_FILE;
         $security = new Ox_SecurityMongoCollection();
         $this->assertFalse($security->authenticateUser($user, 'admin'));
     }
+
+    public function testAuthenticateUserNulls() {
+        $security = new Ox_SecurityMongoCollection();
+        $this->assertFalse($security->authenticateUser(null, null));
+    }
     
     public function testIsPublicPass() {
         $security = new Ox_SecurityMongoCollection();
