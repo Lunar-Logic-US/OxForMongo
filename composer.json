@@ -1,7 +1,4 @@
 {
     "name": "lunar/ox",
     "description": "Flexible, Lightweight PHP Framework that is designed to work with MongoDB.",
-    "require": {
-        "php": "5.3 - 5.5"
-    }
 }
