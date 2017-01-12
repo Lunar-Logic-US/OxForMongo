@@ -1,0 +1,10 @@
+image: asteris/apache-php-mongo
+
+before_script:
+# Install dependencies
+- bash ci/docker_install.sh > /dev/null
+- bash ci/composer_install.sh > /dev/null
+
+test:app:
+  script:
+  - phpunit ox/tests --color --coverage-text
