@@ -92,10 +92,6 @@ JS;
 
             $file = $js_file;
             $url = Ox_Router::buildURL($js_options['directory'].$file);
-            if (strpos($url, '://') == false && strlen($this->_pageBase) == 0) {
-                Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
-                $url = WidgetHelper::addCacheBuster($url);
-            }
             //$directory = $appWebBase . $js_options['directory'];
             $output .= "<script src=\"{$url}\"{$type}{$charset}></script>\n";
         }
