@@ -66,12 +66,7 @@ class CSS implements Ox_Widget {
             $file = $css_file;
 
             $directory = $appWebBase . $css_options['directory'];
-            $url = Ox_Router::buildURL($css_options['directory'].$file);
-            if (strpos($url, '://') == false) {
-                Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
-                $url = WidgetHelper::addCacheBuster($url);
-            }
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$url}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
         }
 
         foreach ($this->_css_override_list as $css_file => $css_options) {
@@ -82,12 +77,7 @@ class CSS implements Ox_Widget {
             $file = $css_file;
 
             $directory = $appWebBase . $css_options['directory'];
-            $url = Ox_Router::buildURL($css_options['directory'].$file);
-            if (strpos($url, '://') == false) {
-                Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
-                $url = WidgetHelper::addCacheBuster($url);
-            }
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$url}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
         }
 
         if ($return_string === FALSE) {
