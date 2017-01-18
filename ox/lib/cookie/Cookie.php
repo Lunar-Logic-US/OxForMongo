@@ -4,10 +4,6 @@ namespace ox\lib;
 
 class Cookie
 {
-    /*
-     * bool setcookie ( string $name [, string $value = "" [, int $expire = 0 [, string $path = "" [, string $domain = "" [, bool $secure = false [, bool $httponly = false ]]]]]] )
-     */
-
     private $name;
     private $value;
     private $expires;
@@ -48,6 +44,30 @@ class Cookie
     }
 
     /**
+     * @return string
+     */
+    public function getExpires()
+    {
+        return $this->expires;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
      * @return bool
      */
     public function isSecure()
@@ -55,21 +75,11 @@ class Cookie
         return true;
     }
 
-    public static function sendRequestCookie($name)
+    /**
+     * @return bool
+     */
+    public function isHttpOnly()
     {
-        setcookie(
-            $this->name,
-            $this->value,
-            $this->expires,
-            $this->path,
-            $this->domain,
-            true, // secure
-            true  // httponly
-        );
-    }
-
-    public static function readRequestCookie($name)
-    {
-        return $_COOKIE[$name];
+        return true;
     }
 }

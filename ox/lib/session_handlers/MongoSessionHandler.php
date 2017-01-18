@@ -47,31 +47,22 @@ class MongoSessionHandler implements
         $db = \Ox_LibraryLoader::db();
 
         // Save a reference to the session collection
-        $this->collection = $db->${COLLECTION_NAME};
+        $this->collection = $db->getCollection(COLLECTION_NAME);
 
-        // TODO: set session ID
-        // TODO: set cookie
-        $this->$session_id = new MongoId();
+        // Check for an existing session ID (received in a cookie)
+        $this->session_id = ox\lib\cookie\CookieManager::getCookieValue($session_name);
 
-        // Check for an existing session cookie
-        $cookie = null;
-        $cookie = ox\lib\Cookie::get($session_name);
-
-        // If there is an existing session cookie
-        if (isset($cookie)) {
-            $this->session_id = $cookie->getValue();
-        } else {
-            // If there is no existing session cookie, generate a new one
+        // If there is no existing session ID, generate a new one
+        if (!isset($this->session_id)) {
             $this->session_id = new MongoId();
-
-            $cookie = new ox\lib\Cookie(
-                $session_name,
-                $this->session_id
-            );
         }
 
-        // Send the cookie for this response
-        $cookie->send();
+        // Create and set a cookie to be sent in the response
+        $cookie = new ox\lib\cookie\Cookie(
+            $session_name,
+            $this->session_id
+        );
+        ox\lib\cookie\CookieManager::set($cookie);
     }
 
     /**
@@ -107,7 +98,7 @@ class MongoSessionHandler implements
         ];
         $fields = [$key => true];
 
-        $this->db->findOne($query, $fields);
+        $this->collection->findOne($query, $fields);
     }
 
     /**
@@ -151,23 +142,5 @@ class MongoSessionHandler implements
         } else {
             return false;
         }
-    }
-
-    private function setCookie()
-    {
-        //$_COOKIE[$this->session_id];
-
-        if (ini_get('session.use_cookies') && headers_sent($file, $line)) {
-            throw new ox\lib\exceptions\SessionException(
-                sprintf(
-                    'Session cannot be opened because cookies were already '
-                    . 'sent in file "%s" on line $line',
-                    $file,
-                    $line
-                )
-            );
-        }
-
-        setcookie($cookie);
     }
 }
