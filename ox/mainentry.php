@@ -79,15 +79,28 @@ if (!defined('OX_FRAME_EXCEPTIONS')) {
      */
     define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
 }
+if (!defined('OX_FRAME_TRAITS')) {
+    // Framework default traits
+    define('OX_FRAME_TRAITS', DIR_FRAMELIB . 'traits' . DIRECTORY_SEPARATOR);
+}
+if (!defined('OX_FRAME_SESSIONHANDLERS')) {
+    // Framework default session handlers
+    define(
+        'OX_FRAME_SESSIONHANDLERS',
+        DIR_FRAMELIB . 'session_handlers' . DIRECTORY_SEPARATOR
+    );
+}
 
 //---------------------------
 //Initialize Base Objects
 //---------------------------
-require_once(OX_FRAMEINTERFACE  . 'Ox_Routable.php');
+require_once(OX_FRAMEINTERFACE . 'Ox_Routable.php');
 require_once(DIR_FRAMELIB . 'Ox_LibraryLoader.php');
 require_once(DIR_FRAMELIB . 'Ox_Logger.php');
 Ox_LibraryLoader::loadAll(OX_FRAME_EXCEPTIONS);
 Ox_LibraryLoader::loadAll(OX_FRAMEINTERFACE);
+Ox_LibraryLoader::loadAll(OX_FRAME_TRAITS);
+Ox_LibraryLoader::loadAll(OX_FRAME_SESSIONHANDLERS);
 
 //TODO:To be moved out of here.
 require_once(DIR_FRAMELIB . 'Ox_Asset.php');
@@ -104,8 +117,8 @@ global $user;  //added for unit test which this needs to be forced in the global
 Ox_LibraryLoader::load('config_parser','Ox_ConfigPHPParser',FALSE);
 Ox_LibraryLoader::load('widget_handler','Ox_WidgetHandler');
 if (DEBUG_BOOT) Ox_Logger::logDebug("*****************Loading Page: " .$_SERVER['REQUEST_URI']);
-Ox_LibraryLoader::load('session','Ox_Session');
-Ox_LibraryLoader::load('db','Ox_MongoSource',FALSE);
+Ox_LibraryLoader::load('db', 'Ox_MongoSource', false);
+Ox_LibraryLoader::load('session', 'ox\lib\session_handlers\MongoSessionHandler');
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
 Ox_LibraryLoader::load('hook','Ox_Hook',TRUE);

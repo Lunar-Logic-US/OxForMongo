@@ -247,7 +247,7 @@ class Ox_LibraryLoader
      * <ul>
      * <li>The file should have the same name as the class and should be in the app/lib directory.</li>
      * <li>Application classes must be unique.</li>
-     * <li>In order to be a singleton, the class must have method getInstance() to initialize it.</li>
+     * <li>In order to be a singleton, the class must use the Singleton trait.</li>
      * </ul>
      *
      * @static
