@@ -90,6 +90,12 @@ if (!defined('OX_FRAME_SESSIONHANDLERS')) {
         DIR_FRAMELIB . 'session_handlers' . DIRECTORY_SEPARATOR
     );
 }
+if (!defined('OX_FRAME_HTTP')) {
+    define(
+        'OX_FRAME_HTTP',
+        DIR_FRAMELIB . 'http' . DIRECTORY_SEPARATOR
+    );
+}
 
 //---------------------------
 //Initialize Base Objects
@@ -101,6 +107,7 @@ Ox_LibraryLoader::loadAll(OX_FRAME_EXCEPTIONS);
 Ox_LibraryLoader::loadAll(OX_FRAMEINTERFACE);
 Ox_LibraryLoader::loadAll(OX_FRAME_TRAITS);
 Ox_LibraryLoader::loadAll(OX_FRAME_SESSIONHANDLERS);
+Ox_LibraryLoader::loadAll(OX_FRAME_HTTP);
 
 //TODO:To be moved out of here.
 require_once(DIR_FRAMELIB . 'Ox_Asset.php');
@@ -118,7 +125,10 @@ Ox_LibraryLoader::load('config_parser','Ox_ConfigPHPParser',FALSE);
 Ox_LibraryLoader::load('widget_handler','Ox_WidgetHandler');
 if (DEBUG_BOOT) Ox_Logger::logDebug("*****************Loading Page: " .$_SERVER['REQUEST_URI']);
 Ox_LibraryLoader::load('db', 'Ox_MongoSource', false);
+
 Ox_LibraryLoader::load('session', 'ox\lib\session_handlers\MongoSessionHandler');
+session_start();
+
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
 Ox_LibraryLoader::load('hook','Ox_Hook',TRUE);

@@ -13,6 +13,12 @@ class MongoSessionHandler implements
     private $collection;
     private $session_id;
 
+    public function __construct()
+    {
+        \Ox_Logger::logDebug('bunny: constructor');
+        session_set_save_handler($this);
+    }
+
     /**
      * @return bool
      */
@@ -43,26 +49,28 @@ class MongoSessionHandler implements
      */
     public function open($save_path, $session_name)
     {
+        \Ox_Logger::logDebug('bunny: session opened');
+
         // Establish a database connection
         $db = \Ox_LibraryLoader::db();
 
         // Save a reference to the session collection
-        $this->collection = $db->getCollection(COLLECTION_NAME);
+        $this->collection = $db->getCollection(self::COLLECTION_NAME);
 
         // Check for an existing session ID (received in a cookie)
-        $this->session_id = ox\lib\cookie\CookieManager::getCookieValue($session_name);
+        $this->session_id = \ox\lib\http\CookieManager::getCookieValue($session_name);
 
         // If there is no existing session ID, generate a new one
         if (!isset($this->session_id)) {
-            $this->session_id = new MongoId();
+            $this->session_id = new \MongoId();
         }
 
         // Create and set a cookie to be sent in the response
-        $cookie = new ox\lib\cookie\Cookie(
+        $cookie = new \ox\lib\http\Cookie(
             $session_name,
             $this->session_id
         );
-        ox\lib\cookie\CookieManager::set($cookie);
+        \ox\lib\http\CookieManager::set($cookie);
     }
 
     /**
@@ -123,6 +131,15 @@ class MongoSessionHandler implements
                 )
             );
         }
+    }
+
+    /**
+     * Reset the time remaining.
+     *
+     * @deprecated
+     */
+    public function update()
+    {
     }
 
 

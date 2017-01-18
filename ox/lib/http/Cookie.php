@@ -1,6 +1,6 @@
 <?php
 
-namespace ox\lib;
+namespace ox\lib\http;
 
 class Cookie
 {

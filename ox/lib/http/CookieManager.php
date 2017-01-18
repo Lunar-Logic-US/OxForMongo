@@ -1,6 +1,6 @@
 <?php
 
-namespace ox\lib\cookie;
+namespace ox\lib\http;
 
 class CookieManager
 {
@@ -26,7 +26,7 @@ class CookieManager
      */
     public static function getCookieValue($name)
     {
-        if (isset($_COOKIE, $name)) {
+        if (isset($_COOKIE[$name])) {
             return $_COOKIE[$name];
         } else {
             return null;
