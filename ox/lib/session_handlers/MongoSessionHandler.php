@@ -2,54 +2,48 @@
 
 namespace ox\lib\session_handlers;
 
-class MongoSessionHandler implements
-    \SessionHandlerInterface,
-    \ox\lib\interfaces\KeyValueStore
+class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
 {
     use \ox\lib\traits\Singleton;
 
-    const COLLECTION_NAME = 'session';
+    const COLLECTION_NAME = 'ox_session';
+    const SESSION_TIMESTAMP_KEY = 'timestamp';
+    const GC_ID = 'garbage_collection';
+    const GC_TIMESTAMP_KEY = 'last_performed';
 
     private $collection;
-    private $session_id;
+    private $gc_period = 10;
+    private $gc_max_session_age = 60;
+    private $session_id; // MongoId
 
     public function __construct()
     {
-        \Ox_Logger::logDebug('bunny: constructor');
-        session_set_save_handler($this);
+        \Ox_Logger::logDebug('MongoSessionHandler: constructor');
     }
 
     /**
      * @return bool
      */
-    public function close()
-    {
-    }
+    //public function close()
+    //{
+    //}
 
     /**
      * @param string $session_id
      * @return bool
      */
-    public function destroy($session_id)
-    {
-    }
-
-    /**
-     * @param int $maxlifetime
-     * @return bool
-     */
-    public function gc($maxlifetime)
-    {
-    }
+    //public function destroy($session_id)
+    //{
+    //}
 
     /**
      * @param string $save_path
      * @param string $session_name
      * @return bool
      */
-    public function open($save_path, $session_name)
+    public function open($session_name)
     {
-        \Ox_Logger::logDebug('bunny: session opened');
+        \Ox_Logger::logDebug('MongoSessionHandler: session opened');
 
         // Establish a database connection
         $db = \Ox_LibraryLoader::db();
@@ -58,7 +52,23 @@ class MongoSessionHandler implements
         $this->collection = $db->getCollection(self::COLLECTION_NAME);
 
         // Check for an existing session ID (received in a cookie)
-        $this->session_id = \ox\lib\http\CookieManager::getCookieValue($session_name);
+        $id = \ox\lib\http\CookieManager::getCookieValue($session_name);
+        if (isset($id)) {
+            \Ox_Logger::logDebug("MongoSessionHandler: received existing cookie");
+
+            if (\MongoId::isValid($id)) {
+                $this->session_id = new \MongoId($id);
+            } else {
+                \Ox_Logger::logDebug(
+                    sprintf(
+                        "MongoSessionHandler: cookie's existing session id is not valid: '%s'",
+                        $id
+                    )
+                );
+            }
+        } else {
+            \Ox_Logger::logDebug("MongoSessionHandler: no cookie was received");
+        }
 
         // If there is no existing session ID, generate a new one
         if (!isset($this->session_id)) {
@@ -68,32 +78,32 @@ class MongoSessionHandler implements
         // Create and set a cookie to be sent in the response
         $cookie = new \ox\lib\http\Cookie(
             $session_name,
-            $this->session_id
+            $this->session_id->__toString(),
+            0,
+            '/'
         );
         \ox\lib\http\CookieManager::set($cookie);
+
+        $this->updateTimestamp();
+        $this->checkGarbage();
     }
 
-    /**
-     * @param string $session_id
-     * @return string
-     */
-    public function read($session_id)
-    {
-        //$query = [
-        //    '_id' => $session_id,
-        //];
+    ///**
+    // * @param string $session_id
+    // * @return string
+    // */
+    //public function read($session_id)
+    //{
+    //}
 
-        //$this->collection->findOne($query);
-    }
-
-    /**
-     * @param string $session_id
-     * @param string $session_data
-     * @return bool
-     */
-    public function write($session_id, $session_data)
-    {
-    }
+    ///**
+    // * @param string $session_id
+    // * @param string $session_data
+    // * @return bool
+    // */
+    //public function write($session_id, $session_data)
+    //{
+    //}
 
     /**
      * @param string $key
@@ -101,12 +111,37 @@ class MongoSessionHandler implements
      */
     public function get($key)
     {
-        $query = [
-            '_id' => $this->session_id,
-        ];
-        $fields = [$key => true];
+        $this->throwIfUnopened();
 
-        $this->collection->findOne($query, $fields);
+        \Ox_Logger::logDebug(
+            sprintf(
+                'MongoSessionHandler: get "%s"',
+                $key
+            )
+        );
+        \Ox_Logger::logDebug(
+            sprintf(
+                'MongoSessionHandler: session_id: "%s"',
+                $this->session_id
+            )
+        );
+
+        if (self::keyIsValid($key)) {
+            $query = [
+                '_id' => new \MongoId($this->session_id)
+            ];
+            $fields = [
+                "variables.$key" => true
+            ];
+
+            $doc = $this->collection->findOne($query, $fields);
+
+            if (isset($doc["variables"][$key])) {
+                return $doc["variables"][$key];
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -116,13 +151,38 @@ class MongoSessionHandler implements
      */
     public function set($key, $value)
     {
-        if (keyIsValid($key)) {
-            $query = [
-                '_id' => $this->session_id,
-                $key
+        $this->throwIfUnopened();
+
+        \Ox_Logger::logDebug(
+            sprintf(
+                'MongoSessionHandler: set "%s" = "%s"',
+                $key,
+                $value
+            )
+        );
+        \Ox_Logger::logDebug(
+            sprintf(
+                'MongoSessionHandler: session_id: "%s"',
+                $this->session_id
+            )
+        );
+
+        if (self::keyIsValid($key)) {
+            $criteria = [
+                '_id' => new \MongoId($this->session_id)
             ];
 
-            $this->collection->upsert($query);
+            $new_object = [
+                '$set' => [
+                    "variables.$key" => $value
+                ]
+            ];
+
+            $options = [
+                'upsert' => true
+            ];
+
+            $this->collection->update($criteria, $new_object, $options);
         } else {
             throw new ox\lib\exceptions\SessionException(
                 sprintf(
@@ -134,7 +194,7 @@ class MongoSessionHandler implements
     }
 
     /**
-     * Reset the time remaining.
+     * Reset the time remaining.  This is here temporarily for compatibility.
      *
      * @deprecated
      */
@@ -154,10 +214,99 @@ class MongoSessionHandler implements
     {
         if (is_string($key)
             && strpos($key, '.') === false
-            && strpos($key, '$') === false) {
+            && strpos($key, '$') === false
+            && strpos($key, ' ') === false) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * Perform garbage collection for expired sessions.
+     *
+     * @return bool True if garbage was collected
+     */
+    private function checkGarbage()
+    {
+        $cutoff = time() - $this->gc_period;
+
+        $query = ['_id' => self::GC_ID];
+        $doc = $this->collection->findOne($query);
+
+        if (isset($doc[self::GC_TIMESTAMP_KEY])) {
+            $lastPerformed = $doc[self::GC_TIMESTAMP_KEY]->sec;
+        } else {
+            $lastPerformed = 0;
+        }
+
+        // If there is no document, or if garbage collection has not been
+        // performed in a long time
+        if ($lastPerformed <= $cutoff) {
+            $this->collectGarbage();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Perform garbage collection for expired sessions.
+     *
+     * @return void
+     */
+    private function collectGarbage()
+    {
+        \Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
+
+        // Remove sessions older than gc_max_session_age
+        $cutoff = time() - $this->gc_max_session_age;
+        $criteria = [
+            self::SESSION_TIMESTAMP_KEY => ['$lte' => new \MongoDate($cutoff)]
+        ];
+        $this->collection->remove($criteria);
+
+        // Record that we last collected garbage right now
+        $now = time();
+        $criteria = ['_id' => self::GC_ID];
+        $new_object = [
+            '$set' => [
+                self::GC_TIMESTAMP_KEY => new \MongoDate($now)
+            ]
+        ];
+        $options = ['upsert' => true];
+        $this->collection->update($criteria, $new_object, $options);
+    }
+
+    /**
+     * Throw if the session has not been opened.
+     * @throws SessionException
+     */
+    private function throwIfUnopened()
+    {
+        if (!isset($this->session_id)) {
+            throw new ox\lib\exceptions\SessionException(
+                'MongoSessionHandler: Session has not been opened yet'
+            );
+        }
+    }
+
+    /**
+     * Update the timestamp for the current session.  The timestamp is used to
+     * find expired sessions when performing garbage collection.
+     *
+     * @return void
+     */
+    private function updateTimestamp()
+    {
+        $now = time();
+        $criteria = ['_id' => new \MongoId($this->session_id)];
+        $new_object = [
+            '$set' => [
+                self::SESSION_TIMESTAMP_KEY => new \MongoDate($now)
+            ]
+        ];
+        $options = ['upsert' => true];
+        $this->collection->update($criteria, $new_object, $options);
     }
 }

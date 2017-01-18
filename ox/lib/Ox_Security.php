@@ -226,7 +226,8 @@ class Ox_Security
      */
     public function loginUser($user=null)
     {
-        $this->session->start();
+        //$this->session->start();
+
         //$this->session->set('user_id', $this->user->getIdString());
         if ($user===null) {
             //@TODO: Make sure this doesn't break backwards compatibility otherwise change implementation to use string.
