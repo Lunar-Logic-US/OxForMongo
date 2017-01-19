@@ -15,11 +15,6 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
-
 namespace ox\tests;
 
 use \ox\lib\exceptions\SessionException;
@@ -33,9 +28,10 @@ require_once(
 
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
+    const TEST_SESSION_NAME = 'TEST_SESSION';
     const TEST_KEY = 'test_key';
     const TEST_VALUE = 'test_value';
-    const TEST_SESSION_NAME = 'TEST_SESSION';
+    const TEST_NONEXISTENT_KEY = 'test_nonexistent_key';
 
     const UNOPENED_NO_EXCEPTION_MESSAGE =
         'No exception was thrown when calling %s() on an unopened session.';
@@ -88,13 +84,13 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $this->session->setMongoSource($this->mockOxMongoSource);
     }
 
-    /**
-     * @test
-     */
     public function testThrowOnCloseIfUnopened()
     {
         try {
+            // Attempt to close an unopened session
             $this->session->close();
+
+            // If we got this far, fail the test
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'close'));
         } catch (SessionException $exception) {
             $this->assertEquals(
@@ -107,7 +103,10 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     public function testThrowOnGetIfUnopened()
     {
         try {
+            // Attempt to get a session variable on an unopened session
             $this->session->get(self::TEST_KEY);
+
+            // If we got this far, fail the test
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'get'));
         } catch (SessionException $exception) {
             $this->assertEquals(
@@ -120,7 +119,10 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     public function testThrowOnSetIfUnopened()
     {
         try {
+            // Attempt to set a session variable on an unopened session
             $this->session->set(self::TEST_KEY, self::TEST_VALUE);
+
+            // If we got this far, fail the test
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'set'));
         } catch (SessionException $exception) {
             $this->assertEquals(
@@ -138,8 +140,10 @@ class SessionTest extends \PHPUnit_Framework_TestCase
             self::$TEST_INVALID_KEY_3
         ];
 
+        // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
 
+        // Make sure each invalid key throws an exception
         foreach ($invalidKeys as $key) {
             try {
                 $this->session->set($key, self::TEST_VALUE);
@@ -156,5 +160,17 @@ class SessionTest extends \PHPUnit_Framework_TestCase
                 );
             }
         }
+    }
+
+    public function testGetNonexistentKey()
+    {
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Attempt to get a nonexistent key
+        $value = $this->session->get(self::TEST_NONEXISTENT_KEY);
+
+        // Verify that the value returned is null
+        $this->assertEquals(null, $value);
     }
 }

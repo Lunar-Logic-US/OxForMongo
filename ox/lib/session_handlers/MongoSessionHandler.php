@@ -19,8 +19,7 @@ class MongoSessionHandler implements
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
 
-    const UNOPENED_EXCEPTION_MESSAGE =
-        'MongoSessionHandler: Session has not been opened yet';
+    const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
 
     private $collection;
@@ -169,7 +168,7 @@ class MongoSessionHandler implements
             '_id' => new \MongoId($this->session_id)
         ];
         $fields = [
-            self::SESSION_VARIABLES_KEY . '.' . $key => true
+            self::buildSessionVariableKey($key) => true
         ];
 
         $doc = $this->collection->findOne($query, $fields);
@@ -198,7 +197,7 @@ class MongoSessionHandler implements
         ];
         $new_object = [
             '$set' => [
-                self::SESSION_VARIABLES_KEY . '.' . $key => $value
+                self::buildSessionVariableKey($key) => $value
             ]
         ];
         $options = [
@@ -219,6 +218,20 @@ class MongoSessionHandler implements
     /*************************************************************************/
     // Private Functions
     /*************************************************************************/
+
+    /**
+     * Return the properly formatted key to use for a session variable
+     *
+     * @return string
+     */
+    private static function buildSessionVariableKey($key)
+    {
+        return sprintf(
+            '%s.%s',
+            self::SESSION_VARIABLES_KEY,
+            $key
+        );
+    }
 
     /**
      * Determine whether a given key is a valid key name for storage in Mongo
