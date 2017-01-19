@@ -18,16 +18,16 @@
  * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
  */
 
-namespace ox\lib\interfaces;
+namespace ox\lib\abstract_classes;
 
-interface SessionHandler
+abstract class SessionHandler implements \ox\lib\interfaces\KeyValueStore
 {
     /**
      * Close the session, destroying it.
      *
      * @return bool True if the session was successfully destroyed
      */
-    public function close();
+    abstract public function close();
 
     /**
      * Open the session.  This must be called before calling any other methods.
@@ -35,5 +35,5 @@ interface SessionHandler
      * @param string $session_name
      * @return bool
      */
-    public function open($session_name);
+    abstract public function open($session_name);
 }

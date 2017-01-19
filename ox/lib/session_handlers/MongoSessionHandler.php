@@ -7,9 +7,7 @@ use \ox\lib\exceptions\SessionException;
 use \Ox_Logger;
 use \Ox_LibraryLoader;
 
-class MongoSessionHandler implements
-    \ox\lib\interfaces\SessionHandler,
-    \ox\lib\interfaces\KeyValueStore
+class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 {
     use \ox\lib\traits\Singleton;
 

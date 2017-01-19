@@ -62,9 +62,19 @@ if (!defined('DIR_LAYOUTS')) {
 
 if (!defined('OX_FRAMEINTERFACE')) {
     /**
-     * Framework interface locations, can be set in framework.php
+     * Framework interface location; can be set in framework.php
      */
     define ('OX_FRAMEINTERFACE', DIR_FRAMELIB . 'interfaces' . DIRECTORY_SEPARATOR);
+}
+
+if (!defined('OX_FRAME_ABSTRACTCLASSES')) {
+    /**
+     * Framework abstract class location; can be set in framework.php
+     */
+    define(
+        'OX_FRAME_ABSTRACTCLASSES',
+        DIR_FRAMELIB . 'abstract_classes' . DIRECTORY_SEPARATOR
+    );
 }
 
 if (!defined('OX_FRAME_DEFAULT')) {
@@ -73,16 +83,19 @@ if (!defined('OX_FRAME_DEFAULT')) {
      */
     define ('OX_FRAME_DEFAULT', DIR_FRAMEWORK . 'default' . DIRECTORY_SEPARATOR);
 }
+
 if (!defined('OX_FRAME_EXCEPTIONS')) {
     /**
      * Framework default exceptions
      */
     define ('OX_FRAME_EXCEPTIONS', DIR_FRAMELIB . 'exceptions' . DIRECTORY_SEPARATOR);
 }
+
 if (!defined('OX_FRAME_TRAITS')) {
     // Framework default traits
     define('OX_FRAME_TRAITS', DIR_FRAMELIB . 'traits' . DIRECTORY_SEPARATOR);
 }
+
 if (!defined('OX_FRAME_SESSIONHANDLERS')) {
     // Framework default session handlers
     define(
@@ -90,6 +103,7 @@ if (!defined('OX_FRAME_SESSIONHANDLERS')) {
         DIR_FRAMELIB . 'session_handlers' . DIRECTORY_SEPARATOR
     );
 }
+
 if (!defined('OX_FRAME_HTTP')) {
     define(
         'OX_FRAME_HTTP',
@@ -105,6 +119,7 @@ require_once(DIR_FRAMELIB . 'Ox_LibraryLoader.php');
 require_once(DIR_FRAMELIB . 'Ox_Logger.php');
 Ox_LibraryLoader::loadAll(OX_FRAME_EXCEPTIONS);
 Ox_LibraryLoader::loadAll(OX_FRAMEINTERFACE);
+Ox_LibraryLoader::loadAll(OX_FRAME_ABSTRACTCLASSES);
 Ox_LibraryLoader::loadAll(OX_FRAME_TRAITS);
 Ox_LibraryLoader::loadAll(OX_FRAME_SESSIONHANDLERS);
 Ox_LibraryLoader::loadAll(OX_FRAME_HTTP);
