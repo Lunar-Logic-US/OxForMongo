@@ -8,33 +8,18 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
 
     const COLLECTION_NAME = 'ox_session';
     const SESSION_TIMESTAMP_KEY = 'timestamp';
+    const SESSION_VARIABLES_KEY = 'variables';
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
 
     private $collection;
-    private $gc_period = 10;
-    private $gc_max_session_age = 60;
+    private $gc_period = 3600; // 1 hour
+    private $gc_max_session_age = 86400; // 24 hours
     private $session_id; // MongoId
 
     public function __construct()
     {
-        \Ox_Logger::logDebug('MongoSessionHandler: constructor');
     }
-
-    /**
-     * @return bool
-     */
-    //public function close()
-    //{
-    //}
-
-    /**
-     * @param string $session_id
-     * @return bool
-     */
-    //public function destroy($session_id)
-    //{
-    //}
 
     /**
      * @param string $save_path
@@ -88,23 +73,6 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
         $this->checkGarbage();
     }
 
-    ///**
-    // * @param string $session_id
-    // * @return string
-    // */
-    //public function read($session_id)
-    //{
-    //}
-
-    ///**
-    // * @param string $session_id
-    // * @param string $session_data
-    // * @return bool
-    // */
-    //public function write($session_id, $session_data)
-    //{
-    //}
-
     /**
      * @param string $key
      * @return mixed
@@ -131,13 +99,13 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
                 '_id' => new \MongoId($this->session_id)
             ];
             $fields = [
-                "variables.$key" => true
+                self::SESSION_VARIABLES_KEY . '.' . $key => true
             ];
 
             $doc = $this->collection->findOne($query, $fields);
 
-            if (isset($doc["variables"][$key])) {
-                return $doc["variables"][$key];
+            if (isset($doc[self::SESSION_VARIABLES_KEY][$key])) {
+                return $doc[self::SESSION_VARIABLES_KEY][$key];
             } else {
                 return null;
             }
@@ -174,7 +142,7 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
 
             $new_object = [
                 '$set' => [
-                    "variables.$key" => $value
+                    self::SESSION_VARIABLES_KEY . '.' . $key => $value
                 ]
             ];
 
@@ -193,22 +161,16 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
         }
     }
 
-    /**
-     * Reset the time remaining.  This is here temporarily for compatibility.
-     *
-     * @deprecated
-     */
-    public function update()
-    {
-    }
-
 
     /*************************************************************************/
     // Private Functions
     /*************************************************************************/
 
     /**
-     * @return bool
+     * Determine whether a given key is a valid key name for storage in Mongo
+     * as a session variable.
+     *
+     * @return bool True if the key is valid
      */
     private function keyIsValid($key)
     {
@@ -223,7 +185,8 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     }
 
     /**
-     * Perform garbage collection for expired sessions.
+     * Check if it's time to perform garbage collection, and perform it if
+     * necessary.
      *
      * @return bool True if garbage was collected
      */
@@ -280,12 +243,13 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
 
     /**
      * Throw if the session has not been opened.
+     *
      * @throws SessionException
      */
     private function throwIfUnopened()
     {
         if (!isset($this->session_id)) {
-            throw new ox\lib\exceptions\SessionException(
+            throw new \ox\lib\exceptions\SessionException(
                 'MongoSessionHandler: Session has not been opened yet'
             );
         }
@@ -307,6 +271,7 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
             ]
         ];
         $options = ['upsert' => true];
+
         $this->collection->update($criteria, $new_object, $options);
     }
 }

@@ -152,12 +152,6 @@ class Ox_Dispatch
         if (self::$_skipRun) { return false; }
         if (!self::$_initialized) { self::_init(); }
 
-        // Do timeout checking--if timeout exceeded, end session, else, update last activity time.
-        Ox_LibraryLoader::Session()->update();
-        if (self::DEBUG) {
-            Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": session after update: " . print_r($_SESSION,1));
-        }
-
         $urlPath = self::getURLPath();
 
         if (self::DEBUG) {
