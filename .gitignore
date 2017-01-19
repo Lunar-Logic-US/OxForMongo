@@ -1,2 +1,6 @@
 # Composer vendor folder
 /vendor/
+
+# Ignore everything in the tests log folder except the .keep file
+/ox/tests/boot/tmp/log/*
+!/ox/tests/boot/tmp/log/.keep

@@ -6,7 +6,6 @@ define('DS', DIRECTORY_SEPARATOR);
 define('DIR_APP', dirname(__FILE__) . DS);
 define('DIR_FRAMEWORK', dirname(dirname(dirname(__FILE__))) . DS);
 define('DIR_FRAMELIB', DIR_FRAMEWORK . 'lib' . DS);
-define('DIR_UPLOAD', '/home/project/uploads/');
 
 // Keep dispatch from actually dispatching.
 require_once(DIR_FRAMELIB . 'Ox_Dispatch.php');

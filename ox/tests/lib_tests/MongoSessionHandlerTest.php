@@ -22,6 +22,7 @@
 
 namespace ox\tests;
 
+use \ox\lib\exceptions\SessionException;
 use \ox\lib\session_handlers\MongoSessionHandler;
 
 require_once(
@@ -45,17 +46,46 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     const INVALID_KEY_NO_EXCEPTION_MESSAGE =
         'No exception was thrown when calling %s() with an invalid key.';
 
-    /**
-     * @var MongoSessionHandler
-     */
+    /** @var MongoSessionHandler The object of the class we are testing */
     private $session;
+
+    /** @var CookieManager */
+    private $mockCookieManager;
+
+    /** @var Ox_MongoSource */
+    private $mockOxMongoSource;
+
+    /** @var Ox_MongoCollection */
+    private $mockOxMongoCollection;
 
     /**
      * @before
      */
     public function setup()
     {
+        // Create the session
         $this->session = new MongoSessionHandler();
+
+        // Create mock objects
+        $this->mockCookieManager =
+            $this->getMockBuilder('\ox\lib\http\CookieManager')
+                 ->getMock();
+        $this->mockOxMongoSource =
+            $this->getMockBuilder('\Ox_MongoSource')
+                 ->getMock();
+        $this->mockOxMongoCollection =
+            $this->getMockBuilder('\Ox_MongoCollection')
+                 ->disableOriginalConstructor()
+                 ->getMock();
+
+        // Define mock behaviors
+        $this->mockOxMongoSource
+             ->method('getCollection')
+             ->willReturn($this->mockOxMongoCollection);
+
+        // Give mock objects to the session
+        $this->session->setCookieManager($this->mockCookieManager);
+        $this->session->setMongoSource($this->mockOxMongoSource);
     }
 
     /**
@@ -66,7 +96,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         try {
             $this->session->close();
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'close'));
-        } catch (\ox\lib\exceptions\SessionException $exception) {
+        } catch (SessionException $exception) {
             $this->assertEquals(
                 MongoSessionHandler::UNOPENED_EXCEPTION_MESSAGE,
                 $exception->getMessage()
@@ -79,7 +109,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         try {
             $this->session->get(self::TEST_KEY);
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'get'));
-        } catch (\ox\lib\exceptions\SessionException $exception) {
+        } catch (SessionException $exception) {
             $this->assertEquals(
                 MongoSessionHandler::UNOPENED_EXCEPTION_MESSAGE,
                 $exception->getMessage()
@@ -92,7 +122,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         try {
             $this->session->set(self::TEST_KEY, self::TEST_VALUE);
             $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'set'));
-        } catch (\ox\lib\exceptions\SessionException $exception) {
+        } catch (SessionException $exception) {
             $this->assertEquals(
                 MongoSessionHandler::UNOPENED_EXCEPTION_MESSAGE,
                 $exception->getMessage()
@@ -108,11 +138,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
             self::$TEST_INVALID_KEY_3
         ];
 
-        $mockCookieManager = $this->getMockBuilder(
-            '\ox\lib\http\CookieManager'
-        )->getMock();
-
-        $this->session->setCookieManager($mockCookieManager);
         $this->session->open(self::TEST_SESSION_NAME);
 
         foreach ($invalidKeys as $key) {
@@ -124,7 +149,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
                         'set'
                     )
                 );
-            } catch (\ox\lib\exceptions\SessionException $exception) {
+            } catch (SessionException $exception) {
                 $this->assertEquals(
                     MongoSessionHandler::INVALID_KEY_EXCEPTION_MESSAGE,
                     $exception->getMessage()

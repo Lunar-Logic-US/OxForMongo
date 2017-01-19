@@ -2,6 +2,11 @@
 
 namespace ox\lib\session_handlers;
 
+use \ox\lib\http\CookieManager;
+use \ox\lib\exceptions\SessionException;
+use \Ox_Logger;
+use \Ox_LibraryLoader;
+
 class MongoSessionHandler implements
     \ox\lib\interfaces\SessionHandler,
     \ox\lib\interfaces\KeyValueStore
@@ -24,17 +29,43 @@ class MongoSessionHandler implements
     private $session_id; // MongoId
     private $session_name;
 
-    public function __construct()
-    {
-        // Use the default cookie manager
-        $this->setCookieManager(
-            new \ox\lib\http\CookieManager()
-        );
-    }
+    /**
+     * @var CookieManager Used for all CookieManager calls, to facilitate mocks
+     *                    in unit tests
+     */
+    private $cookieManager;
 
+    /**
+     * @var Ox_MongoSource Used for all Mongo calls, to facilitate mocks in
+     *                     unit tests
+     */
+    private $mongo;
+
+    /**
+     * Accessor method for cookieManager.  This is here to facilitate unit
+     * testing.
+     */
     public function setCookieManager($cookieManager)
     {
         $this->cookieManager = $cookieManager;
+    }
+
+    /**
+     * Accessor method for mongoSource.  This is here to facilitate unit
+     * testing.
+     */
+    public function setMongoSource($mongoSource)
+    {
+        $this->mongoSource = $mongoSource;
+    }
+
+    public function __construct()
+    {
+        // Use the default MongoSource
+        $this->setMongoSource(Ox_LibraryLoader::db());
+
+        // Use the default cookie manager
+        $this->setCookieManager(new CookieManager());
     }
 
     /**
@@ -54,7 +85,7 @@ class MongoSessionHandler implements
         $result = $this->collection->remove($criteria, $options);
 
         if (isset($result['ok']) && $result['ok']) {
-            \Ox_Logger::logDebug('MongoSessionHandler: successfully closed session');
+            Ox_Logger::logDebug('MongoSessionHandler: successfully closed session');
 
             $this->cookieManager->delete($this->session_name, '/');
             $this->session_id = null;
@@ -62,7 +93,7 @@ class MongoSessionHandler implements
 
             return true;
         } else {
-            \Ox_Logger::logDebug('MongoSessionHandler: failed to close session');
+            Ox_Logger::logDebug('MongoSessionHandler: failed to close session');
             return false;
         }
     }
@@ -76,25 +107,24 @@ class MongoSessionHandler implements
      */
     public function open($session_name)
     {
-        \Ox_Logger::logDebug('MongoSessionHandler: session opened');
+        Ox_Logger::logDebug('MongoSessionHandler: session opened');
 
         $this->session_name = $session_name;
 
-        // Establish a database connection
-        $db = \Ox_LibraryLoader::db();
-
         // Save a reference to the session collection
-        $this->collection = $db->getCollection(self::COLLECTION_NAME);
+        $this->collection = $this->mongoSource->getCollection(
+            self::COLLECTION_NAME
+        );
 
         // Check for an existing session ID (received in a cookie)
         $id = $this->cookieManager->getCookieValue($session_name);
         if (isset($id)) {
-            \Ox_Logger::logDebug("MongoSessionHandler: received existing cookie");
+            Ox_Logger::logDebug("MongoSessionHandler: received existing cookie");
 
             if (\MongoId::isValid($id)) {
                 $this->session_id = new \MongoId($id);
             } else {
-                \Ox_Logger::logDebug(
+                Ox_Logger::logDebug(
                     sprintf(
                         "MongoSessionHandler: cookie's existing session id is not valid: '%s'",
                         $id
@@ -102,7 +132,7 @@ class MongoSessionHandler implements
                 );
             }
         } else {
-            \Ox_Logger::logDebug("MongoSessionHandler: no cookie was received");
+            Ox_Logger::logDebug("MongoSessionHandler: no cookie was received");
         }
 
         // If there is no existing session ID, generate a new one
@@ -211,9 +241,7 @@ class MongoSessionHandler implements
     private static function throwOnInvalidKey($key)
     {
         if (!self::keyIsValid($key)) {
-            throw new \ox\lib\exceptions\SessionException(
-                self::INVALID_KEY_EXCEPTION_MESSAGE
-            );
+            throw new SessionException(self::INVALID_KEY_EXCEPTION_MESSAGE);
         }
     }
 
@@ -256,7 +284,7 @@ class MongoSessionHandler implements
      */
     private function collectGarbage()
     {
-        \Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
+        Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
 
         // Remove sessions older than gc_max_session_age
         $cutoff = time() - $this->gc_max_session_age;
@@ -288,9 +316,7 @@ class MongoSessionHandler implements
     private function throwIfUnopened()
     {
         if (!isset($this->session_id)) {
-            throw new \ox\lib\exceptions\SessionException(
-                self::UNOPENED_EXCEPTION_MESSAGE
-            );
+            throw new SessionException(self::UNOPENED_EXCEPTION_MESSAGE);
         }
     }
 
