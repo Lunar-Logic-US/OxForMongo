@@ -20,22 +20,20 @@
 
 namespace ox\lib\interfaces;
 
-interface KeyValueStore
+interface SessionHandler
 {
     /**
-     * Get the value for a given key.
+     * Close the session, destroying it.
      *
-     * @param $key
-     * @return mixed
+     * @return bool True if the session was successfully destroyed
      */
-    public function get($key);
+    public function close();
 
     /**
-     * Set a value.
+     * Open the session.  This must be called before calling any other methods.
      *
-     * @param $key string
-     * @param $value mixed
-     * @return bool True if the value was successfully set
+     * @param string $session_name
+     * @return bool
      */
-    public function set($key, $value);
+    public function open($session_name);
 }

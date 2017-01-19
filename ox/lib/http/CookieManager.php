@@ -10,7 +10,7 @@ class CookieManager
      * @param Cookie $cookie
      * @return bool The result of the setcookie call, i.e. true on success
      */
-    public static function set(Cookie $cookie)
+    public function set(Cookie $cookie)
     {
         return setcookie(
             $cookie->getName(),
@@ -30,7 +30,7 @@ class CookieManager
      * @param string $path The path of the cookie
      * @return bool The result of the setcookie call, i.e. true on success
      */
-    public static function delete($name, $path = '')
+    public function delete($name, $path = '')
     {
         return setcookie($name, '', time() - 86400, $path);
     }
@@ -42,7 +42,7 @@ class CookieManager
      * @return string The cookie's value, or null if no cookie has the
      *                specified name
      */
-    public static function getCookieValue($name)
+    public function getCookieValue($name)
     {
         if (isset($_COOKIE[$name])) {
             return $_COOKIE[$name];

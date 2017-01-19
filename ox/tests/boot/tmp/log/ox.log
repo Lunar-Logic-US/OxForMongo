@@ -1,0 +1,208 @@
+[19/Jan/2017:10:51:29] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:51:29] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:51:29] DEBUG MongoSessionHandler: collecting garbage
+[19/Jan/2017:10:51:29] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:51:29] DEBUG MongoSessionHandler: session_id: "58810ab127987189568b4567"
+[19/Jan/2017:10:52:24] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:52:24] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:52:24] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:52:24] DEBUG MongoSessionHandler: session_id: "58810ae82798718b568b4567"
+[19/Jan/2017:10:52:58] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:52:58] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:52:58] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:52:58] DEBUG MongoSessionHandler: session_id: "58810b0a2798718d568b4567"
+[19/Jan/2017:10:53:21] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:53:21] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:53:21] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:53:21] DEBUG MongoSessionHandler: session_id: "58810b2127987196568b4567"
+[19/Jan/2017:10:57:42] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:57:42] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:57:42] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:57:42] DEBUG MongoSessionHandler: session_id: "58810c262798719c568b4567"
+[19/Jan/2017:10:58:07] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:58:07] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:58:07] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:58:07] DEBUG MongoSessionHandler: session_id: "58810c3f279871a0568b4567"
+[19/Jan/2017:10:58:17] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:58:17] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:58:17] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:58:17] DEBUG MongoSessionHandler: session_id: "58810c49279871a4568b4567"
+[19/Jan/2017:10:58:17] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:10:59:01] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:59:01] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:59:01] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:59:01] DEBUG MongoSessionHandler: session_id: "58810c752798711c578b4567"
+[19/Jan/2017:10:59:01] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:10:59:05] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:59:05] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:59:05] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:59:05] DEBUG MongoSessionHandler: session_id: "58810c7927987120578b4567"
+[19/Jan/2017:10:59:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:10:59:16] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:10:59:16] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:10:59:16] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:10:59:16] DEBUG MongoSessionHandler: session_id: "58810c8427987124578b4567"
+[19/Jan/2017:10:59:16] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:04:05] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:04:05] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:04:05] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:04:05] DEBUG MongoSessionHandler: session_id: "58810da52798712b578b4567"
+[19/Jan/2017:11:04:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:07:36] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:07:36] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:07:36] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:07:36] DEBUG MongoSessionHandler: session_id: "58810e7827987132578b4567"
+[19/Jan/2017:11:07:36] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:11:31] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:11:31] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:11:31] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:11:31] DEBUG MongoSessionHandler: session_id: "58810f6327987145578b4567"
+[19/Jan/2017:11:11:31] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:11:31] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:12:52] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:12:52] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:12:52] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:12:52] DEBUG MongoSessionHandler: session_id: "58810fb427987149578b4567"
+[19/Jan/2017:11:12:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:12:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:12:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:20] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:13:20] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:13:20] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:13:20] DEBUG MongoSessionHandler: session_id: "58810fd02798714f578b4567"
+[19/Jan/2017:11:13:20] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:20] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:20] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:52] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:13:52] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:13:52] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:13:52] DEBUG MongoSessionHandler: session_id: "58810ff027987153578b4567"
+[19/Jan/2017:11:13:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:13:52] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:35:21] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:35:21] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:35:21] DEBUG MongoSessionHandler: get "user_id"
+[19/Jan/2017:11:35:21] DEBUG MongoSessionHandler: session_id: "588114f9279871d9578b4567"
+[19/Jan/2017:11:35:57] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:35:57] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:35:57] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:35:57] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:35:57] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:53:42] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:53:42] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:53:42] DEBUG MongoSessionHandler: collecting garbage
+[19/Jan/2017:11:53:42] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:53:42] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:53:42] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:54:05] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:11:54:05] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:11:54:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:54:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:54:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:11:54:05] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:03:24] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:03:24] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:03:24] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:03:24] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:03:24] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:04:25] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:04:25] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:04:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:04:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:04:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:04:25] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:04:25] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:22:54] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:22:54] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:22:55] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:22:55] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:22:55] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:26:34] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:26:34] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:32:44] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:32:44] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:35:37] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:35:37] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:35:54] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:35:54] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:35:54] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:35:54] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:35:54] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:36:02] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:36:02] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:36:02] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:36:02] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:36:02] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:36:02] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:37:25] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:37:25] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:37:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:37:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:37:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:37:26] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:38:17] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:38:17] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:38:17] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:38:17] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:38:17] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:38:17] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:13] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:13] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:13] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:13] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:13] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:13] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:13] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:21] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:21] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:21] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:21] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:21] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:21] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:21] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:47] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:47] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:47] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:47] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:47] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:39:47] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:39:47] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:39:47] DEBUG Ox_Exception:Key contains invalid characters: "test.key"
+[19/Jan/2017:12:40:25] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:40:25] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:40:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:25] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:25] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:40:25] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:40:25] DEBUG Ox_Exception:Key contains invalid characters: "test.key"
+[19/Jan/2017:12:40:38] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:40:38] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:40:38] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:38] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:38] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:40:38] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:40:38] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:40:38] DEBUG Ox_Exception:Key contains invalid characters: "test.key"
+[19/Jan/2017:12:40:38] DEBUG Ox_Exception:Key contains invalid characters: "test$key"
+[19/Jan/2017:12:41:44] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:41:44] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:41:44] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:44] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:44] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:44] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:41:45] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:41:45] DEBUG Ox_Exception:Key contains invalid characters
+[19/Jan/2017:12:41:45] DEBUG Ox_Exception:Key contains invalid characters
+[19/Jan/2017:12:41:45] DEBUG Ox_Exception:Key contains invalid characters
+[19/Jan/2017:12:41:58] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:41:58] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:MongoSessionHandler: Session has not been opened yet
+[19/Jan/2017:12:41:58] DEBUG MongoSessionHandler: session opened
+[19/Jan/2017:12:41:58] DEBUG MongoSessionHandler: no cookie was received
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:Key contains invalid characters
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:Key contains invalid characters
+[19/Jan/2017:12:41:58] DEBUG Ox_Exception:Key contains invalid characters

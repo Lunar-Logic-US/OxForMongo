@@ -2,15 +2,21 @@
 
 namespace ox\lib\session_handlers;
 
-class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
+class MongoSessionHandler implements
+    \ox\lib\interfaces\SessionHandler,
+    \ox\lib\interfaces\KeyValueStore
 {
     use \ox\lib\traits\Singleton;
 
     const COLLECTION_NAME = 'ox_session';
-    const SESSION_TIMESTAMP_KEY = 'timestamp';
+    const SESSION_TIMESTAMP_KEY = 'last_updated';
     const SESSION_VARIABLES_KEY = 'variables';
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
+
+    const UNOPENED_EXCEPTION_MESSAGE =
+        'MongoSessionHandler: Session has not been opened yet';
+    const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
 
     private $collection;
     private $gc_max_session_age = 86400; // 24 hours
@@ -20,6 +26,15 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
 
     public function __construct()
     {
+        // Use the default cookie manager
+        $this->setCookieManager(
+            new \ox\lib\http\CookieManager()
+        );
+    }
+
+    public function setCookieManager($cookieManager)
+    {
+        $this->cookieManager = $cookieManager;
     }
 
     /**
@@ -34,14 +49,14 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
         $criteria = ['_id' => new \MongoId($this->session_id)];
         $options = [
             'justOne' => true,
-            'w' => 1
+            'w' => 1 // Acknowledged write
         ];
         $result = $this->collection->remove($criteria, $options);
 
         if (isset($result['ok']) && $result['ok']) {
             \Ox_Logger::logDebug('MongoSessionHandler: successfully closed session');
 
-            \ox\lib\http\CookieManager::delete($this->session_name, '/');
+            $this->cookieManager->delete($this->session_name, '/');
             $this->session_id = null;
             $this->collection = null;
 
@@ -53,6 +68,8 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     }
 
     /**
+     * Open the session.  This must be called before calling any other methods.
+     *
      * @param string $save_path
      * @param string $session_name
      * @return bool
@@ -70,7 +87,7 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
         $this->collection = $db->getCollection(self::COLLECTION_NAME);
 
         // Check for an existing session ID (received in a cookie)
-        $id = \ox\lib\http\CookieManager::getCookieValue($session_name);
+        $id = $this->cookieManager->getCookieValue($session_name);
         if (isset($id)) {
             \Ox_Logger::logDebug("MongoSessionHandler: received existing cookie");
 
@@ -100,97 +117,71 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
             0,
             '/'
         );
-        \ox\lib\http\CookieManager::set($cookie);
+        $this->cookieManager->set($cookie);
 
         $this->updateTimestamp();
         $this->checkGarbage();
     }
 
     /**
-     * @param string $key
-     * @return mixed
+     * Get the value of a session variable.
+     *
+     * @param string $key The key of the session variable for which to query
+     * @return mixed The value of the session variable, or null if the given
+     *               key was not found
      */
     public function get($key)
     {
         $this->throwIfUnopened();
+        self::throwOnInvalidKey($key);
 
-        \Ox_Logger::logDebug(
-            sprintf(
-                'MongoSessionHandler: get "%s"',
-                $key
-            )
-        );
-        \Ox_Logger::logDebug(
-            sprintf(
-                'MongoSessionHandler: session_id: "%s"',
-                $this->session_id
-            )
-        );
+        $query = [
+            '_id' => new \MongoId($this->session_id)
+        ];
+        $fields = [
+            self::SESSION_VARIABLES_KEY . '.' . $key => true
+        ];
 
-        if (self::keyIsValid($key)) {
-            $query = [
-                '_id' => new \MongoId($this->session_id)
-            ];
-            $fields = [
-                self::SESSION_VARIABLES_KEY . '.' . $key => true
-            ];
+        $doc = $this->collection->findOne($query, $fields);
 
-            $doc = $this->collection->findOne($query, $fields);
-
-            if (isset($doc[self::SESSION_VARIABLES_KEY][$key])) {
-                return $doc[self::SESSION_VARIABLES_KEY][$key];
-            } else {
-                return null;
-            }
+        if (isset($doc[self::SESSION_VARIABLES_KEY][$key])) {
+            return $doc[self::SESSION_VARIABLES_KEY][$key];
+        } else {
+            return null;
         }
     }
 
     /**
+     * Set the value of a session variable.
+     *
      * @param string $key
      * @param mixed $value
-     * @return bool
+     * @return bool True if the write succeeded
      */
     public function set($key, $value)
     {
         $this->throwIfUnopened();
+        self::throwOnInvalidKey($key);
 
-        \Ox_Logger::logDebug(
-            sprintf(
-                'MongoSessionHandler: set "%s" = "%s"',
-                $key,
-                $value
-            )
-        );
-        \Ox_Logger::logDebug(
-            sprintf(
-                'MongoSessionHandler: session_id: "%s"',
-                $this->session_id
-            )
-        );
+        $criteria = [
+            '_id' => new \MongoId($this->session_id)
+        ];
+        $new_object = [
+            '$set' => [
+                self::SESSION_VARIABLES_KEY . '.' . $key => $value
+            ]
+        ];
+        $options = [
+            'upsert' => true,
+            'w' => 1 // Acknowledged write
+        ];
 
-        if (self::keyIsValid($key)) {
-            $criteria = [
-                '_id' => new \MongoId($this->session_id)
-            ];
+        $result = $this->collection->update($criteria, $new_object, $options);
 
-            $new_object = [
-                '$set' => [
-                    self::SESSION_VARIABLES_KEY . '.' . $key => $value
-                ]
-            ];
-
-            $options = [
-                'upsert' => true
-            ];
-
-            $this->collection->update($criteria, $new_object, $options);
+        if (isset($result['ok']) && $result['ok']) {
+            return true;
         } else {
-            throw new ox\lib\exceptions\SessionException(
-                sprintf(
-                    'Key contains invalid characters: "%s"',
-                    (string) $key
-                )
-            );
+            return false;
         }
     }
 
@@ -205,15 +196,24 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
      *
      * @return bool True if the key is valid
      */
-    private function keyIsValid($key)
+    private static function keyIsValid($key)
     {
         if (is_string($key)
             && strpos($key, '.') === false
             && strpos($key, '$') === false
-            && strpos($key, ' ') === false) {
+        ) {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private static function throwOnInvalidKey($key)
+    {
+        if (!self::keyIsValid($key)) {
+            throw new \ox\lib\exceptions\SessionException(
+                self::INVALID_KEY_EXCEPTION_MESSAGE
+            );
         }
     }
 
@@ -247,7 +247,10 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     }
 
     /**
-     * Perform garbage collection for expired sessions.
+     * Perform garbage collection for expired sessions.  The expired sessions
+     * are deleted using an unacknowledged write concern, because in this case
+     * performance is more important than receiving confirmation that the
+     * removal(s) took place.
      *
      * @return void
      */
@@ -260,7 +263,10 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
         $criteria = [
             self::SESSION_TIMESTAMP_KEY => ['$lte' => new \MongoDate($cutoff)]
         ];
-        $this->collection->remove($criteria);
+        $options = [
+            'w' => 0 // Unacknowledged write
+        ];
+        $this->collection->remove($criteria, $options);
 
         // Record that we last collected garbage right now
         $now = time();
@@ -283,7 +289,7 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     {
         if (!isset($this->session_id)) {
             throw new \ox\lib\exceptions\SessionException(
-                'MongoSessionHandler: Session has not been opened yet'
+                self::UNOPENED_EXCEPTION_MESSAGE
             );
         }
     }
