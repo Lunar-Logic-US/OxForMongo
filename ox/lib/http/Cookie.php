@@ -17,8 +17,8 @@ class Cookie
         $name,
         $value,
         $expires = 0,
-        $path = "",
-        $domain = ""
+        $path = '',
+        $domain = ''
     ) {
         $this->name = (string) $name;
         $this->value = $value;

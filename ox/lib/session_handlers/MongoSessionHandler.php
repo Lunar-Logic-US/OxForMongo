@@ -13,12 +13,43 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     const GC_TIMESTAMP_KEY = 'last_performed';
 
     private $collection;
-    private $gc_period = 3600; // 1 hour
     private $gc_max_session_age = 86400; // 24 hours
+    private $gc_period = 3600; // 1 hour
     private $session_id; // MongoId
+    private $session_name;
 
     public function __construct()
     {
+    }
+
+    /**
+     * Close the session, destroying it.
+     *
+     * @return bool True if the session was successfully destroyed
+     */
+    public function close()
+    {
+        $this->throwIfUnopened();
+
+        $criteria = ['_id' => new \MongoId($this->session_id)];
+        $options = [
+            'justOne' => true,
+            'w' => 1
+        ];
+        $result = $this->collection->remove($criteria, $options);
+
+        if (isset($result['ok']) && $result['ok']) {
+            \Ox_Logger::logDebug('MongoSessionHandler: successfully closed session');
+
+            \ox\lib\http\CookieManager::delete($this->session_name, '/');
+            $this->session_id = null;
+            $this->collection = null;
+
+            return true;
+        } else {
+            \Ox_Logger::logDebug('MongoSessionHandler: failed to close session');
+            return false;
+        }
     }
 
     /**
@@ -29,6 +60,8 @@ class MongoSessionHandler implements \ox\lib\interfaces\KeyValueStore
     public function open($session_name)
     {
         \Ox_Logger::logDebug('MongoSessionHandler: session opened');
+
+        $this->session_name = $session_name;
 
         // Establish a database connection
         $db = \Ox_LibraryLoader::db();
