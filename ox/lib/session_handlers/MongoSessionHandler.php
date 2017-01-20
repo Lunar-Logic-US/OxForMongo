@@ -11,7 +11,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 {
     use \ox\lib\traits\Singleton;
 
-    const COLLECTION_NAME = 'ox_session';
+    const DB_COLLECTION_NAME = 'ox_session';
     const SESSION_TIMESTAMP_KEY = 'last_updated';
     const SESSION_VARIABLES_KEY = 'variables';
     const GC_ID = 'garbage_collection';
@@ -110,7 +110,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
         // Save a reference to the session collection
         $this->collection = $this->mongoSource->getCollection(
-            self::COLLECTION_NAME
+            self::DB_COLLECTION_NAME
         );
 
         // Check for an existing session ID (received in a cookie)

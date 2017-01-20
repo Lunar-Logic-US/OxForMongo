@@ -26,7 +26,7 @@ require_once(
     . DIRECTORY_SEPARATOR . 'boot.php'
 );
 
-class SessionTest extends \PHPUnit_Framework_TestCase
+class MongoSessionHandlerTest extends \PHPUnit_Framework_TestCase
 {
     const TEST_SESSION_NAME = 'TEST_SESSION';
     const TEST_KEY = 'test_key';
@@ -57,7 +57,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     /**
      * @before
      */
-    public function setup()
+    public function setUp()
     {
         // Create the session
         $this->session = new MongoSessionHandler();

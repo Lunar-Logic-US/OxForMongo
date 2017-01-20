@@ -151,6 +151,11 @@ class Ox_MongoSource
         return true;
     }
 
+    public function dropDB($db)
+    {
+        $this->_connection->dropDB($db);
+    }
+
     /**
      * This allows real time selection of a different database in the mongo system.
      *
