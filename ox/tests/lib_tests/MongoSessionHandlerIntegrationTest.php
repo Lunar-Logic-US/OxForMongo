@@ -72,6 +72,9 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Create a new MongoSessionHandler
         $this->session = new MongoSessionHandler(self::TEST_SESSION_NAME);
 
+        // TODO: Disable garbage collection
+        //$this->session->setGarbageCollectionPeriod(-1);
+
         // Tell the MongoSessionHandler to use our test MongoSource
         $this->session->setMongoSource($this->mongoSource);
 
@@ -105,8 +108,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
              ->with($this->equalTo(self::TEST_SESSION_NAME))
              ->willReturn(self::TEST_SESSION_ID);
 
-        // TODO: Disable garbage collection
-
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
         \Ox_Logger::logDebug('opened session in test');
@@ -127,9 +128,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testOpenWithNoCookie()
     {
-        // TODO: Disable garbage collection
-        //$this->session->setGarbageCollectionPeriod(-1);
-
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
         \Ox_Logger::logDebug('opened session in test');
@@ -158,6 +156,17 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetAndGet()
     {
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+        \Ox_Logger::logDebug('opened session in test');
+
+        // Set a key to a value and verify that it was set successfully
+        $result = $this->session->set(self::TEST_KEY, self::TEST_VALUE);
+        $this->assertTrue($result);
+
+        // Read the value and verify that it is the same
+        $value = $this->session->get(self::TEST_KEY);
+        $this->assertEquals(self::TEST_VALUE, $value);
     }
 
     /**
@@ -165,5 +174,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function testGarbageCollection()
     {
+        // TODO: Enable garbage collection, since we disabled it in setUp()
+        //$this->session->setGarbageCollectionPeriod(1);
     }
 }
