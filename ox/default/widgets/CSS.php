@@ -67,9 +67,12 @@ class CSS implements Ox_Widget {
 
             $directory = $appWebBase . $css_options['directory'];
             $url = Ox_Router::buildURL($css_options['directory'].$file);
-            if (strpos($url, '://') == false) {
-                Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
-                $url = WidgetHelper::addCacheBuster($url);
+
+            if (isset($css_options['cachebust']) && $css_options['cachebust']) {
+                if (strpos($url, '://') == false) {
+                    Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
+                    $url = WidgetHelper::addCacheBuster($url);
+                }
             }
             $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$url}\" />\n";
         }
@@ -98,13 +101,29 @@ class CSS implements Ox_Widget {
     }
 
     /**
+     * Add file to the bottom of the CSS list with cache busting.
+     * This method assumes the file is located in /webroot/css/
+     *
+     * @param string $path the web path relative to /css/
+     * @param bool $media 
+     */
+    public function add_to_bottom_cachebust($path,$media=FALSE) 
+    {
+        $options = array('media'=>$media,'directory'=>'/css/','cachebust'=>TRUE);
+        $new = array($path => $options);
+        $this->_css_file_list = array_merge($new,$this->_css_file_list);
+    }
+
+    /**
      * Add file to the top of the CSS list.
      *
      * @param $file
      * @param bool $media
      * @param string $directory
+     * @deprecated
      */
-    public function add_to_top($file,$media=FALSE,$directory='/css/') {
+    public function add_to_top($file,$media=FALSE,$directory='/css/')
+    {
         $options = array('media'=>$media,'directory'=>$directory);
         if (isset($this->_css_file_list[$file])) {
             $this->_css_file_list[$file] = $options;
@@ -120,8 +139,10 @@ class CSS implements Ox_Widget {
      * @param $file
      * @param bool $media
      * @param string $directory
+     * @deprecated
      */
-    public function add_to_bottom($file,$media=FALSE,$directory='/css/') {
+    public function add_to_bottom($file,$media=FALSE,$directory='/css/') 
+    {
         $new = array($file => array('media'=>$media,'directory'=>$directory));
         //This will overwrite if the same file is used twice.
         $this->_css_file_list = array_merge($this->_css_file_list,$new);
@@ -133,8 +154,10 @@ class CSS implements Ox_Widget {
      * @param $file
      * @param bool $media
      * @param string $directory
+     * @deprecated
      */
-    public function add($file,$media=FALSE,$directory='/css/'){
+    public function add($file,$media=FALSE,$directory='/css/')
+    {
         $this->add_to_bottom($file,$media,$directory);
     }
 
@@ -144,8 +167,10 @@ class CSS implements Ox_Widget {
      * @param $file
      * @param bool $media
      * @param string $directory
+     * @deprecated
      */
-    public function add_override($file,$media=FALSE,$directory='/css/') {
+    public function add_override($file,$media=FALSE,$directory='/css/')
+    {
         $new = array($file => array('media'=>$media,'directory'=>$directory));
         //This will overwrite if the same file is used twice.
         $this->_css_override_list = array_merge($this->_css_override_list,$new);

@@ -92,9 +92,12 @@ JS;
 
             $file = $js_file;
             $url = Ox_Router::buildURL($js_options['directory'].$file);
-            if (strpos($url, '://') == false && strlen($this->_pageBase) == 0) {
-                Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
-                $url = WidgetHelper::addCacheBuster($url);
+            
+            if (isset($js_options['cachebust']) && $js_options['cachebust']) {
+                if (strpos($url, '://') == false && strlen($this->_pageBase) == 0) {
+                    Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
+                    $url = WidgetHelper::addCacheBuster($url);
+                }
             }
             //$directory = $appWebBase . $js_options['directory'];
             $output .= "<script src=\"{$url}\"{$type}{$charset}></script>\n";
@@ -144,6 +147,22 @@ JS;
     }
 
     /**
+     * Add file to the bottom of the JS list with cache busting.
+     * This method assumes the file is located in /webroot/js/
+     *
+     * @param string $path the web path relative to /js/
+     * @param bool $type 
+     * @param bool $charset
+     */
+    public function add_to_bottom_cachebust($path,$type=FALSE,$charset=FALSE)
+    {
+        $options = array('directory'=>'/js/','type'=>$type,'charset'=>$charset,'cachebust'=>TRUE);
+        $new = array($path => $options);
+        //This will overwrite if the same file is used twice.
+        $this->_js_file_list = array_merge($this->_js_file_list,$new);
+    }
+
+    /**
      * Add file to the top of the JS list.
      *
      * @param $file
@@ -152,6 +171,7 @@ JS;
      * @param bool $charset
      * @return void
      * @internal param bool $media
+     * @deprecated
      */
     public function add_to_top($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
@@ -171,6 +191,7 @@ JS;
      * @param string $directory
      * @param bool $type
      * @param bool $charset
+     * @deprecated
      */
     public function add_to_bottom($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
@@ -189,6 +210,7 @@ JS;
      * @param bool $charset
      * @return void
      * @internal param bool $media
+     * @deprecated
      */
     public function add($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
