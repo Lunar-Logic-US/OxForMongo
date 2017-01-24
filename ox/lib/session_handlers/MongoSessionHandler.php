@@ -19,11 +19,17 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
     const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
+    const INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE =
+        'Session token HMAC is invalid';
 
     private $collection;
     private $gc_max_session_age = 86400; // 24 hours
     private $gc_period = 3600; // 1 hour
-    private $session_id; // MongoId
+
+    /** @var string The unique identifier of the session */
+    private $session_id;
+
+    /** @var string The name of the cookie which stores the session token */
     private $session_name;
 
     /**
@@ -74,7 +80,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     {
         $this->throwIfUnopened();
 
-        $criteria = ['_id' => new \MongoId($this->session_id)];
+        $criteria = ['_id' => $this->session_id];
         $options = [
             'justOne' => true,
             'w' => 1 // Acknowledged write
@@ -113,34 +119,21 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
             self::DB_COLLECTION_NAME
         );
 
-        // Check for an existing session ID (received in a cookie)
-        $id = $this->cookieManager->getCookieValue($session_name);
+        $id = $this->getSessionIdFromToken();
+
+        // If an existing session ID was received in a token
         if (isset($id)) {
-            Ox_Logger::logDebug("MongoSessionHandler: received existing cookie");
-
-            if (\MongoId::isValid($id)) {
-                $this->session_id = new \MongoId($id);
-            } else {
-                Ox_Logger::logDebug(
-                    sprintf(
-                        "MongoSessionHandler: cookie's existing session id is not valid: '%s'",
-                        $id
-                    )
-                );
-            }
+            // Use the existing session ID
+            $this->session_id = $id;
         } else {
-            Ox_Logger::logDebug("MongoSessionHandler: no cookie was received");
-        }
-
-        // If there is no existing session ID, generate a new one
-        if (!isset($this->session_id)) {
-            $this->session_id = new \MongoId();
+            // Generate a new session ID
+            $this->session_id = self::generateSessionId();
         }
 
         // Create and set a cookie to be sent in the response
         $cookie = new \ox\lib\http\Cookie(
             $session_name,
-            $this->session_id->__toString(),
+            $this->generateToken(),
             0,
             '/'
         );
@@ -163,7 +156,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         self::throwOnInvalidKey($key);
 
         $query = [
-            '_id' => new \MongoId($this->session_id)
+            '_id' => $this->session_id
         ];
         $fields = [
             self::buildSessionVariableKey($key) => true
@@ -191,7 +184,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         self::throwOnInvalidKey($key);
 
         $criteria = [
-            '_id' => new \MongoId($this->session_id)
+            '_id' => $this->session_id
         ];
         $new_object = [
             '$set' => [
@@ -340,7 +333,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     private function updateTimestamp()
     {
         $now = time();
-        $criteria = ['_id' => new \MongoId($this->session_id)];
+        $criteria = ['_id' => $this->session_id];
         $new_object = [
             '$set' => [
                 self::SESSION_TIMESTAMP_KEY => new \MongoDate($now)
@@ -349,5 +342,108 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         $options = ['upsert' => true];
 
         $this->collection->update($criteria, $new_object, $options);
+    }
+
+    /**
+     * @return string Token ID if a valid existing token was received,
+     *                otherwise null
+     */
+    private function getSessionIdFromToken()
+    {
+        // Check for an existing session token (received in a cookie)
+        $rawToken = $this->cookieManager->getCookieValue($this->session_name);
+        $token = new SessionTokenParser($rawToken);
+
+        // If the token signature is valid
+        if ($this->validateTokenHmac($token)) {
+            // If this token still exists in the database
+            if (!$this->tokenExists($token->getSessionId())) {
+                // If the token is not expired
+                if (!$this->tokenIsExpired($token->getSessionId())) {
+                    // TODO: return the ID part of the token
+                    return $token->getSessionId();
+                }
+            }
+        } else {
+            throw new SessionException(
+                INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE
+            );
+        }
+
+        return null;
+    }
+
+
+    /**
+     * @param SessionTokenParser $token
+     * @return bool True if the token HMAC is valid
+     */
+    private function validateTokenHmac($token)
+    {
+        $token->getHmac();
+    }
+
+    /**
+     * @return string
+     * @todo
+     */
+    private static function generateSessionId()
+    {
+        // TODO; use a PRNG to generate a pseudo-random number which is less
+        // predictable than a MongoID.  A MongoID is used here for prototype
+        // purposes only.
+        $mongoId = new \MongoId();
+        return $mongoId->__toString();
+    }
+
+    /**
+     * Return a token which is the session ID, followed by a dot, followed by
+     * an HMAC.
+     *
+     * @return string
+     */
+    private function generateToken()
+    {
+        // TODO: get secret from app.php
+        $secret = '*whisperwhisper*';
+
+        $data = $this->session_id;
+        $hmac = hash_hmac('sha256', $data, $secret);
+
+        return sprintf(
+            '%s.%s',
+            $data,
+            $hmac
+        );
+    }
+
+    /**
+     * Compare two hashes, using a constant-time comparison to protect against
+     * timing attacks, i.e. all characters in the string are compared, without
+     * stopping early in the case of a non-matching character.
+     *
+     * @param string $hash1
+     * @param string $hash2
+     * @return bool True if the hashes match, false otherwise
+     */
+    private function compareHashes($hash1, $hash2)
+    {
+        if (!is_string($hash1) || !is_string($hash2)) {
+            return false;
+        }
+
+        // Store the length for use below in multiple places
+        $len = strllen($hash1);
+
+        if ($len != strlen($hash2)) {
+            return false;
+        }
+
+        $difference = 0;
+        for ($i = 0; $i < $len; $i++) {
+            $difference |= ord($hash1[$i]) ^ ord($hash2[$i]);
+        }
+
+        return ($difference === 0);
     }
 }

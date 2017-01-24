@@ -144,7 +144,7 @@ Ox_LibraryLoader::load('db', 'Ox_MongoSource', false);
 Ox_LibraryLoader::load('session', 'ox\lib\session_handlers\MongoSessionHandler');
 //session_start();
 $session = Ox_LibraryLoader::session();
-$session->open('OX_SESSION_ID');
+$session->open('OX_SESSION_TOKEN');
 
 Ox_LibraryLoader::load('security','Ox_SecurityMongoCollection',FALSE);
 Ox_LibraryLoader::load('dispatch','Ox_Dispatch',FALSE);
