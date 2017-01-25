@@ -19,9 +19,10 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const GC_TIMESTAMP_KEY = 'last_performed';
     const SESSION_CREATED_KEY = 'created';
     const SESSION_ID_BYTE_LENGTH = 16;
-    const TOKEN_HMAC_BYTE_LENGTH = 32;
     const SESSION_LAST_REQUEST_KEY = 'last_request';
     const SESSION_VARIABLES_KEY = 'variables';
+    const TOKEN_HMAC_ALGORITHM = 'sha256';
+    const TOKEN_HMAC_BYTE_LENGTH = 32; // tied to TOKEN_HMAC_ALGORITHM
 
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
     const INVALID_TOKEN_HMAC_ERROR_MESSAGE =
@@ -507,7 +508,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         // TODO: get secret from app.php
         $secret = '*whisperwhisper*';
 
-        return hash_hmac('sha256', $tokenData, $secret);
+        return hash_hmac(self::TOKEN_HMAC_ALGORITHM, $tokenData, $secret);
     }
 
     /**
