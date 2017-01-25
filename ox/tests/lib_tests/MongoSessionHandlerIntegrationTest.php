@@ -19,6 +19,7 @@ namespace ox\tests;
 
 use \Ox_MongoSource;
 use \ox\lib\session_handlers\MongoSessionHandler;
+use \ox\lib\session_handlers\SessionTokenParser;
 
 require_once(
     dirname(dirname(__FILE__))
@@ -35,9 +36,14 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 {
     const TEST_DB_NAME = 'integration_test';
     const TEST_SESSION_NAME = 'TEST_SESSION';
-    const TEST_SESSION_ID = '000000000000000000000abc';
+    const TEST_SESSION_ID = '00000000000000000000000000abcdef';
+    const TEST_TOKEN_HMAC =
+        '0bfc3b331478b651764ba3bf68797c2a0c0cf75717dd10446e0cb6cb8e7499b3';
+    //const TEST_HMAC_SECRET = '*whisperwhisper*';
     const TEST_KEY = 'test_key';
     const TEST_VALUE = 'test_value';
+
+    private static $test_token;
 
     /** @var MongoSessionHandler The object of the class we are testing */
     private $session;
@@ -56,6 +62,17 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        \Ox_Logger::logDebug(
+            'in setUp'
+        );
+
+        $this->test_token = sprintf(
+            '%s%s%s',
+            self::TEST_SESSION_ID,
+            SessionTokenParser::DELIMITER,
+            self::TEST_TOKEN_HMAC
+        );
+
         // Obtain a connection to the MongoDB server
         $this->mongoSource = new Ox_MongoSource();
 
@@ -92,21 +109,67 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         // Drop the test database
-        $this->mongoSource->dropDB(self::TEST_DB_NAME);
+        //$this->mongoSource->dropDB(self::TEST_DB_NAME);
     }
 
     /**
-     * Test that when an existing session cookie is received, its session ID is
-     * used.
+     * Test that when a valid session token cookie is received, but that
+     * session no longer exists, a new session is created instead.
      */
-    public function testUseExistingSessionId()
+    public function testReceiveValidNonexistentToken()
     {
-        // Make mockCookieManager return a pre-determined value for the
-        // existing session ID
+        \Ox_Logger::logDebug('in testReceiveValidNonexistentToken');
+
+        // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
              ->method('getCookieValue')
              ->with($this->equalTo(self::TEST_SESSION_NAME))
-             ->willReturn(self::TEST_SESSION_ID);
+             ->willReturn($this->test_token);
+
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+        \Ox_Logger::logDebug(
+            'opened session in testReceiveValidNonexistentToken'
+        );
+
+        // Verfiy that there is one session document
+        $query = [
+            '_id' => ['$ne' => MongoSessionHandler::GC_ID]
+        ];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(1, $count);
+
+        // Get the contents of the session document
+        $doc = $this->mongoCollection->findOne($query);
+
+        // Verify that the session ID is not the one we gave via mockCookieManager
+        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+    }
+
+    /**
+     * Test that when a valid session token cookie is received, for which a
+     * non-expired session exists, its session ID is used.
+     */
+    public function testUseExistingSessionId()
+    {
+        // Artificially insert a session into the database
+        $now = time();
+        $new_doc = [
+            '_id' => self::TEST_SESSION_ID,
+            MongoSessionHandler::SESSION_CREATED_KEY => new \MongoDate($now),
+            MongoSessionHandler::SESSION_LAST_REQUEST_KEY =>
+                new \MongoDate($now)
+        ];
+        $options = [
+            'w' => 1 // Acknowledged write
+        ];
+        $this->mongoCollection->insert($new_doc, $options);
+
+        // Make mockCookieManager return a test valid token value
+        $this->mockCookieManager
+             ->method('getCookieValue')
+             ->with($this->equalTo(self::TEST_SESSION_NAME))
+             ->willReturn($this->test_token);
 
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
@@ -128,6 +191,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testOpenWithNoCookie()
     {
+        \Ox_Logger::logDebug('in testOpenWithNoCookie');
+
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
         \Ox_Logger::logDebug('opened session in test');
@@ -142,12 +207,16 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Get the contents of the session document
         $doc = $this->mongoCollection->findOne($query);
 
-        // Verfiy that the timestamp is present
-        $this->assertTrue(
-            array_key_exists(
-                MongoSessionHandler::SESSION_TIMESTAMP_KEY,
-                $doc
-            )
+        // Verfiy that the "created" timestamp is present
+        $this->assertArrayHasKey(
+            MongoSessionHandler::SESSION_CREATED_KEY,
+            $doc
+        );
+
+        // Verfiy that the "last_request" timestamp is present
+        $this->assertArrayHasKey(
+            MongoSessionHandler::SESSION_LAST_REQUEST_KEY,
+            $doc
         );
     }
 
@@ -156,6 +225,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetAndGet()
     {
+        \Ox_Logger::logDebug('in testSetAndGet');
+
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
         \Ox_Logger::logDebug('opened session in test');

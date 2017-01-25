@@ -12,7 +12,8 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     use \ox\lib\traits\Singleton;
 
     const DB_COLLECTION_NAME = 'ox_session';
-    const SESSION_TIMESTAMP_KEY = 'last_updated';
+    const SESSION_CREATED_KEY = 'created';
+    const SESSION_LAST_REQUEST_KEY = 'last_request';
     const SESSION_VARIABLES_KEY = 'variables';
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
@@ -24,6 +25,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
     private $collection;
     private $gc_max_session_age = 86400; // 24 hours
+    private $gc_max_session_idle = 3600; // 1 hour
     private $gc_period = 3600; // 1 hour
 
     /** @var string The unique identifier of the session */
@@ -125,9 +127,11 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         if (isset($id)) {
             // Use the existing session ID
             $this->session_id = $id;
+            $this->updateLastRequestTimestamp();
         } else {
             // Generate a new session ID
             $this->session_id = self::generateSessionId();
+            $this->insertSession(time());
         }
 
         // Create and set a cookie to be sent in the response
@@ -139,7 +143,6 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         );
         $this->cookieManager->set($cookie);
 
-        $this->updateTimestamp();
         $this->checkGarbage();
     }
 
@@ -290,10 +293,18 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     {
         Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
 
-        // Remove sessions older than gc_max_session_age
-        $cutoff = time() - $this->gc_max_session_age;
+        // Find sessions which were either created too long ago, or last used
+        // too long ago
+        $createdCutoff = time() - $this->gc_max_session_age;
+        $lastRequestCutoff = time() - $this->gc_max_session_idle;
+
         $criteria = [
-            self::SESSION_TIMESTAMP_KEY => ['$lte' => new \MongoDate($cutoff)]
+            self::SESSION_CREATED_KEY => [
+                '$lte' => new \MongoDate($createdCutoff)
+            ],
+            self::SESSION_LAST_REQUEST_KEY => [
+                '$lte' => new \MongoDate($lastRequestCutoff)
+            ]
         ];
         $options = [
             'w' => 0 // Unacknowledged write
@@ -325,18 +336,46 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     }
 
     /**
-     * Update the timestamp for the current session.  The timestamp is used to
-     * find expired sessions when performing garbage collection.
+     * Insert a new session into the database.
+     *
+     * @param int $created Unix timestamp of the time of creation
+     * @return bool True if the session was inserted successfully
+     */
+    private function insertSession($created)
+    {
+        $new_doc = [
+            '_id' => $this->session_id,
+            self::SESSION_CREATED_KEY => new \MongoDate($created),
+            self::SESSION_LAST_REQUEST_KEY => new \MongoDate($created)
+        ];
+        $options = [
+            'w' => 1 // Acknowledged write
+        ];
+
+        $result = $this->collection->insert($new_doc, $options);
+
+        if (isset($result['ok']) && $result['ok']) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Update the last_request timestamp for the current session.  The
+     * timestamp is one of two used to find expired sessions when performing
+     * garbage collection.  A session becomes idle if this timestamp does not
+     * get updated for a certain length of time.
      *
      * @return void
      */
-    private function updateTimestamp()
+    private function updateLastRequestTimestamp()
     {
         $now = time();
         $criteria = ['_id' => $this->session_id];
         $new_object = [
             '$set' => [
-                self::SESSION_TIMESTAMP_KEY => new \MongoDate($now)
+                self::SESSION_LAST_REQUEST_KEY => new \MongoDate($now)
             ]
         ];
         $options = ['upsert' => true];
@@ -352,35 +391,65 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     {
         // Check for an existing session token (received in a cookie)
         $rawToken = $this->cookieManager->getCookieValue($this->session_name);
-        $token = new SessionTokenParser($rawToken);
 
-        // If the token signature is valid
-        if ($this->validateTokenHmac($token)) {
-            // If this token still exists in the database
-            if (!$this->tokenExists($token->getSessionId())) {
-                // If the token is not expired
-                if (!$this->tokenIsExpired($token->getSessionId())) {
-                    // TODO: return the ID part of the token
+        // If an existing token was received
+        if (isset($rawToken)) {
+            $token = new SessionTokenParser($rawToken);
+
+            // If the token signature is valid
+            if ($this->validateTokenHmac($token)) {
+                // If this session ID still exists in the database, and is not
+                // expired
+                if (!$this->sessionExistsAndIsNotExpired($token->getSessionId())) {
                     return $token->getSessionId();
                 }
+            } else {
+                throw new SessionException(
+                    self::INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE
+                );
             }
-        } else {
-            throw new SessionException(
-                INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE
-            );
         }
 
         return null;
     }
 
+    /**
+     * @return bool True if the session ID exists and is not expired
+     */
+    private function sessionExistsAndIsNotExpired($session_id)
+    {
+        $now = time();
+
+        $createdCutoff = $now - $this->gc_max_session_age;
+        $lastRequestCutoff = $now - $this->gc_max_session_idle;
+
+        $query = [
+            '_id' => $this->session_id,
+            self::SESSION_CREATED_KEY => ['$gt' => $createdCutoff],
+            self::SESSION_LAST_REQUEST_KEY => ['$gt' => $lastRequestCutoff],
+        ];
+
+        // Use find with limit instead of findOne, to improve performance since
+        // we do not need to iterate through the cursor (we are only checking
+        // that the record exists)
+        $cursor = $this->collection->find($query)->limit(1);
+
+        if (isset($cursor)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * @param SessionTokenParser $token
-     * @return bool True if the token HMAC is valid
+     * @return bool True if the token HMAC is valid, false otherwise
      */
     private function validateTokenHmac($token)
     {
-        $token->getHmac();
+        $freshHmac = $this->generateHmac($token->getSessionId());
+
+        return self::compareHashes($token->getHmac(), $freshHmac);
     }
 
     /**
@@ -396,6 +465,14 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         return $mongoId->__toString();
     }
 
+    private function generateHmac($tokenData)
+    {
+        // TODO: get secret from app.php
+        $secret = '*whisperwhisper*';
+
+        return hash_hmac('sha256', $tokenData, $secret);
+    }
+
     /**
      * Return a token which is the session ID, followed by a dot, followed by
      * an HMAC.
@@ -404,11 +481,8 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function generateToken()
     {
-        // TODO: get secret from app.php
-        $secret = '*whisperwhisper*';
-
         $data = $this->session_id;
-        $hmac = hash_hmac('sha256', $data, $secret);
+        $hmac = $this->generateHmac($data);
 
         return sprintf(
             '%s.%s',
@@ -433,7 +507,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         }
 
         // Store the length for use below in multiple places
-        $len = strllen($hash1);
+        $len = strlen($hash1);
 
         if ($len != strlen($hash2)) {
             return false;
