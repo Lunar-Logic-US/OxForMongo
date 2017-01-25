@@ -2,6 +2,9 @@
 
 namespace ox\lib\session_handlers;
 
+require_once dirname(dirname(dirname(dirname(__FILE__))))
+    . '/vendor/autoload.php';
+
 use \ox\lib\http\CookieManager;
 use \ox\lib\exceptions\SessionException;
 use \Ox_Logger;
@@ -12,20 +15,27 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     use \ox\lib\traits\Singleton;
 
     const DB_COLLECTION_NAME = 'ox_session';
-    const SESSION_CREATED_KEY = 'created';
-    const SESSION_LAST_REQUEST_KEY = 'last_request';
-    const SESSION_VARIABLES_KEY = 'variables';
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
+    const SESSION_CREATED_KEY = 'created';
+    const SESSION_ID_BYTE_LENGTH = 16;
+    const TOKEN_HMAC_BYTE_LENGTH = 32;
+    const SESSION_LAST_REQUEST_KEY = 'last_request';
+    const SESSION_VARIABLES_KEY = 'variables';
 
-    const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
     const INVALID_TOKEN_HMAC_ERROR_MESSAGE =
         'Session token HMAC is invalid';
+    const NO_RANDOM_BYTES_EXCEPTION_MESSAGE =
+        'PRNG failure; no session ID can be generated';
+    const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
 
     private $collection;
-    private $gc_max_session_age = 86400; // 24 hours
-    private $gc_max_session_idle = 3600; // 1 hour
+
+    // TODO: get garbage collection settings from app.php, but fall back to
+    // defaults
+    private $gc_max_session_age = 28800; // 8 hours
+    private $gc_max_session_idle = 1800; // 30 minutes
     private $gc_period = 3600; // 1 hour
 
     /** @var string The unique identifier of the session */
@@ -247,6 +257,10 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         }
     }
 
+    /**
+     * @return void
+     * @throws SessionException
+     */
     private static function throwOnInvalidKey($key)
     {
         if (!self::keyIsValid($key)) {
@@ -328,6 +342,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     /**
      * Throw if the session has not been opened.
      *
+     * @return void
      * @throws SessionException
      */
     private function throwIfUnopened()
@@ -478,17 +493,15 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
     /**
      * @return string
-     * @todo
      */
     private static function generateSessionId()
     {
-        // TODO; use a PRNG to generate a pseudo-random number which is less
-        // predictable than a MongoID.  A MongoID is used here for prototype
-        // purposes only.
-        $mongoId = new \MongoId();
-        return $mongoId->__toString();
+        return bin2hex(random_bytes(self::SESSION_ID_BYTE_LENGTH));
     }
 
+    /**
+     * @return string
+     */
     private function generateHmac($tokenData)
     {
         // TODO: get secret from app.php
@@ -509,8 +522,9 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         $hmac = $this->generateHmac($data);
 
         return sprintf(
-            '%s.%s',
+            '%s%s%s',
             $data,
+            SessionTokenParser::DELIMITER,
             $hmac
         );
     }

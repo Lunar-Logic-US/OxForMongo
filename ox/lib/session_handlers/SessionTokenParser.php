@@ -59,9 +59,13 @@ class SessionTokenParser
      */
     private static function validateTokenFormat($token)
     {
-        $pattern = '/^[a-f0-9]{32}'
-            . preg_quote(self::DELIMITER)
-            . '[a-f0-9]{64}$/';
+        $id_charlength = MongoSessionHandler::SESSION_ID_BYTE_LENGTH * 2;
+        $hmac_charlength = MongoSessionHandler::TOKEN_HMAC_BYTE_LENGTH * 2;
+
+        $pattern =
+            '/^[a-f0-9]{' . $id_charlength . '}' .
+            preg_quote(self::DELIMITER) .
+            '[a-f0-9]{' . $hmac_charlength . '}$/';
 
         if (is_string($token) && preg_match($pattern, $token) === 1) {
             return true;
