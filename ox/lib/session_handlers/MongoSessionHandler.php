@@ -20,7 +20,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
     const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
-    const INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE =
+    const INVALID_TOKEN_HMAC_ERROR_MESSAGE =
         'Session token HMAC is invalid';
 
     private $collection;
@@ -397,7 +397,17 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         // If an existing token was received
         if (isset($rawToken)) {
             Ox_Logger::logDebug('got raw token' . $rawToken);
-            $token = new SessionTokenParser($rawToken);
+
+            try {
+                $token = new SessionTokenParser($rawToken);
+            } catch (SessionException $exception) {
+                // Log the exception
+                Ox_Logger::logError($exception->getMessage());
+
+                // Do not use the existing token, but continue serving the
+                // request
+                return null;
+            }
 
             // If the token signature is valid
             if ($this->validateTokenHmac($token)) {
@@ -411,9 +421,10 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
                     Ox_Logger::logDebug('MongoSessionHandler: session is dead');
                 }
             } else {
-                throw new SessionException(
-                    self::INVALID_TOKEN_HMAC_EXCEPTION_MESSAGE
-                );
+                // The HMAC token is invalid; log this as an error and do not
+                // use the existing token, but continue serving the request
+                Ox_Logger::logError(self::INVALID_TOKEN_HMAC_ERROR_MESSAGE);
+                return null;
             }
         }
 

@@ -39,7 +39,9 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     const TEST_SESSION_ID = '00000000000000000000000000abcdef';
     const TEST_TOKEN_HMAC =
         '0bfc3b331478b651764ba3bf68797c2a0c0cf75717dd10446e0cb6cb8e7499b3';
-    //const TEST_HMAC_SECRET = '*whisperwhisper*';
+    const TEST_MALFORMED_TOKEN = '123.abc';
+    const TEST_INVALID_HMAC =
+        '0000000000000000000000000000000000000000000000000000000000000000';
     const TEST_KEY_1 = 'test_key_1';
     const TEST_KEY_2 = 'test_key_2';
     const TEST_VALUE_1 = 'test_value_1';
@@ -135,7 +137,76 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Get the contents of the session document
         $doc = $this->mongoCollection->findOne($query);
 
-        // Verify that the session ID is not the one we gave via mockCookieManager
+        // Verify that the session ID is not the one we gave via
+        // mockCookieManager
+        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+    }
+
+    /**
+     * Test that when a malformed token is received, the token is not used and
+     * a new session ID is created.
+     */
+    public function testMalformedToken()
+    {
+        // Make mockCookieManager return the test malformed token
+        $this->mockCookieManager
+             ->method('getCookieValue')
+             ->with($this->equalTo(self::TEST_SESSION_NAME))
+             ->willReturn(self::TEST_MALFORMED_TOKEN);
+
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Verfiy that there is one session document
+        $query = [
+            '_id' => ['$ne' => MongoSessionHandler::GC_ID]
+        ];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(1, $count);
+
+        // Get the contents of the session document
+        $doc = $this->mongoCollection->findOne($query);
+
+        // Verify that the session ID is not the one we gave via
+        // mockCookieManager
+        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+    }
+
+    /**
+     * Test that when a well-formed token is received whose HMAC is invalid,
+     * the token is not used and a new session ID is created.
+     */
+    public function testTokenWithInvalidHmac()
+    {
+        // Create a well-formed token with an invalid HMAC
+        $token = sprintf(
+            '%s%s%s',
+            self::TEST_SESSION_ID,
+            SessionTokenParser::DELIMITER,
+            self::TEST_INVALID_HMAC
+        );
+
+        // Make mockCookieManager return the test token
+        $this->mockCookieManager
+             ->method('getCookieValue')
+             ->with($this->equalTo(self::TEST_SESSION_NAME))
+             ->willReturn($token);
+
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Verfiy that there is one session document
+        $query = [
+            '_id' => ['$ne' => MongoSessionHandler::GC_ID]
+        ];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(1, $count);
+
+        // Get the contents of the session document
+        $doc = $this->mongoCollection->findOne($query);
+
+        // Verify that the session ID is not the one we gave via
+        // mockCookieManager
         $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
     }
 

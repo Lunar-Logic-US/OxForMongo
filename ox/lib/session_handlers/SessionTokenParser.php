@@ -20,8 +20,6 @@ class SessionTokenParser
      */
     public function __construct($token)
     {
-        \Ox_Logger::logDebug('token: ' . $token);
-
         if (self::validateTokenFormat($token)) {
             $this->token = $token;
             $this->parse();
