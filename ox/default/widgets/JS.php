@@ -23,12 +23,14 @@
  * Widget JS
  * This widget Allows you to add javascript files from anywhere in your code and then have it added
  * in a layout (or anywhere)
+ * 
+ * Use the methods that are appended with '_cachebust' to have the benefits of cache-busting. These methods will
+ * only work for files located in webroot/js.
  *
  * To set:
  * <code>
  * $widget_handler=Ox_LibraryLoader::Widget_Handler();
- * $widget_handler->JS->add("tag-it.js"); // set a simple js from /js/tag-it.js
- * $widget_handler->JS->add("jquery.min.js",'http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/','text/javascript','utf-8');
+ * $widget_handler->JS->add_cachebust("tag-it.js"); // set a simple js from /js/tag-it.js
  *</code>
  * To display:
  * <code>
@@ -92,6 +94,13 @@ JS;
 
             $file = $js_file;
             $url = Ox_Router::buildURL($js_options['directory'].$file);
+            
+            if (isset($js_options['cachebust']) && $js_options['cachebust']) {
+                if (strpos($url, '://') == false && strlen($this->_pageBase) == 0) {
+                    Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
+                    $url = WidgetHelper::addCacheBuster($url);
+                }
+            }
             //$directory = $appWebBase . $js_options['directory'];
             $output .= "<script src=\"{$url}\"{$type}{$charset}></script>\n";
         }
@@ -130,13 +139,59 @@ JS;
             $output .= "</script>\n";
         }
 
-
-
         if ($return_string === FALSE) {
             print $output;
         } else {
             return $output;
         }
+    }
+
+    /**
+     * Add file to the top of the JS list with cache busting.
+     * Assumes the file is located in /webroot/js/.
+     *
+     * @param string $path the web path relative to /js/
+     * @param bool $type 
+     * @param bool $charset
+     */
+    public function add_to_top_cachebust($path,$type=FALSE,$charset=FALSE)
+    {
+        $options = array('directory'=>'/js/','type'=>$type,'charset'=>$charset);
+        if (isset($this->_js_file_list[$path])) {
+            $this->_js_file_list[$file] = $options;
+        } else {
+            $new = array($path => $options);
+            $this->_js_file_list = array_merge($new,$this->_js_file_list);
+        }
+    }
+
+    /**
+     * Add file to the bottom of the JS list with cache busting.
+     * Assumes the file is located in /webroot/js/.
+     *
+     * @param string $path the web path relative to /js/
+     * @param bool $type 
+     * @param bool $charset
+     */
+    public function add_to_bottom_cachebust($path,$type=FALSE,$charset=FALSE)
+    {
+        $options = array('directory'=>'/js/','type'=>$type,'charset'=>$charset,'cachebust'=>TRUE);
+        $new = array($path => $options);
+        //This will overwrite if the same file is used twice.
+        $this->_js_file_list = array_merge($this->_js_file_list,$new);
+    }
+
+    /**
+     * Add file to the bottom of the JS list with cache busting.
+     * Assumes the file is located in /webroot/js/.
+     *
+     * @param string $path the web path relative to /js/
+     * @param bool $type 
+     * @param bool $charset
+     */
+    public function add_cachebust($path,$type=FALSE,$charset=FALSE)
+    {
+        $this->add_to_bottom_cachebust($path,$type,$charset);
     }
 
     /**
@@ -148,6 +203,7 @@ JS;
      * @param bool $charset
      * @return void
      * @internal param bool $media
+     * @deprecated
      */
     public function add_to_top($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
@@ -167,6 +223,7 @@ JS;
      * @param string $directory
      * @param bool $type
      * @param bool $charset
+     * @deprecated
      */
     public function add_to_bottom($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
@@ -185,6 +242,7 @@ JS;
      * @param bool $charset
      * @return void
      * @internal param bool $media
+     * @deprecated
      */
     public function add($file,$directory='/js/',$type=FALSE,$charset=FALSE)
     {
