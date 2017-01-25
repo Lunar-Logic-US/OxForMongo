@@ -398,10 +398,14 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
             // If the token signature is valid
             if ($this->validateTokenHmac($token)) {
+                Ox_Logger::logDebug('MongoSessionHandler: HMAC is valid');
                 // If this session ID still exists in the database, and is not
                 // expired
-                if (!$this->sessionExistsAndIsNotExpired($token->getSessionId())) {
+                if ($this->sessionExistsAndIsNotExpired($token->getSessionId())) {
+                    Ox_Logger::logDebug('MongoSessionHandler: session is alive');
                     return $token->getSessionId();
+                } else {
+                    Ox_Logger::logDebug('MongoSessionHandler: session is dead');
                 }
             } else {
                 throw new SessionException(
@@ -419,7 +423,6 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     private function sessionExistsAndIsNotExpired($session_id)
     {
         $now = time();
-
         $createdCutoff = $now - $this->gc_max_session_age;
         $lastRequestCutoff = $now - $this->gc_max_session_idle;
 
@@ -434,9 +437,13 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         // that the record exists)
         $cursor = $this->collection->find($query)->limit(1);
 
+        Ox_Logger::logDebug(print_r($cursor, true));
+
         if (isset($cursor)) {
+            Ox_Logger::logDebug('cursor is set');
             return true;
         } else {
+            Ox_Logger::logDebug('cursor is NOT set');
             return false;
         }
     }

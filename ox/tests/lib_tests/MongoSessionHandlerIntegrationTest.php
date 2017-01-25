@@ -109,7 +109,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         // Drop the test database
-        //$this->mongoSource->dropDB(self::TEST_DB_NAME);
+        $this->mongoSource->dropDB(self::TEST_DB_NAME);
     }
 
     /**
