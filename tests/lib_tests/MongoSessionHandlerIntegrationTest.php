@@ -62,10 +62,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        \Ox_Logger::logDebug(
-            'in setUp'
-        );
-
         $this->test_token = sprintf(
             '%s%s%s',
             self::TEST_SESSION_ID,
@@ -118,8 +114,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function testReceiveValidNonexistentToken()
     {
-        \Ox_Logger::logDebug('in testReceiveValidNonexistentToken');
-
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
              ->method('getCookieValue')
@@ -128,9 +122,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
-        \Ox_Logger::logDebug(
-            'opened session in testReceiveValidNonexistentToken'
-        );
 
         // Verfiy that there is one session document
         $query = [
@@ -163,7 +154,10 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $options = [
             'w' => 1 // Acknowledged write
         ];
-        $this->mongoCollection->insert($new_doc, $options);
+        $result = $this->mongoCollection->insert($new_doc, $options);
+        if (!isset($result['ok']) || !$result['ok']) {
+            $this->fail('failed to insert fake existing session');
+        }
 
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
@@ -173,7 +167,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
-        \Ox_Logger::logDebug('opened session in test');
 
         // Verfiy that there is one session document
         $query = [
@@ -191,11 +184,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testOpenWithNoCookie()
     {
-        \Ox_Logger::logDebug('in testOpenWithNoCookie');
-
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
-        \Ox_Logger::logDebug('opened session in test');
 
         // Verfiy that there is one session document
         $query = [
@@ -225,11 +215,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetAndGet()
     {
-        \Ox_Logger::logDebug('in testSetAndGet');
-
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
-        \Ox_Logger::logDebug('opened session in test');
 
         // Set a key to a value and verify that it was set successfully
         $result = $this->session->set(self::TEST_KEY, self::TEST_VALUE);

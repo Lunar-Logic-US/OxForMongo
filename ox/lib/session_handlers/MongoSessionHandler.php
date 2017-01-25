@@ -130,7 +130,9 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
             $this->updateLastRequestTimestamp();
         } else {
             // Generate a new session ID
+            Ox_Logger::logDebug('generating new session ID');
             $this->session_id = self::generateSessionId();
+            Ox_Logger::logDebug('inserting session');
             $this->insertSession(time());
         }
 
@@ -300,10 +302,10 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
         $criteria = [
             self::SESSION_CREATED_KEY => [
-                '$lte' => new \MongoDate($createdCutoff)
+                '$lt' => new \MongoDate($createdCutoff)
             ],
             self::SESSION_LAST_REQUEST_KEY => [
-                '$lte' => new \MongoDate($lastRequestCutoff)
+                '$lt' => new \MongoDate($lastRequestCutoff)
             ]
         ];
         $options = [
@@ -394,6 +396,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
         // If an existing token was received
         if (isset($rawToken)) {
+            Ox_Logger::logDebug('got raw token' . $rawToken);
             $token = new SessionTokenParser($rawToken);
 
             // If the token signature is valid
@@ -418,6 +421,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     }
 
     /**
+     * @param string $session_id
      * @return bool True if the session ID exists and is not expired
      */
     private function sessionExistsAndIsNotExpired($session_id)
@@ -427,23 +431,25 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         $lastRequestCutoff = $now - $this->gc_max_session_idle;
 
         $query = [
-            '_id' => $this->session_id,
-            self::SESSION_CREATED_KEY => ['$gt' => $createdCutoff],
-            self::SESSION_LAST_REQUEST_KEY => ['$gt' => $lastRequestCutoff],
+            '_id' => $session_id,
+            self::SESSION_CREATED_KEY => [
+                '$gte' => new \MongoDate($createdCutoff)
+            ],
+            self::SESSION_LAST_REQUEST_KEY => [
+                '$gte' => new \MongoDate($lastRequestCutoff)
+            ],
         ];
 
         // Use find with limit instead of findOne, to improve performance since
         // we do not need to iterate through the cursor (we are only checking
         // that the record exists)
         $cursor = $this->collection->find($query)->limit(1);
+        $count = $cursor->count();
 
-        Ox_Logger::logDebug(print_r($cursor, true));
-
-        if (isset($cursor)) {
-            Ox_Logger::logDebug('cursor is set');
+        // If there were any results
+        if ($count > 0) {
             return true;
         } else {
-            Ox_Logger::logDebug('cursor is NOT set');
             return false;
         }
     }
