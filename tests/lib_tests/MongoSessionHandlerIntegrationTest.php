@@ -40,8 +40,10 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     const TEST_TOKEN_HMAC =
         '0bfc3b331478b651764ba3bf68797c2a0c0cf75717dd10446e0cb6cb8e7499b3';
     //const TEST_HMAC_SECRET = '*whisperwhisper*';
-    const TEST_KEY = 'test_key';
-    const TEST_VALUE = 'test_value';
+    const TEST_KEY_1 = 'test_key_1';
+    const TEST_KEY_2 = 'test_key_2';
+    const TEST_VALUE_1 = 'test_value_1';
+    const TEST_VALUE_2 = 'test_value_2';
 
     private static $test_token;
 
@@ -211,20 +213,29 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo
+     * Test that get() and set() work as expected to store and retrieve session
+     * variables
      */
-    public function testSetAndGet()
+    public function testSetAndGetSessionVariables()
     {
         // Open the session
         $this->session->open(self::TEST_SESSION_NAME);
 
         // Set a key to a value and verify that it was set successfully
-        $result = $this->session->set(self::TEST_KEY, self::TEST_VALUE);
+        $result = $this->session->set(self::TEST_KEY_1, self::TEST_VALUE_1);
         $this->assertTrue($result);
 
-        // Read the value and verify that it is the same
-        $value = $this->session->get(self::TEST_KEY);
-        $this->assertEquals(self::TEST_VALUE, $value);
+        // Set another key to a value and verify that it was set successfully
+        $result = $this->session->set(self::TEST_KEY_2, self::TEST_VALUE_2);
+        $this->assertTrue($result);
+
+        // Read the first value and verify that it is correct
+        $value = $this->session->get(self::TEST_KEY_1);
+        $this->assertEquals(self::TEST_VALUE_1, $value);
+
+        // Read the second value and verify that it is correct
+        $value = $this->session->get(self::TEST_KEY_2);
+        $this->assertEquals(self::TEST_VALUE_2, $value);
     }
 
     /**
