@@ -309,6 +309,23 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::TEST_VALUE_2, $value);
     }
 
+    public function testDestroy()
+    {
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Destroy the session
+        $this->session->destroy();
+
+        // Verify that the session is not present in the database (i.e. verify
+        // that there are no sessions at all, since that was the only session)
+        $query = [
+            '_id' => ['$ne' => MongoSessionHandler::GC_ID]
+        ];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(0, $count);
+    }
+
     /**
      * @todo
      */
