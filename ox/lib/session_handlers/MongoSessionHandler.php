@@ -336,6 +336,17 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     {
         Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
 
+        // Record that we last collected garbage right now
+        $now = time();
+        $criteria = ['_id' => self::GC_ID];
+        $new_object = [
+            '$set' => [
+                self::GC_TIMESTAMP_KEY => new \MongoDate($now)
+            ]
+        ];
+        $options = ['upsert' => true];
+        $this->collection->update($criteria, $new_object, $options);
+
         // Find sessions which were either created too long ago, or last used
         // too long ago
         $createdCutoff = time() - $this->max_session_age;
@@ -353,17 +364,6 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
             'w' => 0 // Unacknowledged write
         ];
         $this->collection->remove($criteria, $options);
-
-        // Record that we last collected garbage right now
-        $now = time();
-        $criteria = ['_id' => self::GC_ID];
-        $new_object = [
-            '$set' => [
-                self::GC_TIMESTAMP_KEY => new \MongoDate($now)
-            ]
-        ];
-        $options = ['upsert' => true];
-        $this->collection->update($criteria, $new_object, $options);
     }
 
     /**
