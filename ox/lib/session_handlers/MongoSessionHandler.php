@@ -25,25 +25,36 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const TOKEN_HMAC_BYTE_LENGTH = 32; // tied to TOKEN_HMAC_ALGORITHM
 
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
-    const INVALID_TOKEN_HMAC_ERROR_MESSAGE =
-        'Session token HMAC is invalid';
+    const INVALID_TOKEN_HMAC_ERROR_MESSAGE = 'Session token HMAC is invalid';
     const NO_RANDOM_BYTES_EXCEPTION_MESSAGE =
         'PRNG failure; no session ID can be generated';
     const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
 
-    private $collection;
+    const CONFIG_GC_PERIOD_NAME = 'session_gc_period';
+    const CONFIG_MAX_SESSION_AGE_NAME = 'max_session_age';
+    const CONFIG_MAX_SESSION_IDLE_NAME = 'max_session_idle';
 
-    // TODO: get garbage collection settings from app.php, but fall back to
-    // defaults
-    private $gc_max_session_age = 28800; // 8 hours
-    private $gc_max_session_idle = 1800; // 30 minutes
-    private $gc_period = 3600; // 1 hour
+    // These settings can be overridden in the app config using the names above
+    const GC_PERIOD_DEFAULT = 3600; // 1 hour
+    const MAX_SESSION_AGE_DEFAULT = 3600; // 1 hour
+    const MAX_SESSION_IDLE_DEFAULT = 900; // 15 minutes
+
+    private $collection;
+    private $gc_period;
+    private $max_session_age;
+    private $max_session_idle;
 
     /** @var string The unique identifier of the session */
     private $session_id;
 
     /** @var string The name of the cookie which stores the session token */
     private $session_name;
+
+    /**
+     * @var Ox_ConfigParser Used for all ConfigParser calls, to facilitate
+     *                      mocks in unit tests
+     */
+    private $configParser;
 
     /**
      * @var CookieManager Used for all CookieManager calls, to facilitate mocks
@@ -55,7 +66,16 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      * @var Ox_MongoSource Used for all Mongo calls, to facilitate mocks in
      *                     unit tests
      */
-    private $mongo;
+    private $mongoSource;
+
+    /**
+     * Accessor method for configParser.  This is here to facilitate unit
+     * testing.
+     */
+    public function setConfigParser($configParser)
+    {
+        $this->configParser = Ox_LibraryLoader::Config_Parser();
+    }
 
     /**
      * Accessor method for cookieManager.  This is here to facilitate unit
@@ -77,11 +97,14 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
     public function __construct()
     {
-        // Use the default MongoSource
-        $this->setMongoSource(Ox_LibraryLoader::db());
+        // Use the default ConfigParser singleton
+        $this->configParser = Ox_LibraryLoader::Config_Parser();
 
-        // Use the default cookie manager
+        // Use an instance of the default CookieManager class
         $this->setCookieManager(new CookieManager());
+
+        // Use the default MongoSource singleton
+        $this->setMongoSource(Ox_LibraryLoader::db());
     }
 
     /**
@@ -123,9 +146,12 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     public function open($session_name)
     {
-        Ox_Logger::logDebug('MongoSessionHandler: session opened');
+        Ox_Logger::logDebug('MongoSessionHandler: in open()');
 
         $this->session_name = $session_name;
+
+        // Apply settings defined in app config
+        $this->applyAppConfig();
 
         // Save a reference to the session collection
         $this->collection = $this->mongoSource->getCollection(
@@ -312,8 +338,8 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
         // Find sessions which were either created too long ago, or last used
         // too long ago
-        $createdCutoff = time() - $this->gc_max_session_age;
-        $lastRequestCutoff = time() - $this->gc_max_session_idle;
+        $createdCutoff = time() - $this->max_session_age;
+        $lastRequestCutoff = time() - $this->max_session_idle;
 
         $criteria = [
             self::SESSION_CREATED_KEY => [
@@ -454,8 +480,8 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     private function sessionExistsAndIsNotExpired($session_id)
     {
         $now = time();
-        $createdCutoff = $now - $this->gc_max_session_age;
-        $lastRequestCutoff = $now - $this->gc_max_session_idle;
+        $createdCutoff = $now - $this->max_session_age;
+        $lastRequestCutoff = $now - $this->max_session_idle;
 
         $query = [
             '_id' => $session_id,
@@ -558,5 +584,42 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         }
 
         return ($difference === 0);
+    }
+
+    /**
+     * @return void
+     */
+    private function applyAppConfig()
+    {
+        $this->gc_period = $this->getConfigValue(
+            self::CONFIG_GC_PERIOD_NAME,
+            self::GC_PERIOD_DEFAULT
+        );
+
+        $this->max_session_age = $this->getConfigValue(
+            self::CONFIG_MAX_SESSION_AGE_NAME,
+            self::MAX_SESSION_AGE_DEFAULT
+        );
+
+        $this->max_session_idle = $this->getConfigValue(
+            self::CONFIG_MAX_SESSION_IDLE_NAME,
+            self::MAX_SESSION_IDLE_DEFAULT
+        );
+    }
+
+    /**
+     * @param string $configName
+     * @param mixed $defaultValue
+     * @return mixed The value corresponding to $configName if set in app.php;
+     *               otherwise $defaultValue
+     */
+    private function getConfigValue($configName, $defaultValue)
+    {
+        $value = $this->configParser->getAppConfigValue($configName);
+        if (isset($value)) {
+            return $value;
+        } else {
+            return $defaultValue;
+        }
     }
 }
