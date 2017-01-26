@@ -18,7 +18,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const GC_ID = 'garbage_collection';
     const GC_TIMESTAMP_KEY = 'last_performed';
     const SESSION_CREATED_KEY = 'created';
-    const SESSION_ID_BYTE_LENGTH = 16;
+    const SESSION_ID_BYTE_LENGTH = 32;
     const SESSION_LAST_REQUEST_KEY = 'last_request';
     const SESSION_VARIABLES_KEY = 'variables';
     const TOKEN_HMAC_ALGORITHM = 'sha256';
