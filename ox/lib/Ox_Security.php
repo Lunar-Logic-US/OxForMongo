@@ -237,7 +237,6 @@ class Ox_Security
             $this->session->set('user_id', $user['_id']->__toString());
         }
         if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser - adding to session " . $this->user->getIdString());
-        if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::loginUser - Session " . print_r($_SESSION,1));
     }
 
     /**

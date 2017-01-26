@@ -50,8 +50,9 @@ abstract class Ox_User {
     /**
      * Loads a user using the session.
      *
-     * The users is loaded from the DB into the user property, if there is a good value in $_SESSION['user_id'].
-     * This is called as part of the start of Ox and is call from Ox_Security->__construct.
+     * The user is loaded from the DB into the user property, if there is a
+     * good value in the "user_id" session variable.  This is called as part of
+     * the start of Ox and is call from Ox_Security->__construct.
      *
      * @see Ox_Security::__construct
      */
