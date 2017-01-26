@@ -84,14 +84,14 @@ class MongoSessionHandlerTest extends \PHPUnit_Framework_TestCase
         $this->session->setMongoSource($this->mockOxMongoSource);
     }
 
-    public function testThrowOnCloseIfUnopened()
+    public function testThrowOnDestroyIfUnopened()
     {
         try {
-            // Attempt to close an unopened session
-            $this->session->close();
+            // Attempt to destroy an unopened session
+            $this->session->destroy();
 
             // If we got this far, fail the test
-            $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'close'));
+            $this->fail(sprintf(self::UNOPENED_NO_EXCEPTION_MESSAGE, 'destroy'));
         } catch (SessionException $exception) {
             $this->assertEquals(
                 MongoSessionHandler::UNOPENED_EXCEPTION_MESSAGE,

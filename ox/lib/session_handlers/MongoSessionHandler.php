@@ -89,7 +89,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      *
      * @return bool True if the session was successfully destroyed
      */
-    public function close()
+    public function destroy()
     {
         $this->throwIfUnopened();
 

@@ -27,7 +27,7 @@ abstract class SessionHandler implements \ox\lib\interfaces\KeyValueStore
      *
      * @return bool True if the session was successfully destroyed
      */
-    abstract public function close();
+    abstract public function destroy();
 
     /**
      * Open the session.  This must be called before calling any other methods.

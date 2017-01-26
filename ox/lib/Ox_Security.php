@@ -259,7 +259,7 @@ class Ox_Security
     {
         $user_id = $this->session->get('user_id');
         if (self::DEBUG) Ox_Logger::logMessage("Ox_Security::logout - Logged user $user_id out");
-        $this->session->close();
+        $this->session->destroy();
     }
 
     /**
