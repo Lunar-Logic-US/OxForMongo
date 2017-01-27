@@ -22,6 +22,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const GC_TIMESTAMP_KEY = 'last_performed';
     const SESSION_CREATED_KEY = 'created';
     const SESSION_ID_BYTE_LENGTH = 32;
+    const SESSION_ID_HASH_ALGORITHM = 'sha256';
     const SESSION_LAST_REQUEST_KEY = 'last_request';
     const SESSION_VARIABLES_KEY = 'variables';
     const TOKEN_HMAC_ALGORITHM = 'sha256';
@@ -126,7 +127,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     {
         $this->throwIfUnopened();
 
-        $criteria = ['_id' => $this->session_id];
+        $criteria = ['_id' => $this->session_id_hash];
         $options = [
             'justOne' => true,
             'w' => 1 // Acknowledged write
@@ -136,6 +137,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         if (isset($result['ok']) && $result['ok']) {
             $this->cookieManager->delete($this->session_name, '/');
             $this->session_id = null;
+            $this->session_id_hash = null;
             $this->collection = null;
 
             return true;
@@ -172,6 +174,10 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         if (isset($id)) {
             // Use the existing session ID
             $this->session_id = $id;
+
+            // Cache the hashed version of the session ID
+            $this->session_id_hash = $this->hashSessionId($this->session_id);
+
             $this->updateLastRequestTimestamp();
         } else {
             // Generate a new session ID
@@ -204,7 +210,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         self::throwOnInvalidKey($key);
 
         $query = [
-            '_id' => $this->session_id
+            '_id' => $this->session_id_hash
         ];
         $fields = [
             self::buildSessionVariableKey($key) => true
@@ -232,7 +238,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         self::throwOnInvalidKey($key);
 
         $criteria = [
-            '_id' => $this->session_id
+            '_id' => $this->session_id_hash
         ];
         $new_object = [
             '$set' => [
@@ -399,6 +405,14 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     }
 
     /**
+     * @return string
+     */
+    private function hashSessionId($session_id)
+    {
+        return hash(self::SESSION_ID_HASH_ALGORITHM, $session_id);
+    }
+
+    /**
      * Insert a new session into the database.
      *
      * @param int $created Unix timestamp of the time of creation
@@ -406,8 +420,11 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function insertSession($created)
     {
+        // Cache the hashed version of the session ID
+        $this->session_id_hash = $this->hashSessionId($this->session_id);
+
         $new_doc = [
-            '_id' => $this->session_id,
+            '_id' => $this->session_id_hash,
             self::SESSION_CREATED_KEY => new \MongoDate($created),
             self::SESSION_LAST_REQUEST_KEY => new \MongoDate($created)
         ];
@@ -435,7 +452,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     private function updateLastRequestTimestamp()
     {
         $now = time();
-        $criteria = ['_id' => $this->session_id];
+        $criteria = ['_id' => $this->session_id_hash];
         $new_object = [
             '$set' => [
                 self::SESSION_LAST_REQUEST_KEY => new \MongoDate($now)
@@ -501,7 +518,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         $lastRequestCutoff = $now - $this->max_session_idle;
 
         $query = [
-            '_id' => $session_id,
+            '_id' => $this->hashSessionId($session_id),
             self::SESSION_CREATED_KEY => [
                 '$gte' => new \MongoDate($createdCutoff)
             ],

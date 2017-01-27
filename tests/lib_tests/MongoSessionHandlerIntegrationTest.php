@@ -39,6 +39,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     const TEST_SESSION_NAME = 'TEST_SESSION';
     const TEST_SESSION_ID =
         '0000000000000000000000000000000000000000000000000000000000abcdef';
+    const TEST_SESSION_ID_HASH =
+        '984b0e0504d5d260155d22c86a98966a0fd4ca408cc259a78d86da82bd650b35';
     const TEST_TOKEN_HMAC =
         '0d495350c8cacd00894d02ef086a5fa489377dd134c548384289c0c713dd262e';
     const TEST_MALFORMED_TOKEN = '123.abc';
@@ -163,7 +165,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Verify that the session ID is not the one we gave via
         // mockCookieManager
-        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+        $this->assertNotEquals(self::TEST_SESSION_ID_HASH, $doc['_id']);
     }
 
     /**
@@ -192,7 +194,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Verify that the session ID is not the one we gave via
         // mockCookieManager
-        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+        $this->assertNotEquals(self::TEST_SESSION_ID_HASH, $doc['_id']);
     }
 
     /**
@@ -229,7 +231,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Verify that the session ID is not the one we gave via
         // mockCookieManager
-        $this->assertNotEquals(self::TEST_SESSION_ID, $doc['_id']);
+        $this->assertNotEquals(self::TEST_SESSION_ID_HASH, $doc['_id']);
     }
 
     /**
@@ -240,7 +242,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     {
         // Artificially insert a session into the database
         $now = time();
-        $this->artificiallyInsertSession(self::TEST_SESSION_ID, $now, $now);
+        $this->artificiallyInsertSession(self::TEST_SESSION_ID_HASH, $now, $now);
 
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
@@ -261,7 +263,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $doc = $this->mongoCollection->findOne($query);
 
         // Verify that the session ID is the one we gave via mockCookieManager
-        $this->assertEquals(self::TEST_SESSION_ID, $doc['_id']);
+        $this->assertEquals(self::TEST_SESSION_ID_HASH, $doc['_id']);
     }
 
     public function testOpenWithNoCookie()
@@ -346,7 +348,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Artificially insert an old session which will be cleaned up, given
         // the garbage collection interval we set above
         $this->artificiallyInsertSession(
-            self::TEST_SESSION_ID,
+            self::TEST_SESSION_ID_HASH,
             $this->max_session_age - 1,
             $this->max_session_age - 1
         );
@@ -356,7 +358,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Verify that the old session is no longer in the database
         $query = [
-            '_id' => self::TEST_SESSION_ID
+            '_id' => self::TEST_SESSION_ID_HASH
         ];
         $doc = $this->mongoCollection->findOne($query);
         $this->assertNull($doc);
@@ -394,7 +396,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Artifically insert an old session which will be deleted if garbage
         // collection is run
         $this->artificiallyInsertSession(
-            self::TEST_SESSION_ID,
+            self::TEST_SESSION_ID_HASH,
             $this->max_session_age - 1,
             $this->max_session_age - 1
         );
@@ -403,7 +405,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->session->open(self::TEST_SESSION_NAME);
 
         // Verify that the old session did not get deleted
-        $query = ['_id' => self::TEST_SESSION_ID];
+        $query = ['_id' => self::TEST_SESSION_ID_HASH];
         $count = $this->mongoCollection->count($query);
         $this->assertEquals(1, $count);
     }
@@ -411,15 +413,18 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     /**
      * Artificially insert a session into the database.
      *
-     * @param mixed $id Value to be used as the document's "_id" property
+     * @param mixed $id Hash value to be used as the document's "_id" property
      * @param int $created Unix timestamp to be used as the "created" property
      * @param int $last_request Unix timestamp to be used as the "last_request"
      *                          property
      */
-    private function artificiallyInsertSession($id, $created, $last_request)
-    {
+    private function artificiallyInsertSession(
+        $id_hash,
+        $created,
+        $last_request
+    ) {
         $session_doc = [
-            '_id' => $id,
+            '_id' => $id_hash,
             MongoSessionHandler::SESSION_CREATED_KEY =>
                 new \MongoDate($created),
             MongoSessionHandler::SESSION_LAST_REQUEST_KEY =>
