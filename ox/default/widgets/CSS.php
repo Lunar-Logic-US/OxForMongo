@@ -140,7 +140,7 @@ class CSS implements Ox_Widget {
      */
     public function add_cachebust($path,$media=FALSE)
     {
-        $this->add_to_bottom_cachbust($path,$media);
+        $this->add_to_bottom_cachebust($path,$media);
     }
 
     /**

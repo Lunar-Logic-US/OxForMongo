@@ -156,7 +156,7 @@ JS;
      */
     public function add_to_top_cachebust($path,$type=FALSE,$charset=FALSE)
     {
-        $options = array('directory'=>'/js/','type'=>$type,'charset'=>$charset);
+        $options = array('directory'=>'/js/','type'=>$type,'charset'=>$charset,'cachebust'=>TRUE);
         if (isset($this->_js_file_list[$path])) {
             $this->_js_file_list[$file] = $options;
         } else {
