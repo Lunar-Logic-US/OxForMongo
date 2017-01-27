@@ -17,6 +17,7 @@
 
 namespace ox\tests;
 
+use \Ox_ConfigParser;
 use \Ox_MongoSource;
 use \ox\lib\session_handlers\MongoSessionHandler;
 use \ox\lib\session_handlers\SessionTokenParser;
@@ -30,7 +31,7 @@ require_once(
 /**
  * Integration Tests for MongoSessionHandler which use an actual Mongo
  * database.  Note that this is not a 100% full integration test because
- * CookieManager is still mocked.
+ * CookieManager and Ox_ConfigParser are still mocked.
  */
 class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 {
@@ -50,6 +51,11 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     private static $test_token;
 
+    // Define settings that would normally be defined by the app config
+    private $gc_interval = MongoSessionHandler::GC_INTERVAL_DEFAULT;
+    private $max_session_age = MongoSessionHandler::MAX_SESSION_AGE_DEFAULT;
+    private $max_session_idle = MongoSessionHandler::MAX_SESSION_IDLE_DEFAULT;
+
     /** @var MongoSessionHandler The object of the class we are testing */
     private $session;
 
@@ -61,6 +67,9 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     /** @var CookieManager */
     private $mockCookieManager;
+
+    /** @var Ox_ConfigParser */
+    private $mockConfigParser;
 
     /**
      * @before
@@ -91,7 +100,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->session = new MongoSessionHandler(self::TEST_SESSION_NAME);
 
         // TODO: Disable garbage collection
-        //$this->session->setGarbageCollectionPeriod(-1);
 
         // Tell the MongoSessionHandler to use our test MongoSource
         $this->session->setMongoSource($this->mongoSource);
@@ -102,6 +110,17 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
             $this->getMockBuilder('\ox\lib\http\CookieManager')
                  ->getMock();
         $this->session->setCookieManager($this->mockCookieManager);
+
+        // Create a mock Ox_ConfigParser so we can control the configuration
+        // (and because we don't need to test the Ox_ConfigParser class here)
+        $this->mockConfigParser =
+            $this->getMockBuilder('\Ox_ConfigParser')
+                 ->getMock();
+        $this->mockConfigParser
+             ->method('getAppConfigValue')
+             ->with(MongoSessionHandler::CONFIG_GC_INTERVAL_NAME)
+             ->willReturn($this->gc_interval);
+        $this->session->setConfigParser($this->mockConfigParser);
     }
 
     /**
@@ -219,19 +238,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     {
         // Artificially insert a session into the database
         $now = time();
-        $new_doc = [
-            '_id' => self::TEST_SESSION_ID,
-            MongoSessionHandler::SESSION_CREATED_KEY => new \MongoDate($now),
-            MongoSessionHandler::SESSION_LAST_REQUEST_KEY =>
-                new \MongoDate($now)
-        ];
-        $options = [
-            'w' => 1 // Acknowledged write
-        ];
-        $result = $this->mongoCollection->insert($new_doc, $options);
-        if (!isset($result['ok']) || !$result['ok']) {
-            $this->fail('failed to insert fake existing session');
-        }
+        $this->artificiallyInsertSession(self::TEST_SESSION_ID, $now, $now);
 
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
@@ -286,7 +293,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Test that get() and set() work as expected to store and retrieve session
-     * variables
+     * variables.
      */
     public function testSetAndGetSessionVariables()
     {
@@ -328,11 +335,101 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo
+     * Test that garbage collection deletes old sessions.
      */
     public function testGarbageCollection()
     {
-        // TODO: Enable garbage collection, since we disabled it in setUp()
-        //$this->session->setGarbageCollectionPeriod(1);
+        // Ensure that garbage collection occurs every time a session is opened
+        $this->gc_interval = 0;
+
+        // Artificially insert an old session which will be cleaned up, given
+        // the garbage collection interval we set above
+        $this->artificiallyInsertSession(
+            self::TEST_SESSION_ID,
+            $this->max_session_age - 1,
+            $this->max_session_age - 1
+        );
+
+        // Open the session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Verify that the old session is no longer in the database
+        $query = [
+            '_id' => self::TEST_SESSION_ID
+        ];
+        $doc = $this->mongoCollection->findOne($query);
+        $this->assertNull($doc);
+    }
+
+    /**
+     * Test that the garbage collection timestamp gets updated whenever garbage
+     * collection runs, such that running it again (before the interval has
+     * elapsed) will not run garbage collection again.
+     */
+    public function testSkipGarbageCollection()
+    {
+        // Set the garbage collection interval to a long time so that it will
+        // not elapse within the time this test takes to run
+        $this->gc_interval = 9999;
+
+        // Verify that there is no garbage collection timestamp in the database
+        $query = ['_id' => MongoSessionHandler::GC_ID];
+        $doc = $this->mongoCollection->findOne($query);
+        $this->assertNull($doc);
+
+        // Open a new session (garbage collection should run here since there
+        // is no record of it having run before)
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Verify that there is now a garbage collection timestamp in the
+        // database
+        $query = ['_id' => MongoSessionHandler::GC_ID];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(1, $count);
+
+        // Destroy the session
+        $this->session->destroy();
+
+        // Artifically insert an old session which will be deleted if garbage
+        // collection is run
+        $this->artificiallyInsertSession(
+            self::TEST_SESSION_ID,
+            $this->max_session_age - 1,
+            $this->max_session_age - 1
+        );
+
+        // Open a new session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        // Verify that the old session did not get deleted
+        $query = ['_id' => self::TEST_SESSION_ID];
+        $count = $this->mongoCollection->count($query);
+        $this->assertEquals(1, $count);
+    }
+
+    /**
+     * Artificially insert a session into the database.
+     *
+     * @param mixed $id Value to be used as the document's "_id" property
+     * @param int $created Unix timestamp to be used as the "created" property
+     * @param int $last_request Unix timestamp to be used as the "last_request"
+     *                          property
+     */
+    private function artificiallyInsertSession($id, $created, $last_request)
+    {
+        $session_doc = [
+            '_id' => $id,
+            MongoSessionHandler::SESSION_CREATED_KEY =>
+                new \MongoDate($created),
+            MongoSessionHandler::SESSION_LAST_REQUEST_KEY =>
+                new \MongoDate($last_request)
+        ];
+        $options = [
+            'w' => 1 // Acknowledged write
+        ];
+        $result = $this->mongoCollection->insert($session_doc, $options);
+        if (!isset($result['ok']) || !$result['ok']) {
+            $this->fail('failed to artificially insert a session');
+        }
     }
 }

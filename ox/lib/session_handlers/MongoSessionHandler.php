@@ -5,14 +5,17 @@ namespace ox\lib\session_handlers;
 require_once dirname(dirname(dirname(dirname(__FILE__))))
     . '/vendor/autoload.php';
 
-use \ox\lib\http\CookieManager;
-use \ox\lib\exceptions\SessionException;
-use \Ox_Logger;
+use \Ox_ConfigParser;
 use \Ox_LibraryLoader;
+use \Ox_Logger;
+use \ox\lib\exceptions\SessionException;
+use \ox\lib\http\CookieManager;
 
 class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 {
     use \ox\lib\traits\Singleton;
+
+    const LOG_PREFIX = 'MongoSessionHandler: ';
 
     const DB_COLLECTION_NAME = 'ox_session';
     const GC_ID = 'garbage_collection';
@@ -25,22 +28,23 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const TOKEN_HMAC_BYTE_LENGTH = 32; // tied to TOKEN_HMAC_ALGORITHM
 
     const INVALID_KEY_EXCEPTION_MESSAGE = 'Key contains invalid characters';
-    const INVALID_TOKEN_HMAC_ERROR_MESSAGE = 'Session token HMAC is invalid';
+    const INVALID_TOKEN_HMAC_MESSAGE = 'Session token HMAC is invalid';
     const NO_RANDOM_BYTES_EXCEPTION_MESSAGE =
         'PRNG failure; no session ID can be generated';
-    const UNOPENED_EXCEPTION_MESSAGE = 'Session has not been opened yet';
+    const UNOPENED_EXCEPTION_MESSAGE = 'A session has not been opened yet';
+    const OPEN_EXCEPTION_MESSAGE = 'A session is already open';
 
-    const CONFIG_GC_PERIOD_NAME = 'session_gc_period';
+    const CONFIG_GC_INTERVAL_NAME = 'session_gc_interval';
     const CONFIG_MAX_SESSION_AGE_NAME = 'max_session_age';
     const CONFIG_MAX_SESSION_IDLE_NAME = 'max_session_idle';
 
     // These settings can be overridden in the app config using the names above
-    const GC_PERIOD_DEFAULT = 3600; // 1 hour
+    const GC_INTERVAL_DEFAULT = 3600; // 1 hour
     const MAX_SESSION_AGE_DEFAULT = 3600; // 1 hour
     const MAX_SESSION_IDLE_DEFAULT = 900; // 15 minutes
 
     private $collection;
-    private $gc_period;
+    private $gc_interval;
     private $max_session_age;
     private $max_session_idle;
 
@@ -124,15 +128,13 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         $result = $this->collection->remove($criteria, $options);
 
         if (isset($result['ok']) && $result['ok']) {
-            Ox_Logger::logDebug('MongoSessionHandler: successfully closed session');
-
             $this->cookieManager->delete($this->session_name, '/');
             $this->session_id = null;
             $this->collection = null;
 
             return true;
         } else {
-            Ox_Logger::logDebug('MongoSessionHandler: failed to close session');
+            Ox_Logger::logError(self::LOG_PREFIX . 'failed to close session');
             return false;
         }
     }
@@ -146,7 +148,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     public function open($session_name)
     {
-        Ox_Logger::logDebug('MongoSessionHandler: in open()');
+        $this->throwIfOpen();
 
         $this->session_name = $session_name;
 
@@ -167,9 +169,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
             $this->updateLastRequestTimestamp();
         } else {
             // Generate a new session ID
-            Ox_Logger::logDebug('generating new session ID');
             $this->session_id = self::generateSessionId();
-            Ox_Logger::logDebug('inserting session');
             $this->insertSession(time());
         }
 
@@ -303,7 +303,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function checkGarbage()
     {
-        $cutoff = time() - $this->gc_period;
+        $cutoff = time() - $this->gc_interval;
 
         $query = ['_id' => self::GC_ID];
         $doc = $this->collection->findOne($query);
@@ -311,12 +311,12 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         if (isset($doc[self::GC_TIMESTAMP_KEY])) {
             $lastPerformed = $doc[self::GC_TIMESTAMP_KEY]->sec;
         } else {
-            $lastPerformed = 0;
+            $lastPerformed = null;
         }
 
-        // If there is no document, or if garbage collection has not been
-        // performed in a long time
-        if ($lastPerformed <= $cutoff) {
+        // If there is no record of garbage collection ever happening before,
+        // or if garbage collection has not been performed recently enough
+        if (!isset($lastPerformed) || $lastPerformed <= $cutoff) {
             $this->collectGarbage();
             return true;
         } else {
@@ -334,7 +334,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function collectGarbage()
     {
-        Ox_Logger::logDebug('MongoSessionHandler: collecting garbage');
+        Ox_Logger::logDebug(self::LOG_PREFIX . 'collecting garbage');
 
         // Record that we last collected garbage right now
         $now = time();
@@ -367,7 +367,20 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     }
 
     /**
-     * Throw if the session has not been opened.
+     * Throw if a session is currently open.
+     *
+     * @return void
+     * @throws SessionException
+     */
+    private function throwIfOpen()
+    {
+        if (isset($this->session_id)) {
+            throw new SessionException(self::OPEN_EXCEPTION_MESSAGE);
+        }
+    }
+
+    /**
+     * Throw if no session is currently open.
      *
      * @return void
      * @throws SessionException
@@ -438,13 +451,13 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
         // If an existing token was received
         if (isset($rawToken)) {
-            Ox_Logger::logDebug('got raw token' . $rawToken);
-
             try {
                 $token = new SessionTokenParser($rawToken);
             } catch (SessionException $exception) {
                 // Log the exception
-                Ox_Logger::logError($exception->getMessage());
+                Ox_Logger::logWarning(
+                    self::LOG_PREFIX . $exception->getMessage()
+                );
 
                 // Do not use the existing token, but continue serving the
                 // request
@@ -453,19 +466,17 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
 
             // If the token signature is valid
             if ($this->validateTokenHmac($token)) {
-                Ox_Logger::logDebug('MongoSessionHandler: HMAC is valid');
                 // If this session ID still exists in the database, and is not
                 // expired
                 if ($this->sessionExistsAndIsNotExpired($token->getSessionId())) {
-                    Ox_Logger::logDebug('MongoSessionHandler: session is alive');
                     return $token->getSessionId();
-                } else {
-                    Ox_Logger::logDebug('MongoSessionHandler: session is dead');
                 }
             } else {
-                // The HMAC token is invalid; log this as an error and do not
-                // use the existing token, but continue serving the request
-                Ox_Logger::logError(self::INVALID_TOKEN_HMAC_ERROR_MESSAGE);
+                // The HMAC token is invalid; log this and do not use the
+                // existing token, but continue serving the request
+                Ox_Logger::logWarning(
+                    self::LOG_PREFIX . self::INVALID_TOKEN_HMAC_MESSAGE
+                );
                 return null;
             }
         }
@@ -591,9 +602,9 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function applyAppConfig()
     {
-        $this->gc_period = $this->getConfigValue(
-            self::CONFIG_GC_PERIOD_NAME,
-            self::GC_PERIOD_DEFAULT
+        $this->gc_interval = $this->getConfigValue(
+            self::CONFIG_GC_INTERVAL_NAME,
+            self::GC_INTERVAL_DEFAULT
         );
 
         $this->max_session_age = $this->getConfigValue(

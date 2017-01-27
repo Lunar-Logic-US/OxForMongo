@@ -116,6 +116,33 @@ class MongoSessionHandlerTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * Test that the session handler does not allow opening a new session if
+     * there is already an open session, since we are using the class as a
+     * singleton.
+     */
+    public function testThrowOnOpenIfOpened()
+    {
+        // Open a session
+        $this->session->open(self::TEST_SESSION_NAME);
+
+        try {
+            // Attempt to open a new session
+            $this->session->open(self::TEST_SESSION_NAME);
+
+            // If we got this far, fail the test
+            $this->fail(
+                'No exception was thrown when calling open() on an open '
+                . 'session.'
+            );
+        } catch (SessionException $exception) {
+            $this->assertEquals(
+                $exception->getMessage(),
+                MongoSessionHandler::OPEN_EXCEPTION_MESSAGE
+            );
+        }
+    }
+
     public function testThrowOnSetIfUnopened()
     {
         try {
