@@ -33,10 +33,13 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         'PRNG failure; no session ID can be generated';
     const UNOPENED_EXCEPTION_MESSAGE = 'A session has not been opened yet';
     const OPEN_EXCEPTION_MESSAGE = 'A session is already open';
+    const MISSING_TOKEN_HMAC_KEY_EXCEPTION_MESSAGE =
+        'Session token HMAC key is not set (in environment app config)';
 
     const CONFIG_GC_INTERVAL_NAME = 'session_gc_interval';
     const CONFIG_MAX_SESSION_AGE_NAME = 'max_session_age';
     const CONFIG_MAX_SESSION_IDLE_NAME = 'max_session_idle';
+    const CONFIG_TOKEN_HMAC_KEY_NAME = 'session_token_hmac_key';
 
     // These settings can be overridden in the app config using the names above
     const GC_INTERVAL_DEFAULT = 3600; // 1 hour
@@ -47,6 +50,9 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     private $gc_interval;
     private $max_session_age;
     private $max_session_idle;
+
+    /** @var string The token HMAC key (loaded from app config) */
+    private $token_hmac_key;
 
     /** @var string The unique identifier of the session */
     private $session_id;
@@ -78,7 +84,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     public function setConfigParser($configParser)
     {
-        $this->configParser = Ox_LibraryLoader::Config_Parser();
+        $this->configParser = $configParser;
     }
 
     /**
@@ -542,10 +548,13 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function generateHmac($tokenData)
     {
-        // TODO: get secret from app.php
-        $secret = '*whisperwhisper*';
+        Ox_Logger::logDebug(self::LOG_PREFIX . 'generating HMAC using key: ' . $this->token_hmac_key);
 
-        return hash_hmac(self::TOKEN_HMAC_ALGORITHM, $tokenData, $secret);
+        return hash_hmac(
+            self::TOKEN_HMAC_ALGORITHM,
+            $tokenData,
+            $this->token_hmac_key
+        );
     }
 
     /**
@@ -578,6 +587,8 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function compareHashes($hash1, $hash2)
     {
+        Ox_Logger::logDebug(self::LOG_PREFIX . "comparing hashes:\n$hash1\n\n$hash2");
+
         if (!is_string($hash1) || !is_string($hash2)) {
             return false;
         }
@@ -616,13 +627,26 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
             self::CONFIG_MAX_SESSION_IDLE_NAME,
             self::MAX_SESSION_IDLE_DEFAULT
         );
+
+        $this->token_hmac_key = $this->getConfigValue(
+            self::CONFIG_TOKEN_HMAC_KEY_NAME,
+            null
+        );
+
+        // If the token HMAC key is not set, it is not safe to continue, so
+        // throw an exception
+        if (!isset($this->token_hmac_key)) {
+            throw new SessionException(
+                self::MISSING_TOKEN_HMAC_KEY_EXCEPTION_MESSAGE
+            );
+        }
     }
 
     /**
      * @param string $configName
      * @param mixed $defaultValue
-     * @return mixed The value corresponding to $configName if set in app.php;
-     *               otherwise $defaultValue
+     * @return mixed The value corresponding to $configName if set in app
+     *               config; otherwise $defaultValue
      */
     private function getConfigValue($configName, $defaultValue)
     {

@@ -51,10 +51,11 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
 
     private static $test_token;
 
-    // Define settings that would normally be defined by the app config
+    // Define settings that would normally be defined by the app config but
+    // which are set up here to be overridable by tests
     private $gc_interval = MongoSessionHandler::GC_INTERVAL_DEFAULT;
     private $max_session_age = MongoSessionHandler::MAX_SESSION_AGE_DEFAULT;
-    private $max_session_idle = MongoSessionHandler::MAX_SESSION_IDLE_DEFAULT;
+    private $token_hmac_key = '*whisperwhisper*';
 
     /** @var MongoSessionHandler The object of the class we are testing */
     private $session;
@@ -99,7 +100,7 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Create a new MongoSessionHandler
         $this->session = new MongoSessionHandler(self::TEST_SESSION_NAME);
 
-        // TODO: Disable garbage collection
+        // TODO: Disable garbage collection maybe??
 
         // Tell the MongoSessionHandler to use our test MongoSource
         $this->session->setMongoSource($this->mongoSource);
@@ -116,10 +117,14 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->mockConfigParser =
             $this->getMockBuilder('\Ox_ConfigParser')
                  ->getMock();
+        $map = [
+            [MongoSessionHandler::CONFIG_GC_INTERVAL_NAME, $this->gc_interval],
+            [MongoSessionHandler::CONFIG_MAX_SESSION_AGE_NAME, $this->max_session_age],
+            [MongoSessionHandler::CONFIG_TOKEN_HMAC_KEY_NAME, $this->token_hmac_key]
+        ];
         $this->mockConfigParser
              ->method('getAppConfigValue')
-             ->with(MongoSessionHandler::CONFIG_GC_INTERVAL_NAME)
-             ->willReturn($this->gc_interval);
+             ->will($this->returnValueMap($map));
         $this->session->setConfigParser($this->mockConfigParser);
     }
 
@@ -141,7 +146,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
              ->method('getCookieValue')
-             ->with($this->equalTo(self::TEST_SESSION_NAME))
              ->willReturn($this->test_token);
 
         // Open the session
@@ -171,7 +175,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Make mockCookieManager return the test malformed token
         $this->mockCookieManager
              ->method('getCookieValue')
-             ->with($this->equalTo(self::TEST_SESSION_NAME))
              ->willReturn(self::TEST_MALFORMED_TOKEN);
 
         // Open the session
@@ -209,7 +212,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Make mockCookieManager return the test token
         $this->mockCookieManager
              ->method('getCookieValue')
-             ->with($this->equalTo(self::TEST_SESSION_NAME))
              ->willReturn($token);
 
         // Open the session
@@ -243,7 +245,6 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Make mockCookieManager return a test valid token value
         $this->mockCookieManager
              ->method('getCookieValue')
-             ->with($this->equalTo(self::TEST_SESSION_NAME))
              ->willReturn($this->test_token);
 
         // Open the session
