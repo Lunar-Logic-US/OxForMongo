@@ -548,8 +548,6 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function generateHmac($tokenData)
     {
-        Ox_Logger::logDebug(self::LOG_PREFIX . 'generating HMAC using key: ' . $this->token_hmac_key);
-
         return hash_hmac(
             self::TOKEN_HMAC_ALGORITHM,
             $tokenData,
@@ -587,8 +585,6 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
      */
     private function compareHashes($hash1, $hash2)
     {
-        Ox_Logger::logDebug(self::LOG_PREFIX . "comparing hashes:\n$hash1\n\n$hash2");
-
         if (!is_string($hash1) || !is_string($hash2)) {
             return false;
         }
