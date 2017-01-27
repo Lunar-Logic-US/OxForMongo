@@ -475,6 +475,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
         // If an existing token was received
         if (isset($rawToken)) {
             try {
+                // Attempt to parse the token
                 $token = new SessionTokenParser($rawToken);
             } catch (SessionException $exception) {
                 // Log the exception

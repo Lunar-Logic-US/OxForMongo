@@ -20,7 +20,7 @@ class SessionTokenParser
      */
     public function __construct($token)
     {
-        if (self::validateTokenFormat($token)) {
+        if (self::tokenIsWellFormed($token)) {
             $this->token = $token;
             $this->parse();
         } else {
@@ -52,12 +52,16 @@ class SessionTokenParser
     /*************************************************************************/
 
     /**
-     * Validate that a token is in the correct format.  This does NOT validate
-     * the HMAC.
+     * Determine whether a token string is well-formed.  This does NOT validate
+     * the HMAC.  In order to be well-formed, the token must be a string
+     * comprised of two lowercase hex strings separated by a delimiter
+     * character.  The required length of the hex strings and the delimter
+     * character are defined by constants.
      *
-     * @return bool true if the token is a valid token
+     * @param mixed $token
+     * @return bool True if the token is a well-formed token
      */
-    private static function validateTokenFormat($token)
+    private static function tokenIsWellFormed($token)
     {
         $id_charlength = MongoSessionHandler::SESSION_ID_BYTE_LENGTH * 2;
         $hmac_charlength = MongoSessionHandler::TOKEN_HMAC_BYTE_LENGTH * 2;
