@@ -34,7 +34,7 @@ class MongoSessionHandler extends \ox\lib\abstract_classes\SessionHandler
     const UNOPENED_EXCEPTION_MESSAGE = 'A session has not been opened yet';
     const OPEN_EXCEPTION_MESSAGE = 'A session is already open';
     const MISSING_TOKEN_HMAC_KEY_EXCEPTION_MESSAGE =
-        'Session token HMAC key is not set (in environment app config)';
+        'Session token HMAC key is not set (in app config)';
 
     const CONFIG_GC_INTERVAL_NAME = 'session_gc_interval';
     const CONFIG_MAX_SESSION_AGE_NAME = 'max_session_age';
