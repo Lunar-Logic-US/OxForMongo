@@ -262,7 +262,8 @@ class MongoSessionHandlerIntegrationTest extends \PHPUnit_Framework_TestCase
         // Get the contents of the session document
         $doc = $this->mongoCollection->findOne($query);
 
-        // Verify that the session ID is the one we gave via mockCookieManager
+        // Verify that the session ID is a hash of the one we gave via
+        // mockCookieManager
         $this->assertEquals(self::TEST_SESSION_ID_HASH, $doc['_id']);
     }
 
