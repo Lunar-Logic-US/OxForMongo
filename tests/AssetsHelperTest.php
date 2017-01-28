@@ -15,25 +15,12 @@
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 //require_once (OX_FRAME_EXCEPTIONS . 'Ox_Exception.php');
-$appConfigFile = <<<APP_CONFIG_FILE
-<?php
-\$log_dir = '/tmp/';
-\$mongo_config = array(
-    'set_string_id' => TRUE,
-    'persistent' => TRUE,
-    'host'       => 'localhost',
-    'database'   => 'test',
-    'port'       => '27017',
-    'login'         => '',
-    'password'      => '',
-    'replicaset'    => '',
+
+require_once(
+    dirname(__FILE__) . DIRECTORY_SEPARATOR .
+    'boot' . DIRECTORY_SEPARATOR .
+    'boot.php'
 );
-
-?>
-APP_CONFIG_FILE;
-
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . '/boot.php');
-
 
 /**
  * Ox_LocalAssetTest
@@ -63,5 +50,3 @@ class Ox_LocalAssetTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('/assets/4efa53fa7932046105000000.jpg', $asset_helper->createURI($asset));
     }
 }
-
-?>
