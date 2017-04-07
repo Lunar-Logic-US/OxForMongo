@@ -2,7 +2,8 @@
 
 namespace ox\lib\session_handlers;
 
-require_once dirname(dirname(dirname(dirname(__FILE__))))
+// TODO: learn the correct way to require autoload.php
+require_once dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))))
     . '/vendor/autoload.php';
 
 use \Ox_ConfigParser;
