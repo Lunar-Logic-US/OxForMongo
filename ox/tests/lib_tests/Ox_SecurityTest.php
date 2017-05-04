@@ -117,7 +117,7 @@ APP_CONFIG_FILE;
     }
     public function testLoginUser() {
         $security = new Ox_SecurityMongoCollection();
-        $security->loginUser(array('_id'=>new MongoId('1111111111')));
+        $security->loginUser(array('_id'=>new MongoId()));
         global $session;
         $user_id = $session->get('user_id');
 
