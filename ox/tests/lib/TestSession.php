@@ -46,12 +46,12 @@ class TestSession extends Ox_Session {
     }
 
     function set($key, $value) {
-        $this->_storedValues[$key]=$value;
+        self::$_storedValues[$key] = $value;
     }
 
     function get($key) {
-        if (isset($this->_storedValues[$key])) {
-            return $this->_storedValues[$key];
+        if (isset(self::$_storedValues[$key])) {
+            return self::$_storedValues[$key];
         }
         return null;
     }
