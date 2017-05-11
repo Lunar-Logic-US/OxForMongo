@@ -20,7 +20,7 @@
  */
 class TestAsset extends Ox_Asset
 {
-    public function save($file_info)
+    public function save($file_info, $fieldName = 'file', array $extra_fields = array())
     {
         $doc = parent::save($file_info);
         return $doc;
