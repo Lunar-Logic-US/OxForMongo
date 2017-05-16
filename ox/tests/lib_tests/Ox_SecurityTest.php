@@ -179,7 +179,6 @@ APP_CONFIG_FILE;
 
         $required = array('admin');
         $user = array('roles'=>array('su'));
-        print "call just before\n";
         $this->assertTrue($security->secureResource('/',$required,'index', $user));
     }
     public function testSecureResourceAdminUserLoggedIn() {
@@ -200,15 +199,18 @@ APP_CONFIG_FILE;
         return false;
     }
     public function testSecureResourceAdminSULoggedOut() {
-        //ob_start();
         $security = new Ox_SecurityMongoCollection();
         $required = array('admin');
         $user = array('roles'=>array('su'));
         //$this->expectOutputString('<title>Ox Framework</title>');
+
+        // prints output page to stdout, which we don't need to see. So hide it.
+        ob_start();
         $security->secureResource('/',$required,'index', $user);
+        ob_end_clean();
 
         //test what headers are set.
-         $headers_list = xdebug_get_headers();
+        $headers_list = xdebug_get_headers();
         $this->assertTrue($this->_containedInArrayValue('401',$headers_list));
     }
 
