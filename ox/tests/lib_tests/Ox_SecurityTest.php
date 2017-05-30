@@ -117,11 +117,12 @@ APP_CONFIG_FILE;
     }
     public function testLoginUser() {
         $security = new Ox_SecurityMongoCollection();
-        $security->loginUser(array('_id'=>new MongoId()));
+        $mongo_id = new MongoId();
+        $security->loginUser(array('_id'=>$mongo_id));
         global $session;
         $user_id = $session->get('user_id');
 
-        $this->assertFalse($security->checkPermission($user_id, '1111111111'));
+        $this->assertFalse($security->checkPermission($user_id, $mongo_id));
     }
     public function testLogout(){
         global $session;
