@@ -189,9 +189,6 @@ PHP;
         if (substr(DIR_APPLIB, -1, 1) == DIRECTORY_SEPARATOR) {
             $filePath = substr_replace(DIR_APPLIB, "", -1, 1);
         }
-        else {
-            $filePath = DIR_APPLIB . DIRECTORY_SEPARATOR;
-        }
 
         Ox_LibraryLoader::loadCode($testClass,array($filePath));
         $this->assertTrue(class_exists($testClass,FALSE));
