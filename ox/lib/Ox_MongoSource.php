@@ -108,7 +108,7 @@ class Ox_MongoSource
             $this->_config = array(
                 'set_string_id' => true,
                 'persistent' => true,
-                'host'       => 'localhost',
+                'host'       => 'mongodb',
                 'database'   => 'test',
                 'port'       => '27017',
                 'login'         => '',
@@ -120,13 +120,13 @@ class Ox_MongoSource
             $host = $this->createConnectionName($this->_config, $this->driverVersion());
 
             if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
-                $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
+                $this->_connection = new MongoClient($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
             } else if ($this->driverVersion() >= '1.3.0') {
                 $this->_connection = new MongoClient($host);
             } else if ($this->driverVersion() >= '1.2.0') {
-                $this->_connection = new Mongo($host);
+                $this->_connection = new MongoClient($host);
             } else {
-                $this->_connection = new Mongo($host, true, $this->_config['persistent']);
+                $this->_connection = new MongoClient($host, true, $this->_config['persistent']);
             }
 
             if (isset($this->_config['slaveok'])) {

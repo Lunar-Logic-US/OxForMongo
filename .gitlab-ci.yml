@@ -3,11 +3,16 @@ before_script:
 - bash ci/docker_install.sh > /dev/null
 - bash ci/composer_install.sh > /dev/null
 
+services:
+  - mongo
+
 test:app:
-  image: asteris/apache-php-mongo
+  image: php:5.5
+  # image: asteris/apache-php-mongo
   script:
   - phpunit ox/tests --color --coverage-text
 
+    
 # test:5.6:
 #   image: php:5.6
 #   script:
