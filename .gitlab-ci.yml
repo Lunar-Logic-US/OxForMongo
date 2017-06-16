@@ -1,10 +1,10 @@
-image: asteris/apache-php-mongo
+image: docker:git
 
-before_script:
-# Install dependencies
-- bash ci/docker_install.sh > /dev/null
-- bash ci/composer_install.sh > /dev/null
+services: 
+  - docker:dind
 
-test:app:
+test:
   script:
-  - phpunit ox/tests --color --coverage-text
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker run -dit --rm --name ox -w /ox -v `pwd`:/ox registry.gitlab.com/lunar-logic/ox-seed/dev:latest
+    - docker exec ox phpunit ox/tests --color --coverage-text
