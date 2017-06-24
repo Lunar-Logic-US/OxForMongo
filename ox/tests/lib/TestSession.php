@@ -21,7 +21,7 @@ require_once(DIR_FRAMELIB  . 'Ox_Session.php');
  */
 class TestSession extends Ox_Session {
     private static $_instance = null;
-    private static $_storedValues = array();
+    private  $_storedValues = array();
     public $started = false;
 
     public static function getInstance() {
@@ -46,7 +46,7 @@ class TestSession extends Ox_Session {
     }
 
     function set($key, $value) {
-        $this->_storedValues[$key]=$value;
+        $this->_storedValues[$key] = $value;
     }
 
     function get($key) {
