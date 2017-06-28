@@ -22,5 +22,5 @@
  */
 
 if (!defined('DIR_FRAMEWORK')) {
-    define ("DIR_FRAMEWORK",'/home/project/ox/');
+    define ("DIR_FRAMEWORK",'/home/app/current/ox/');
 }
