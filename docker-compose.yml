@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  app:
+    build: 
+        context: .
+        dockerfile: Dockerfile.prod
+    container_name: app
+    volumes:
+      - ./app-blank:/home/app/current/
+      - ./ox:/home/app/current/ox
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+      - "8443:443"
+    tty: true
+
+  db:
+    image: mongo:3.4
+    container_name: db
+    volumes:
+      - ./../dump:/home/app/data/dump/
+    ports:
+      - "27017:27017"
+    logging:
+      driver: none
+

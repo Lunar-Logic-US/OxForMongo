@@ -43,13 +43,13 @@ EnableSendFile off" > /etc/apache2/httpd.conf
 
 echo "<VirtualHost *:80>
 ServerAdmin webmaster@localhost
-DocumentRoot /home/project/$projectName/webroot/
+DocumentRoot /home/app/current/webroot/
 
 CustomLog ${APACHE_LOG_DIR}/access.log combined
 ErrorLog ${APACHE_LOG_DIR}/error.log
 LogLevel warn
 
-<Directory /home/project/$projectName/webroot/>
+<Directory /home/app/current/webroot/>
     Options -Indexes +FollowSymLinks -MultiViews
     AllowOverride All
     Order allow,deny
@@ -61,13 +61,13 @@ LogLevel warn
 echo "<IfModule mod_ssl.c>
 <VirtualHost *:443>
 ServerAdmin webmaster@localhost
-DocumentRoot /home/project/$projectName/webroot/
+DocumentRoot /home/app/current/webroot/
 
 CustomLog ${APACHE_LOG_DIR}/access.log combined
 ErrorLog ${APACHE_LOG_DIR}/error.log
 LogLevel warn
 
-<Directory /home/project/$projectName/webroot/>
+<Directory /home/app/current/webroot/>
     Options -Indexes +FollowSymLinks -MultiViews
     AllowOverride All
     Order allow,deny
@@ -233,39 +233,13 @@ apt-get install mongodb-10gen
 pecl install mongo-1.3.7
 
 
-# Rock Mongo http://localhost:8080/rock
-# ------------------------------------------------
-echo '***************************** Installing Rock Mongo - http://localhost:8080/rock *****************************'
-git clone https://github.com/iwind/rockmongo.git /home/project/rockmongo
-echo "# rockmongo default Apache configuration
-Alias /rock /home/project/rockmongo
-<Directory /home/project/rockmongo>
-        Options FollowSymLinks
-        DirectoryIndex index.php
-</Directory>
-" > /etc/apache2/conf.d/rockmongo.conf
-
-
-echo '***************************** Installing Pimp My Log - http://localhost:8080/pml *****************************'
-git clone https://github.com/potsky/PimpMyLog.git /home/project/pimpmylog
-
-echo "# pimpmylog default Apache configuration
-Alias /pml /home/project/pimpmylog
-<Directory /home/project/pimpmylog>
-        Options FollowSymLinks
-        DirectoryIndex index.php
-</Directory>
-" > /etc/apache2/conf.d/pimpmylog.conf
-
-mkdir /home/project/upload #default upload location for OxCMS
-
 # ------------------------------------------------
 # Finish up
 # ------------------------------------------------
 # restart apache
 service apache2 restart
 # set permission for vagrant user
-chown -R vagrant /home/project
+chown -R vagrant /home/app/
 
 echo '***************************** Completed bootstrap.sh for $projectName *****************************'
 echo '

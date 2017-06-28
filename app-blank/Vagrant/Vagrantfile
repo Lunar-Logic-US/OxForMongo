@@ -22,10 +22,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Recommended: Do not share OxCart and OxCMS from your local file system, rather, use svn subrepositories in your project.
 
   # Default to the project directory.
-  config.vm.synced_folder "..", "/home/project/" + $projectName
+  config.vm.synced_folder "..", "/home/app/current/"
   
   # Framework directory.
-  config.vm.synced_folder "../../ox", "/home/project/ox"
+  config.vm.synced_folder "../../ox", "/home/app/current/ox"
 
   #HTTP
   config.vm.network :forwarded_port, guest: 80, host: 8080
