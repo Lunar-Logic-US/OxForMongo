@@ -19,23 +19,34 @@ class Ox_Mail implements Ox_Mailer {
 	 *
 	 * @return array $result
 	 */
-    public function sendMail($from, $to, $subject, $messageInHtml=null, $messageInText=null, $replyTo=null) {
-    	$result = array();
-      if(is_null($replyTo)) {
-        $replyTo = $from;
-      }
-    	
-        $headers = "From: " . $from . "\r\n";
-        $headers .= "Reply-To: ". $replyTo . "\r\n";
-        $headers .= "MIME-Version: 1.0\r\n";
-        
+    public function sendMail($from, $to, $subject, $messageInHtml=null, $messageInText=null, $replyTo=null, $cc=null, $bcc=null) {
+        $result = array();
+
+        if(is_null($replyTo)) {
+            $replyTo = $from;
+        }
+
+        $headers[] = "MIME-Version: 1.0";
+        $headers[] = "From: " . $from;
+        $headers[] = "Reply-To: " . $replyTo;
+
+        if (!is_null($cc)) {
+            $headers[] = "Cc: " . $cc;
+        }
+
+        if (!is_null($bcc)) {
+            $headers[] = "Bcc: " . $bcc;
+        }
+
         if(!is_null($messageInHtml)) {
             $message = $messageInHtml;
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            $headers[] = "Content-Type: text/html; charset=ISO-8859-1";
         } else {
             $message = $messageInText;
         }
-        
+
+        $headers = implode("\r\n", $headers);
+
         $log_entry = array(
             'type'=>'local',
             'to'=>$to,
@@ -43,18 +54,18 @@ class Ox_Mail implements Ox_Mailer {
             'message'=>$message,
             'timestamp'=>new MongoDate()
         );
-        
+
         if(!@mail($to, $subject, $message, $headers)) {
-        	$result['success'] = false;
-        	Ox_Logger::logError('Error sending: ' . print_r($log_entry, 1));
+            $result['success'] = false;
+            Ox_Logger::logError('Error sending: ' . print_r($log_entry, 1));
             $log_entry['is_success'] = false;    
         } else {
-        	$result['success'] = true;
-        	$log_entry['is_success'] = true;
+            $result['success'] = true;
+            $log_entry['is_success'] = true;
         }
-        
+
         Ox_LibraryLoader::db()->{Ox_Mailer::MAIL_LOG_COLLECTION}->insert($log_entry);
-        
+
         return $result;
     }
 }
