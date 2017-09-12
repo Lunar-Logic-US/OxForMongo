@@ -14,28 +14,32 @@
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @copyright Copyright (c) 2017 Lunar Logic LLC
  * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
  * @package Ox_Widgets
  */
 
 /**
- * Widget JS
- * This widget Allows you to add javascript files from anywhere in your code and then have it added
- * in a layout (or anywhere)
- * 
- * Use the methods that are appended with '_cachebust' to have the benefits of cache-busting. These methods will
- * only work for files located in webroot/js.
+ * Widget ReCaptcha
+ * This widget Allows you to add a Google ReCaptcha widget to any page,
+ * as well as verify the response from the form submission
  *
- * To set:
+ * To render a widget:
  * <code>
  * $widget_handler=Ox_LibraryLoader::Widget_Handler();
- * $widget_handler->JS->add_cachebust("tag-it.js"); // set a simple js from /js/tag-it.js
+ * $captcha = $widget_handler->ReCaptcha->create(array(
+ *   'siteKey' => 'site-key-value'
+ *)); // Create the captcha handler
+ * $captcha->render(); // Render the widget
  *</code>
- * To display:
- * <code>
- * Ox_WidgetHandler::JS();
- * </code>
+ * To verify a widget form response:
+ * $widget_handler=Ox_LibraryLoader::Widget_Handler();
+ * $captcha = $widget_handler->ReCaptcha->create(array(
+ *   'siteSecret' => 'site-secret-value'
+ *)); // Create the captcha handler
+ * $response = $captcha->verify($_POST['g-recaptcha-response']); // Verify the token
+ * if ($response->isSuccess())... //Handle
+ *</code>
  *
  * @package Ox_Widgets
  */
