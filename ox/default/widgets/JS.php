@@ -91,6 +91,14 @@ JS;
             if (isset($js_options['charset']) && $js_options['charset']!==FALSE) {
                 $charset = " charset=\"{$js_options['charset']}\" ";
             }
+            $async = '';
+            if (isset($js_options['async']) && $js_options['async']) {
+                $async = " async ";
+            }
+            $defer = '';
+            if (isset($js_options['defer']) && $js_options['defer']) {
+                $async = " defer ";
+            }
 
             $file = $js_file;
             $url = Ox_Router::buildURL($js_options['directory'].$file);
@@ -102,7 +110,7 @@ JS;
                 }
             }
             //$directory = $appWebBase . $js_options['directory'];
-            $output .= "<script src=\"{$url}\"{$type}{$charset}></script>\n";
+            $output .= "<script src=\"{$url}\"{$type}{$charset}{$async}{$defer}></script>\n";
         }
         
         if (count($this->_js_script_list)) {
@@ -248,6 +256,40 @@ JS;
     {
         $this->add_to_bottom($file,$directory,$type,$charset);
     }
+
+    /**
+     * Add an async file to the bottom of the JS list.
+     *
+     * @param $file
+     * @param string $directory
+     * @param bool $type
+     * @param bool $charset
+     * @deprecated
+     */
+     public function add_async($file,$directory='/js/',$type=FALSE,$charset=FALSE)
+     {
+         $options = array('directory'=>$directory,'type'=>$type,'charset'=>$charset,'async'=>TRUE);
+         $new = array($file => $options);
+         //This will overwrite if the same file is used twice.
+         $this->_js_file_list = array_merge($this->_js_file_list,$new);
+     }
+
+     /**
+     * Add a defer file to the bottom of the JS list.
+     *
+     * @param $file
+     * @param string $directory
+     * @param bool $type
+     * @param bool $charset
+     * @deprecated
+     */
+     public function add_defer($file,$directory='/js/',$type=FALSE,$charset=FALSE)
+     {
+         $options = array('directory'=>$directory,'type'=>$type,'charset'=>$charset,'defer'=>TRUE);
+         $new = array($file => $options);
+         //This will overwrite if the same file is used twice.
+         $this->_js_file_list = array_merge($this->_js_file_list,$new);
+     }
 
     /**
      * This setups a javascript variable pageBase that can be used with other javascript code.
