@@ -5,6 +5,7 @@ MAINTAINER Lunar Logic <support@lunarlogic.com>
 WORKDIR /home/app/current
 
 COPY Docker/php.ini /etc/php/5.6/apache2/php.ini
+COPY Docker/cli-php.ini /etc/php/5.6/cli/php.ini
 COPY Docker/xdebug.ini /etc/php/5.6/apache2/conf.d/xdebug.ini
 COPY Docker/bootstrap.sh bootstrap.sh
 
