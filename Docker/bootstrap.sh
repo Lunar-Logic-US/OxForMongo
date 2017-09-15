@@ -82,6 +82,13 @@ a2ensite default-ssl.conf
 a2enmod ssl
 a2enmod rewrite
 
+apt-get update
+
+echo '***************************** Installing PHP5 *****************************'
+apt-get install -y libapache2-mod-php5.6 php5.6-cli php5.6-ldap php5.6-mbstring
+
+echo '***************************** Installing PHP5 tools *****************************'
+apt-get install -y php5.6-curl php5.6-mcrypt php5.6-gd php5.6-xdebug php5.6-intl php5.6-dev php5.6-imagick
 
 echo '***************************** Wrapping Up *****************************'
 sudo service apache2 restart
