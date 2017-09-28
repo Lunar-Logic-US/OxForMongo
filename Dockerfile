@@ -2,11 +2,11 @@ FROM php:5.6-apache
 
 MAINTAINER Lunar Logic <support@lunarlogic.com>
 
-RUN apt-get update && apt-get install mod_ssl
 
-COPY Docker/php.ini /etc/php/5.6/apache2/php.ini
-#COPY Docker/cli-php.ini /etc/php/5.6/cli/php.ini
-#COPY Docker/xdebug.ini /etc/php/5.6/apache2/conf.d/xdebug.ini
+COPY Docker/php.ini /usr/local/etc/php/php.ini
+
+
+#COPY Docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 COPY apache_configs/ /etc/apache2
 
@@ -19,21 +19,33 @@ RUN echo '\n\
 ' >> /etc/apache2/apache2.conf
 
 
-
-
 RUN mkdir -p /home/app/current/webroot/ && \
     mkdir /home/app/data/ && \
     chmod -R 755 /home/app/ && \
     chown -R www-data:www-data /home/app/
 
-# Expect these to be overwritten in production
-RUN apt-get update && apt-get install ssl-cert && \
+
+RUN apt-get update && apt-get install -y ssl-cert libssl-dev  && \
     make-ssl-cert generate-default-snakeoil --force-overwrite && \
     mv /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/ox.pem && \ 
     mv /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/ox.key
 
+# Enable our http and https sites.
+RUN a2dissite 000-default.conf && \
+    rm /etc/apache2/sites-available/000-default.conf && \
+    a2ensite default.conf && \
+    a2ensite default-ssl.conf && \
+    a2enmod ssl && \
+    a2enmod rewrite
 
 RUN chown -R www-data:www-data ..
 
+WORKDIR /home/app/current
 
+COPY ./app-blank .
+COPY ./ox ./ox
+
+RUN pecl install mongo
+
+RUN service apache2 restart
 
