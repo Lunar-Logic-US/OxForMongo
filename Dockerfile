@@ -2,9 +2,11 @@ FROM php:5.6-apache
 
 MAINTAINER Lunar Logic <support@lunarlogic.com>
 
+#needed for postfix installation 
+ENV DEBIAN_FRONTEND noninteractive
 
 COPY Docker/php.ini /usr/local/etc/php/php.ini
-COPY Docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY Docker/xdebug.ini /uslocal/etc/php/conf.d/xdebug.ini
 
 # Set up Apache configs.
 COPY apache_configs/ /etc/apache2
@@ -22,13 +24,28 @@ RUN mkdir -p /home/app/current/webroot/ && \
     chmod -R 755 /home/app/ && \
     chown -R www-data:www-data /home/app/
 
+#postfix configs
+RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections  && \
+    echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
+
+
 # Install packages. 
-RUN apt-get update && apt-get install -y ssl-cert libssl-dev  
+RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog
+# install mail logging disabled by default
+#RUN apt-get install -y syslog-ng syslog-ng-core
+RUN pecl install mongo
+RUN pecl install xdebug
 
 # Set up temp certs, this will be replaced in production. 
-Run make-ssl-cert generate-default-snakeoil --force-overwrite && \
+RUN make-ssl-cert generate-default-snakeoil --force-overwrite && \
     mv /etc/ssl/certs/ssl-cert-snakeoil.pem /etc/ssl/certs/ox.pem && \ 
     mv /etc/ssl/private/ssl-cert-snakeoil.key /etc/ssl/private/ox.key
+
+# copy config file for post fix after installing and creating keys.
+COPY Docker/main.cf /etc/postfix/main.cf
+
+
+
 
 # Enable our http and https sites.
 RUN a2dissite 000-default.conf && \
@@ -38,6 +55,28 @@ RUN a2dissite 000-default.conf && \
     a2enmod ssl && \
     a2enmod rewrite
 
+# install phpunit for unti tests
+RUN wget https://phar.phpunit.de/phpunit-4.8.0.phar && \ 
+    chmod +x phpunit-4.8.0.phar && \ 
+    mv phpunit-4.8.0.phar /usr/bin/phpunit
+
+
+
+#install composer 
+RUN EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig) && \ 
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+    ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');") && \
+    if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]; then  >&2 echo 'ERROR: Invalid installer signature' && rm composer-setup.php \
+    else; php composer-setup.php --quiet && \
+    rm composer-setup.php && \ 
+    mv composer.phar /usr/local/bin/composer; \
+    fi
+
+
+    
+
+
+
 
 WORKDIR /home/app/current
 
@@ -45,8 +84,6 @@ WORKDIR /home/app/current
 COPY ./app-blank .
 COPY ./ox ./ox
 
-# Mongo php drive installation.
-RUN pecl install mongo
 
 RUN service apache2 restart
-
+RUN service postfix restart
