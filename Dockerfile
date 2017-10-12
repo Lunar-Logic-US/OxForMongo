@@ -87,3 +87,5 @@ COPY ./ox ./ox
 
 RUN service apache2 restart
 RUN service postfix restart
+
+CMD ["/bin/bash", "-c","service postfix start && /usr/local/bin/apache2-foreground"]
