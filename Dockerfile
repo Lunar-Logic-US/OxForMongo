@@ -21,6 +21,7 @@ RUN echo '\n\
 # Make project folders and set perrmisions.
 RUN mkdir -p /home/app/current/webroot/ && \
     mkdir /home/app/data/ && \
+    mkdir /home/app/assets/ && \
     chmod -R 755 /home/app/ && \
     chown -R www-data:www-data /home/app/
 
@@ -30,11 +31,12 @@ RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections  &
 
 
 # Install packages. 
-RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog
+RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog php5-imagick libmagickwand-dev imagemagick
 # install mail logging disabled by default
 #RUN apt-get install -y syslog-ng syslog-ng-core
 RUN pecl install mongo
 RUN pecl install xdebug
+RUN pecl install imagick
 
 # Set up temp certs, this will be replaced in production. 
 RUN make-ssl-cert generate-default-snakeoil --force-overwrite && \
@@ -44,9 +46,6 @@ RUN make-ssl-cert generate-default-snakeoil --force-overwrite && \
 # copy config file for post fix after installing and creating keys.
 COPY Docker/main.cf /etc/postfix/main.cf
 
-
-
-
 # Enable our http and https sites.
 RUN a2dissite 000-default.conf && \
     rm /etc/apache2/sites-available/000-default.conf && \
@@ -55,12 +54,10 @@ RUN a2dissite 000-default.conf && \
     a2enmod ssl && \
     a2enmod rewrite
 
-# install phpunit for unti tests
+# install phpunit for unit tests
 RUN wget https://phar.phpunit.de/phpunit-4.8.0.phar && \ 
     chmod +x phpunit-4.8.0.phar && \ 
     mv phpunit-4.8.0.phar /usr/bin/phpunit
-
-
 
 #install composer 
 RUN EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig) && \ 
@@ -71,12 +68,6 @@ RUN EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig) 
     rm composer-setup.php && \ 
     mv composer.phar /usr/local/bin/composer; \
     fi
-
-
-    
-
-
-
 
 WORKDIR /home/app/current
 
