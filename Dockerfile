@@ -22,8 +22,11 @@ RUN echo '\n\
 RUN mkdir -p /home/app/current/webroot/ && \
     mkdir /home/app/data/ && \
     mkdir /home/app/assets/ && \
+    mkdir /home/project/assets/ && \
     chmod -R 755 /home/app/ && \
-    chown -R www-data:www-data /home/app/
+    chown -R www-data:www-data /home/app/ \
+    chmod -R 755 /home/project/ && \
+    chown -R www-data:www-data /home/project
 
 #postfix configs
 RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections  && \
