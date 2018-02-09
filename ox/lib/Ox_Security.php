@@ -35,6 +35,23 @@
 
 require_once(DIR_FRAMELIB.'Ox_User.php');
 
+/**
+ * Backwards compatibility with PHP versions < 5.6, allows for timing attack safety.
+ * From php.net documentation, http://php.net/manual/en/function.hash-equals.php#115635
+ */
+if(!function_exists('hash_equals')) {
+    function hash_equals($str1, $str2) {
+        if(strlen($str1) != strlen($str2)) {
+            return false;
+        } else {
+            $res = $str1 ^ $str2;
+            $ret = 0;
+            for($i = strlen($res) - 1; $i >= 0; $i--) $ret |= ord($res[$i]);
+            return !$ret;
+        }
+    }
+}
+
 class Ox_Security
 {
     const DEBUG = FALSE;
@@ -72,10 +89,20 @@ class Ox_Security
             //backward compatibility
             $passwordFromDatabase = $passwordFromDatabase['password'];
         }
+
+        //40 character sha1 hash + 6 character salt
+        $isSha1Hash = strlen($passwordFromDatabase) == 46;
+
+        //backward compatibility with old sha1 password hashes
         $salt = substr($passwordFromDatabase, 0, 6);
-        if($salt . sha1($salt . $password) == $passwordFromDatabase) {
+        if($isSha1Hash) {
+            if(hash_equals($passwordFromDatabase, $salt . sha1($salt . $password))) {
+                return true;
+            }
+        } else if(password_verify($password, $passwordFromDatabase)) {
             return true;
         }
+
         return false;
     }
 
@@ -223,8 +250,7 @@ class Ox_Security
      */
     public static function hashAndSaltString($plainString)
     {
-        $salt = substr(sha1(uniqid(rand(), true)), 0, 6);
-        $hashed = $salt . sha1($salt . $plainString);
+        $hashed = password_hash($plainString, PASSWORD_BCRYPT);
         return $hashed;
     }
 
