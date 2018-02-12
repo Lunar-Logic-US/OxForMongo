@@ -35,11 +35,12 @@ RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections  &
 
 
 # Install packages. 
-RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog php5-imagick libmagickwand-dev imagemagick
+RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog libmagickwand-dev imagemagick
 # install mail logging disabled by default
 #RUN apt-get install -y syslog-ng syslog-ng-core
+RUN pecl channel-update pecl.php.net
 RUN pecl install mongo
-RUN pecl install xdebug
+RUN pecl install xdebug-2.2.7
 RUN pecl install imagick
 
 # Set up temp certs, this will be replaced in production. 
