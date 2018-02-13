@@ -18,17 +18,6 @@ RUN echo '\n\
         EnableSendFile off \n\
 ' >> /etc/apache2/apache2.conf
 
-# Make project folders and set perrmisions.
-RUN mkdir -p /home/app/current/webroot/ && \
-    mkdir /home/app/data/ && \
-    mkdir /home/app/assets/ && \
-    mkdir /home/project/ && \
-    mkdir /home/project/assets/ && \
-    chmod -R 755 /home/app/ && \
-    chown -R www-data:www-data /home/app/ && \
-    chmod -R 755 /home/project/ && \
-    chown -R www-data:www-data /home/project
-
 #postfix configs
 RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections  && \
     echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
@@ -79,9 +68,11 @@ WORKDIR /home/app/current
 # copy ox things
 COPY ./app-blank .
 COPY ./ox ./ox
+COPY ./Docker .
 
+RUN chmod 777 permissions.sh
 
 RUN service apache2 restart
 RUN service postfix restart
 
-CMD ["/bin/bash", "-c","service postfix start && /usr/local/bin/apache2-foreground"]
+CMD ["/bin/bash", "-c","service postfix start && /usr/local/bin/apache2-foreground","./permissions.sh"]
