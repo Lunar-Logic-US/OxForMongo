@@ -65,14 +65,26 @@ RUN EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig) 
 
 WORKDIR /home/app/current
 
+
+# Make project folders and set perrmisions.
+RUN mkdir -p /home/app/current/webroot/ && \
+	mkdir /home/app/data/ && \
+	mkdir /home/app/assets/ && \
+	mkdir /home/project/ && \
+	mkdir /home/project/assets/ && \
+	chmod -R 755 /home/app/ && \
+	chown -R www-data:www-data /home/app/ && \
+	chmod -R 755 /home/app/current && \
+	chown -R www-data:www-data /home/app/current && \
+	chmod -R 755 /home/project/ && \
+	chown -R www-data:www-data /home/project
+
 # copy ox things
 COPY ./app-blank .
 COPY ./ox ./ox
-COPY ./Docker .
 
-RUN chmod 777 permissions.sh
 
 RUN service apache2 restart
 RUN service postfix restart
 
-CMD ["/bin/bash", "-c","service postfix start && /usr/local/bin/apache2-foreground","./permissions.sh"]
+CMD ["/bin/bash", "-c","service postfix start && /usr/local/bin/apache2-foreground"]

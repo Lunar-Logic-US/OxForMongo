@@ -7,5 +7,7 @@ mkdir /home/project/ && \
 mkdir /home/project/assets/ && \
 chmod -R 755 /home/app/ && \
 chown -R www-data:www-data /home/app/ && \
+chmod -R 755 /home/app/current && \
+chown -R www-data:www-data /home/app/current && \
 chmod -R 755 /home/project/ && \
 chown -R www-data:www-data /home/project
