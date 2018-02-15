@@ -13,6 +13,7 @@ services:
       - "8080:80"
       - "8443:443"
     tty: true
+    command: bash -c "mkdir -p /home/app/current/log && chmod 777 /home/app/current/log && service postfix start && /usr/local/bin/apache2-foreground"
 
   ox_db:
     image: mongo:3.4
