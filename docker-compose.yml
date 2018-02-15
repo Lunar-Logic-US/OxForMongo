@@ -2,9 +2,7 @@ version: '3'
 
 services:
   ox_app:
-    build: 
-        context: .
-        dockerfile: Dockerfile
+	image: lunarlogic/ox
     container_name: ox_app
     volumes:
       - ./app-blank:/home/app/current/
