@@ -2,7 +2,7 @@ version: '3'
 
 services:
   ox_app:
-	image: lunarlogic/ox
+    image:  registry.gitlab.com/lunar-logic/ox:v1.0.5
     container_name: ox_app
     volumes:
       - ./app-blank:/home/app/current/
