@@ -76,8 +76,11 @@ class Ox_MongoCollection
         $normalizedId = $idIn;
 
         if (is_array($idIn) && isset($idIn['_id'])) {
-            //We have been given a whole record and
-            $normalizedId = $idIn['_id'];
+            //If we have been given a whole record then we expect a mongoid, but just in case...
+            $normalizedId = self::normalizeId($idIn['_id']);
+        } elseif (is_array($idIn) && isset($idIn['$id'])) {
+            //We may have an array in place of a mongoid
+            $normalizedId = self::normalizeId($idIn['$id']);
         } elseif (is_string($idIn) && preg_match('/^[0-9A-F]{24}\z/i',$idIn)) {
             //we have the string representation of a MongoId, make a mongoID
             //We do the regex and the try because we do not know which version of the
