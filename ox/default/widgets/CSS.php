@@ -69,7 +69,7 @@ class CSS implements Ox_Widget {
             $file = $css_file;
 
             $directory = $appWebBase . $css_options['directory'];
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\" {$media} href=\"{$directory}{$file}\" />\n";
             $url = Ox_Router::buildURL($css_options['directory'].$file);
 
             if (isset($css_options['cachebust']) && $css_options['cachebust']) {
@@ -78,7 +78,7 @@ class CSS implements Ox_Widget {
                     $url = WidgetHelper::addCacheBuster($url);
                 }
             }
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$url}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\" {$media} href=\"{$url}\" />\n";
         }
 
         foreach ($this->_css_override_list as $css_file => $css_options) {
@@ -89,7 +89,7 @@ class CSS implements Ox_Widget {
             $file = $css_file;
 
             $directory = $appWebBase . $css_options['directory'];
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\" {$media} href=\"{$directory}{$file}\" />\n";
         }
 
         if ($return_string === FALSE) {
