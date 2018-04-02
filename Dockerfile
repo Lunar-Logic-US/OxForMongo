@@ -6,7 +6,7 @@ MAINTAINER Lunar Logic <support@lunarlogic.com>
 ENV DEBIAN_FRONTEND noninteractive
 
 COPY Docker/php.ini /usr/local/etc/php/php.ini
-COPY Docker/xdebug.ini /uslocal/etc/php/conf.d/xdebug.ini
+COPY Docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Set up Apache configs.
 COPY apache_configs/ /etc/apache2
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y ssl-cert libssl-dev wget postfix dialog
 # install mail logging disabled by default
 #RUN apt-get install -y syslog-ng syslog-ng-core
 RUN pecl channel-update pecl.php.net
-RUN pecl install mongodb
+RUN pecl install mongo-1.6.14
 RUN pecl install xdebug-2.2.7
 RUN pecl install imagick
 
