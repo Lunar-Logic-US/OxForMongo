@@ -41,6 +41,7 @@
  */
 
 class CSS implements Ox_Widget {
+    
     /**
      * Storage var for the list of CSS filenames.
      */
@@ -49,7 +50,7 @@ class CSS implements Ox_Widget {
      * Added for site overrides.
      */
     private $_css_override_list = array();
-
+    
     /**
      * Create link tags for the list of css files.  Files specified in the override
      * list will be added after files specified using the normal add functions.
@@ -59,73 +60,71 @@ class CSS implements Ox_Widget {
      */
     public function render($return_string = FALSE) {
         $output = '';
-
+        
         $appWebBase = Ox_LibraryLoader::Config_Parser()->getAppConfigValue(Ox_Dispatch::CONFIG_WEB_BASE_NAME);
         foreach ($this->_css_file_list as $css_file => $css_options) {
             $media = '';
             if (isset($css_options['media']) && $css_options['media']!==FALSE) {
-                $media = " media=\"{$css_options['media']}\" ";
+                $media = " media=\"{$css_options['media']}\"";
             }
             $file = $css_file;
-
             $directory = $appWebBase . $css_options['directory'];
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
+            
             $url = Ox_Router::buildURL($css_options['directory'].$file);
-
             if (isset($css_options['cachebust']) && $css_options['cachebust']) {
                 if (strpos($url, '://') == false) {
                     Ox_LibraryLoader::loadCode('WidgetHelper', array(__DIR__.DIRECTORY_SEPARATOR));
                     $url = WidgetHelper::addCacheBuster($url);
                 }
             }
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$url}\" />\n";
+            
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media} href=\"{$url}\">\n";
         }
-
+        
         foreach ($this->_css_override_list as $css_file => $css_options) {
             $media = '';
             if (isset($css_options['media']) && $css_options['media']!==FALSE) {
                 $media = " media=\"{$css_options['media']}\" ";
             }
             $file = $css_file;
-
+            
             $directory = $appWebBase . $css_options['directory'];
-            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media}href=\"{$directory}{$file}\" />\n";
+            $output .= "<link rel=\"stylesheet\" type=\"text/css\"{$media} href=\"{$url}\">\n";
         }
-
+        
         if ($return_string === FALSE) {
             print $output;
         } else {
             return $output;
         }
     }
-
+    
     /**
      * Add file to the top of the CSS list with cache busting.
      * Assumes the file is located in /webroot/css/.
      *
-     * @param string $path the web path relative to /css/
+     * @param $file
+     * @param bool $media
+     * @param string $directory
      * @param bool $media 
      */
-    public function add_to_top_cachebust($path,$media=FALSE)
+    public function add_to_top_cachebust($file, $media=FALSE, $directory='/css/')
     {
-        $options = array('media'=>$media,'directory'=>'/css/','cachebust'=>TRUE);
-        if (isset($this->_css_file_list[$file])) {
-            $this->_css_file_list[$path] = $options;
-        } else {
-            $new = array($path => $options);
-            $this->_css_file_list = array_merge($new,$this->_css_file_list);
-        }
+        $this->add_to_top($file, $media, $directory, true);
     }
 
     /**
      * Add file to the bottom of the CSS list with cache busting.
      * Assumes the file is located in /webroot/css/.
      *
-     * @param string $path the web path relative to /css/
+     * @param $file
+     * @param bool $media
+     * @param string $directory
      * @param bool $media 
      */
-    public function add_to_bottom_cachebust($path,$media=FALSE) 
+    public function add_to_bottom_cachebust($file, $media=FALSE, $directory='/css/') 
     {
+        $path = $directory . $file;
         $options = array('media'=>$media,'directory'=>'/css/','cachebust'=>TRUE);
         $new = array($path => $options);
         $this->_css_file_list = array_merge($new,$this->_css_file_list);
@@ -135,24 +134,28 @@ class CSS implements Ox_Widget {
      * Add file to the bottom of the CSS list with cache busting.
      * Assumes the file is located in /webroot/css/.
      *
-     * @param string $path the web path relative to /css/
+     * @param $file
+     * @param bool $media
+     * @param string $directory
      * @param bool $media 
      */
-    public function add_cachebust($path,$media=FALSE)
+    public function add_cachebust($file, $media=FALSE, $directory='/css/')
     {
-        $this->add_to_bottom_cachebust($path,$media);
+        $this->add_to_bottom_cachebust($file, $media, $directory);
     }
 
     /**
      * Add override file to the bottom of the override list with cache busting.
      * Assumes the file is located in /webroot/css/.
      *
-     * @param string $path the web path relative to /css/
-     * @param bool $media 
+     * @param $file
+     * @param bool $media
+     * @param string $directory
      */
-    public function add_override_cachebust($path,$media=FALSE)
+    public function add_override_cachebust($file, $media=FALSE, $directory='/css/')
     {
-        $options = array('media'=>$media,'directory'=>'/css/','cachebust'=>TRUE);
+        $path = $directory . $file;
+        $options = array('media'=>$media, 'directory'=>'/css/', 'cachebust'=>TRUE);
         $new = array($path => $options);
         //This will overwrite if the same file is used twice.
         $this->_css_override_list = array_merge($this->_css_override_list,$new);
@@ -166,14 +169,18 @@ class CSS implements Ox_Widget {
      * @param string $directory
      * @deprecated
      */
-    public function add_to_top($file,$media=FALSE,$directory='/css/')
+    public function add_to_top($file, $media=FALSE, $directory='/css/', $cachebust = false)
     {
-        $options = array('media'=>$media,'directory'=>$directory);
+        $options = array('media'=>$media, 'directory'=>$directory);
+        if ($cachebust === true) {
+            $options['cachebust'] = true;
+        }
+        
         if (isset($this->_css_file_list[$file])) {
             $this->_css_file_list[$file] = $options;
         } else {
             $new = array($file => $options);
-            $this->_css_file_list = array_merge($new,$this->_css_file_list);
+            $this->_css_file_list = array_merge($new, $this->_css_file_list);
         }
     }
 
@@ -185,9 +192,9 @@ class CSS implements Ox_Widget {
      * @param string $directory
      * @deprecated
      */
-    public function add_to_bottom($file,$media=FALSE,$directory='/css/') 
+    public function add_to_bottom($file, $media=FALSE, $directory='/css/') 
     {
-        $new = array($file => array('media'=>$media,'directory'=>$directory));
+        $new = array($file => array('media'=>$media, 'directory'=>$directory));
         //This will overwrite if the same file is used twice.
         $this->_css_file_list = array_merge($this->_css_file_list,$new);
     }
@@ -200,9 +207,9 @@ class CSS implements Ox_Widget {
      * @param string $directory
      * @deprecated
      */
-    public function add($file,$media=FALSE,$directory='/css/')
+    public function add($file, $media=FALSE, $directory='/css/')
     {
-        $this->add_to_bottom($file,$media,$directory);
+        $this->add_to_bottom($file, $media, $directory);
     }
 
     /**
@@ -213,10 +220,11 @@ class CSS implements Ox_Widget {
      * @param string $directory
      * @deprecated
      */
-    public function add_override($file,$media=FALSE,$directory='/css/')
+    public function add_override($file, $media=FALSE, $directory='/css/')
     {
-        $new = array($file => array('media'=>$media,'directory'=>$directory));
+        $new = array($file => array('media'=>$media, 'directory'=>$directory));
         //This will overwrite if the same file is used twice.
         $this->_css_override_list = array_merge($this->_css_override_list,$new);
     }
+    
 }
