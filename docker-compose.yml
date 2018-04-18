@@ -16,12 +16,12 @@ services:
     command: bash -c "mkdir -p /home/app/current/log && chmod 777 /home/app/current/log && service postfix start && /usr/local/bin/apache2-foreground"
 
   ox_db:
-    image: mongo:3.4
+    image: registry.gitlab.com/lunar-logic/docker/dev-mongo:v1.0.0
     container_name: ox_db
-    volumes:
-      - ./../dump:/home/app/data/dump/
     ports:
-      - "27017:27017"
+      - "8445:80"
+    volumes:
+      - ./dump/:/home/app/data/dump/
+      - ./db:/data/db
     logging:
       driver: none
-
