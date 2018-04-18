@@ -13,27 +13,21 @@
  *
  *    You should have received a copy of the GNU Affero General Public License
  *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @copyright Copyright (c) 2012 Lunar Logic LLC
+ * @license http://www.gnu.org/licenses/agpl-3.0.html AGPLv3
+ * @package Ox_Widgets
  */
+
+Ox_LibraryLoader::loadCode('CSS',array(__DIR__.DIRECTORY_SEPARATOR));
 
 /**
- * Test version of an asset.
+ * Class CSSDeferred
+ *
+ * This just gives another CSS widget that we can use later in a layout.
+ * @package Ox_Widgets
  */
-class TestAsset extends Ox_Asset
+class CSSDeferred extends CSS
 {
-    public function save($file_info, $fieldName = 'file', array $extra_fields = array())
-    {
-        $doc = parent::save($file_info);
-        return $doc;
-
-    }
-
-    public function createURI($asset)
-    {
-        return $asset;
-    }
-
-    public function getAsset($uri)
-    {
-        return $uri;
-    }
+    
 }

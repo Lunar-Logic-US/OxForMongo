@@ -1,10 +1,30 @@
-image: asteris/apache-php-mongo
+image: docker:latest
+
+# Improved performance with dind
+variables:
+  DOCKER_DRIVER: overlay
+
+services:
+  - docker:dind
 
 before_script:
-# Install dependencies
-- bash ci/docker_install.sh > /dev/null
-- bash ci/composer_install.sh > /dev/null
+  - docker info
 
-test:app:
+test:
+  stage: test
   script:
-  - phpunit ox/tests --color --coverage-text
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -f Dockerfile.dev . -t test-image
+    - docker run -dit --rm --name test-container -w /home/app/current test-image
+    - docker exec test-container phpunit ox/tests --color --coverage-text
+
+deploy:
+  stage: deploy
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -f Dockerfile.prod . -t registry.gitlab.com/lunar-logic/ox/prod:$CI_COMMIT_TAG
+    - docker build -f Dockerfile.dev . -t registry.gitlab.com/lunar-logic/ox/dev:$CI_COMMIT_TAG
+    - docker push registry.gitlab.com/lunar-logic/ox/prod:$CI_COMMIT_TAG
+    - docker push registry.gitlab.com/lunar-logic/ox/dev:$CI_COMMIT_TAG
+  only:
+    - tags

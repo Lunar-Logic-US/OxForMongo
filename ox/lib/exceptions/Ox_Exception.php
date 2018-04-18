@@ -28,6 +28,7 @@ class Ox_Exception extends Exception {
      * Saved String Code
      * @var string
      */
+    public static $DEBUG=false;
     protected $code = '';
 
     /**
@@ -40,13 +41,23 @@ class Ox_Exception extends Exception {
      * Create the exception.
      *
      * Save the string code.
-     * @param null $message
+     * @param string $message
      * @param string $code
      * @param Exception $previous
      */
     public function __construct($message=null, $code = '', Exception $previous = null) {
         $this->code = $code;
         if (class_exists('Ox_Logger',false)){
+            // We only want to log objects and other non-strings if DEBUG is true.
+            // If DEBUG is false and we are given a non-string, log the fact that some information is omitted
+            if (self::$DEBUG) {
+                $message = var_export($message, true);
+            }
+            else {
+                if (! is_string($message)) {
+                    $message = 'Dump not shown because Ox_Exception::DEBUG is false';
+                }
+            }
             Ox_Logger::logDebug(self::$_logHeader . $message);
         }
         parent::__construct($message, 0, $previous);
@@ -61,3 +72,4 @@ class Ox_Exception extends Exception {
         return $this->code;
     }
 }
+

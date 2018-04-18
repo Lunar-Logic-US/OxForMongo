@@ -167,7 +167,12 @@ PHP;
 
         require_once($fileName);
         Ox_Router::add('/^testroutecantfind$/',new TestAction());
+
+        // prints 404 page to stdout, which we don't need to see
+        ob_start();
         Ox_Router::route('testroute');
+        ob_end_clean();
+
         $this->assertTrue(!defined('ROUTE_SUCCESS'));
 
         unlink($fileName);
