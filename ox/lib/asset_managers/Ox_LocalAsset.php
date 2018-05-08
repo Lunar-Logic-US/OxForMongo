@@ -238,6 +238,24 @@ class LocalAsset extends Ox_Asset
 
         //Make sure magic quotes are off.  Otherwise php will add unwanted slashes.
         @ini_set('magic_quotes_runtime', 0);
+        
+        // Get value of `ASSETS_SECONDS_TO_CACHE` from app.php
+        $assets_cache = Ox_LibraryLoader::Config_Parser()->getAppConfigValue('ASSETS_SECONDS_TO_CACHE');
+        
+        // Check if $assets_cache is set
+        if(isset($assets_cache)){
+            // If it's set, set it to $seconds_to_cache
+            $seconds_to_cache = $assets_cache;
+        }
+        else {
+            // Else set a default value
+            $seconds_to_cache = 10800;
+        }
+        
+        $ts = gmdate("D, d M Y H:i:s", time() + $seconds_to_cache) . " GMT";
+        header("Expires: $ts");
+        header("Pragma: cache");
+        header("Cache-Control: max-age=$seconds_to_cache");
 
         // send the headers and data
         if ($partial_content) {
@@ -252,6 +270,9 @@ class LocalAsset extends Ox_Asset
         $fs = stat(DIR_UPLOAD . $base_filename);
         header("ETag: ".sprintf('"%x-%x-%s"', $fs['ino'], $fs['size'],base_convert(str_pad($fs['mtime'],16,"0"),10,16)));
         header("Connection: close");
+        header("Expires: $ts");
+        header("Pragma: cache");
+        header("Cache-Control: max-age=$seconds_to_cache");
 
         //Send the file data
         echo $buffer;
