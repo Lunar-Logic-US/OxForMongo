@@ -34,7 +34,9 @@ class LocalAsset extends Ox_Asset
      * Saved uri path
      * @var string
      */
-    private $base_uri;
+    protected $base_uri;
+    
+    protected $dir_upload;
 
     /**
      * Setup
@@ -53,20 +55,24 @@ class LocalAsset extends Ox_Asset
      */
     public function save($file_info, $fieldName = 'file', array $extra_fields = array())
     {
+        $this->_setDirUpload();
+        
         $doc = parent::save($file_info, $fieldName, $extra_fields);
         if(empty($doc)) {
             return false;
         }
-        if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], DIR_UPLOAD . $doc['_id']->__tostring())) {
-            Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . DIR_UPLOAD . $doc['_id']->__tostring());
+        if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], $this->dir_upload . $doc['_id']->__tostring())) {
+            Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . $this->dir_upload . $doc['_id']->__tostring());
         } else {
-            Ox_Logger::logError('Failed to move ' . $file_info[$fieldName]['name'] . ' to ' . DIR_UPLOAD . $doc['_id']->__tostring());
+            Ox_Logger::logError('Failed to move ' . $file_info[$fieldName]['name'] . ' to ' . $this->dir_upload . $doc['_id']->__tostring());
         }
         return $doc;
     }
     
     public function saveFromUrl($url)
     {
+        $this->_setDirUpload();
+        
         // Generate a MongoId to use as the filename
         $_id = new MongoId();
         // Parse the URL for a file extension
@@ -75,7 +81,7 @@ class LocalAsset extends Ox_Asset
         $pathParts = pathinfo($remotePath);
         $extension = isset($pathParts['extension']) ? $pathParts['extension'] : '';
         // Generate the destination (in the assets folder)
-        $destination = DIR_UPLOAD . $_id->__tostring(); // . '.' . $extension;
+        $destination = $this->dir_upload . $_id->__tostring(); // . '.' . $extension;
         
         // Copy the remote file to the assets folder
         if ( copy($url, $destination) ) {
@@ -129,6 +135,8 @@ class LocalAsset extends Ox_Asset
      */
     public function getAsset($uri)
     {
+        $this->_setDirUpload();
+        
         $db = Ox_LibraryLoader::Db();
 
         //$uri = Ox_Router::trimPrefix($uri,Ox_Dispatch::CONFIG_WEB_BASE_NAME);
@@ -141,8 +149,8 @@ class LocalAsset extends Ox_Asset
             Ox_Logger::logWarning('LocalAsset::getAsset File: '.$base_filename.' Not found in the database.');
             exit(1);
         }
-        if (!file_exists(DIR_UPLOAD . $base_filename)) {
-            Ox_Logger::logWarning('LocalAsset::getAsset File: '. DIR_UPLOAD . $base_filename.' Not found on the filesystem.');
+        if (!file_exists($this->dir_upload . $base_filename)) {
+            Ox_Logger::logWarning('LocalAsset::getAsset File: '. $this->dir_upload . $base_filename.' Not found on the filesystem.');
             header("HTTP/1.0 404 Not Found (File Missing)");
             exit(1);
         }
@@ -213,7 +221,7 @@ class LocalAsset extends Ox_Asset
         //-------------------------------------------------------------------------
 
         //read the data from the file
-        $handle = fopen(DIR_UPLOAD . $base_filename, 'r');
+        $handle = fopen($this->dir_upload . $base_filename, 'r');
         if ($handle===false) {
             Ox_Logger::logDebug('LocalAsset::getAsset Could not open the file: '. $base_filename);
             header("HTTP/1.0 404 Not Found (Can not open file)");
@@ -264,7 +272,7 @@ class LocalAsset extends Ox_Asset
         header('Content-Type: ' . $asset['type']);
         header('Content-Disposition: filename="' . $asset['original_name'] . '"');
         header("Content-md5: " . $md5_sum);
-        $fs = stat(DIR_UPLOAD . $base_filename);
+        $fs = stat($this->dir_upload . $base_filename);
         header("ETag: ".sprintf('"%x-%x-%s"', $fs['ino'], $fs['size'],base_convert(str_pad($fs['mtime'],16,"0"),10,16)));
         header("Connection: close");
         header("Expires: $ts");
@@ -276,4 +284,12 @@ class LocalAsset extends Ox_Asset
         flush();
         exit(0);
     }
+    
+    private function _setDirUpload()
+    {
+        if (!isset($this->dir_upload) || empty($this->dir_upload)) {
+            $this->dir_upload = DIR_UPLOAD;
+        }
+    }
+    
 }
