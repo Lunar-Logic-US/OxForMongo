@@ -171,6 +171,7 @@ class Ox_AssemblerConstruct
     public function js($fileName){
         $this->layout = 'ajax';
         header("Content-type: application/x-javascript",true);
+        self::_headersCache();
         @readfile($this->dir  . '/js/' . $fileName);
 
     }
@@ -183,10 +184,32 @@ class Ox_AssemblerConstruct
     public function css($fileName){
         $this->layout = 'ajax';
         header("Content-type: text/css", true);
+        self::_headersCache();
         @readfile($this->dir  . '/css/' . $fileName);
 
     }
-
+    
+    
+    private function _headersCache()
+    {
+        // Get value of `ASSETS_SECONDS_TO_CACHE` from app.php
+        $assets_cache = Ox_LibraryLoader::Config_Parser()->getAppConfigValue('ASSETS_SECONDS_TO_CACHE');
+        
+        // Check if $assets_cache is set
+        if(isset($assets_cache)){
+            // If it's set, set it to $seconds_to_cache
+            $seconds_to_cache = $assets_cache;
+        }
+        else {
+            // Else set a default value
+            $seconds_to_cache = 10800;
+        }
+        
+        $ts = gmdate("D, d M Y H:i:s", time() + $seconds_to_cache) . " GMT";
+        
+        header("Expires: $ts");
+        header("Pragma: cache");
+        header("Cache-Control: max-age=$seconds_to_cache");
+    }
     
 }
-
