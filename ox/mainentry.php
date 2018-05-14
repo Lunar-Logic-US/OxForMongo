@@ -113,7 +113,7 @@ Ox_LibraryLoader::load('mailer','Ox_Mail',FALSE);
 
 //Router uses the Ox_Dispatch::CONFIG_WEB_BASE_NAME, must be after OxDispatch
 Ox_LibraryLoader::load('router','Ox_Router',FALSE);
-//Load after router, uses Oc_Router::buildURL
+//Load after router, uses Ox_Router::buildURL
 Ox_LibraryLoader::load('assets_helper','LocalAsset',FALSE);
 
 //Loading routes.php in loadRoutes.  Loaded here to allow modules to overwrite the default routes.
