@@ -385,5 +385,15 @@ class Ox_MongoSource
         }
         return $this->_databaseVersion;
     }
-
+    
+    /**
+     * Get a list of the names of the collections in the Mongo database.
+     *
+     * @return array
+     */
+    public function getCollectionNames()
+    {
+        return $this->_db->getCollectionNames();
+    }
+    
 }
