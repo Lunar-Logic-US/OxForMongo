@@ -116,7 +116,7 @@ JS;
         if (count($this->_js_script_list)) {
             $output .= "<script>\n";
             foreach ($this->_js_script_list as $id => $script) {
-                $output .= "    //<!-- Script ID: {$id} -->\n";
+                $output .= "    /*<!-- Script ID: {$id} -->*/\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
@@ -127,7 +127,7 @@ JS;
             $output .= "<script>\n";
             $output .= '$(document).ready(function() {' . "\n";
             foreach ($this->_js_jQuery_ready_list as $id => $script) {
-                $output .= "    //<!-- Script ID: {$id} -->\n";
+                $output .= "    /*<!-- Script ID: {$id} -->*/\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
@@ -139,7 +139,7 @@ JS;
             $output .= "<script>\n";
             $output .= '$(window).load(function() {' . "\n";
             foreach ($this->_js_jQuery_load_list as $id => $script) {
-                $output .= "    //<!-- Script ID: {$id} -->\n";
+                $output .= "    /*<!-- Script ID: {$id} -->*/\n";
                 $output .= "    " . $script;
                 $output .= "\n";
             }
