@@ -28,6 +28,11 @@ if (!defined('DEBUG_BOOT')) {
     define('DEBUG_BOOT',FALSE);
 }
 
+if (!defined('DIR_OX')) {
+    /** Framework library directory, can be set in framework.php */
+    define ('DIR_OX', dirname(DIR_FRAMEWORK)  . DIRECTORY_SEPARATOR );
+}
+
 //These are constants that can be originally set in the app/config/framework.php
 if (!defined('DIR_FRAMELIB')) {
     /** Framework library directory, can be set in framework.php */
