@@ -395,7 +395,14 @@ class Ox_MongoSource
     public function databaseVersion()
     {
         if(!$this->_databaseVersion){
-            $mongo_info = $this->run(array('buildinfo'=>true));
+            // TODO: Find how to do with this with new driver.
+            if (MONGODB_VERSION) {
+                // var_dump($this);
+            }
+            else {
+                $mongo_info = $this->run(array('buildinfo'=>true));    
+            }
+            
             $this->_databaseVersion = $mongo_info['version'];
         }
         return $this->_databaseVersion;

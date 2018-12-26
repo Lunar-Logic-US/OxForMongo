@@ -81,6 +81,7 @@ abstract class Ox_Asset
 
         $md5_file = md5_file($tmp_name);
         $doc = array(
+            '_id'=> new MongoDB\BSON\ObjectId(),
             'original_name'=>$file_info[$fieldName]['name'],
             'type'=>$file_info[$fieldName]['type'],
             'size'=>$file_info[$fieldName]['size'],

@@ -20,11 +20,14 @@
  */
 
 /**
- * Facade to the PHP MongoDB Collection and released Ox_Schema
+ * Facade to the MongoDB 4 PHP Library Collection and released Ox_Schema
  *
  * This adds validation and ID utility functions
  * @package Ox_Mongo
  */
+ 
+require_once(DIR_FRAMELIB . 'mongo/Ox_MongoDelayedCursor.php');
+
 class Ox_MongoDBCollection
 {
     /**
@@ -86,7 +89,7 @@ class Ox_MongoDBCollection
             //We do the regex and the try because we do not know which version of the
             //PHP Mongo driver that we will be dealing with.
             try {
-                $normalizedId = new MongoId($idIn);
+                $normalizedId = new MongoDB\BSON\ObjectId($idIn);
             } catch (Exception $e) {
                 //do nothing it must be a string _id
                 //Really we should not get here, because of the regex.
@@ -100,6 +103,10 @@ class Ox_MongoDBCollection
     // MongoCollection Facade
     // ------------------------------------
 
+    public function find(array $filter = array())
+    {
+        return new Ox_MongoDelayedCursor($this->_mongoCollection, $filter);
+    }
 
     /**
      * Find doc with id
@@ -112,6 +119,36 @@ class Ox_MongoDBCollection
     {
         $mongoId = self::normalizeId($id);
         return $this->_mongoCollection->findOne(array('_id' => $mongoId),$fieldsToRetrieve);
+    }
+    
+    /**
+     * Remove a doc
+     * Replace the remove method with deleteMany
+     *
+     * @param string | MongoID $id
+     * @param array $options
+     * @return ?
+     */
+    public function remove($id, array $options=array())
+    {
+        $mongoId = self::normalizeId($id);
+        $criteria = array('_id'=>$mongoId);
+        return $this->_mongoCollection->deleteMany($criteria, $options);
+    }
+     
+    
+    /**
+     * The save method has been removed from the mongodb 4 php library,
+     * We will use the replaceOne method
+     *
+     * @param array $updateArray
+     * @return mixed
+     */
+    public function save(array $updateArray)
+    {
+        $filter = [ '_id' => $updateArray['_id'] ];
+        $options = [ 'upsert' => true ]; // This will cause replaceOne to insert a new document if there is none to replace
+        return $this->_mongoCollection->replaceOne($filter, $updateArray, $options);
     }
 
     /**
@@ -126,7 +163,17 @@ class Ox_MongoDBCollection
     {
         $mongoId = self::normalizeId($id);
         $criteria = array('_id'=>$mongoId);
-        return $this->_mongoCollection->update($criteria,$updateArray,$options);
+        return $this->_mongoCollection->updateOne($criteria,$updateArray,$options);
+    }
+    
+    /**
+     * The update method has been removed. Using updateMany instead
+     */
+    public function update($id,array $updateArray=array(),array $options=array())
+    {
+        $mongoId = self::normalizeId($id);
+        $criteria = array('_id'=>$mongoId);
+        return $this->_mongoCollection->updateOne($criteria,$updateArray, $options);
     }
 
     /**
@@ -136,7 +183,7 @@ class Ox_MongoDBCollection
      * @return MongoCollection
      */
     public function __call($name, $params)
-    {
+    {    
         return call_user_func_array(array($this->_mongoCollection, $name), $params);
     }
 
@@ -171,7 +218,6 @@ class Ox_MongoDBCollection
      */
     public function insert (array $a, array $options = array())
     {
-
         if ($this->_schema !== null && $this->_schema->checkOnInsert()) {
             $this->_schema->isValid($a);
         }

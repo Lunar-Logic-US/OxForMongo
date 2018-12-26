@@ -58,14 +58,17 @@ class LocalAsset extends Ox_Asset
         $this->_setDirUpload();
         
         $doc = parent::save($file_info, $fieldName, $extra_fields);
+        
         if(empty($doc)) {
             return false;
         }
+        
         if($uploaded=move_uploaded_file($file_info[$fieldName]["tmp_name"], $this->dir_upload . $doc['_id']->__tostring())) {
             Ox_Logger::logMessage('Uploaded: ' . $file_info[$fieldName]['name'] . ' -> ' . $this->dir_upload . $doc['_id']->__tostring());
         } else {
             Ox_Logger::logError('Failed to move ' . $file_info[$fieldName]['name'] . ' to ' . $this->dir_upload . $doc['_id']->__tostring());
         }
+        
         return $doc;
     }
     
@@ -74,7 +77,13 @@ class LocalAsset extends Ox_Asset
         $this->_setDirUpload();
         
         // Generate a MongoId to use as the filename
-        $_id = new MongoId();
+        if (MONGODB_VERSION) {
+            $_id = new MongoDB\BSON\ObjectId();
+        }
+        else {
+            $_id = new MongoId();
+        }
+        
         // Parse the URL for a file extension
         $parsedUrl = parse_url($url);
         $remotePath = $parsedUrl['path'];

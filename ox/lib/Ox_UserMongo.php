@@ -57,16 +57,11 @@ class Ox_UserMongo extends Ox_User
         $user_id = $session->get('user_id');
         if ($user_id) {
             $db = Ox_LibraryLoader::getResource('db');
-            $collection = $this->userCollection;
-            
-            if (MONGODB_VERSION && MONGODB_VERSION >= '1.5.0') {
-                $id = new MongoDB\BSON\ObjectId($user_id);
-            }
-            else {
-                $id = new MongoId($user_id);
-            }
-            
-            $this->user = $db->$collection->findOne(array('_id'=> $id));
+            $collection = $this->userCollection;            
+            $this->user = $db->$collection->findOne(array('_id'=> new MongoDB\BSON\ObjectId($user_id)));
+            $user = json_encode($this->user);
+            $user = str_replace('$oid', '_id', $user);
+            $this->user = json_decode($user, true);
         }
     }
 
