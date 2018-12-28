@@ -274,6 +274,11 @@ DEBUG;
         if($security->loggedIn() && isset($_SESSION['last_request_time'])) {
             // If a user has multiple roles, simply take the one with the longest timeout.
             $roles = $security->getUserRoles();
+
+            if (!is_array($roles)) {
+                $roles = iterator_to_array($roles);
+            }
+            
             if(in_array('su', $roles)) {
                 // check for the presence of an app-defined SU timeout.  If not, set to 8 hours.
                 if(in_array('su', $this->_user_time_outs)) {

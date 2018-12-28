@@ -19,7 +19,9 @@
  * @package Ox_Mongo
  */
 
+require_once(DIR_OX . 'vendor/autoload.php');
 require_once(DIR_FRAMELIB . 'mongo/Ox_MongoCollection.php');
+require_once(DIR_FRAMELIB . 'mongo/Ox_MongoDBCollection.php');
 require_once(DIR_FRAMELIB . 'Ox_Schema.php');
 
 /**
@@ -117,10 +119,12 @@ class Ox_MongoSource
             );
         }
         try{
+            // var_dump(new MongoDB\Client);
             $host = $this->createConnectionName($this->_config, $this->driverVersion());
-
-            if (isset($this->_config['replicaset']) && count($this->_config['replicaset']) === 2) {
+            if (isset($this->_config['replicaset']) && $this->_config['replicaset'] instanceof Countable && count($this->_config['replicaset']) === 2) {
                 $this->_connection = new Mongo($this->_config['replicaset']['host'], $this->_config['replicaset']['options']);
+            } else if ($this->driverVersion() >= '1.5.0') {
+                $this->_connection = new MongoDB\Driver\Manager($host);
             } else if ($this->driverVersion() >= '1.3.0') {
                 $this->_connection = new MongoClient($host);
             } else if ($this->driverVersion() >= '1.2.0') {
@@ -128,26 +132,30 @@ class Ox_MongoSource
             } else {
                 $this->_connection = new Mongo($host, true, $this->_config['persistent']);
             }
-
             if (isset($this->_config['slaveok'])) {
                 $this->_connection->setSlaveOkay($this->_config['slaveok']);
             }
-
-            if ($this->_db = $this->_connection->selectDB($this->_config['database'])) {
+            $this->_db = $this->driverVersion() >= '1.5.0'
+                ? (new MongoDB\Client)->selectDatabase($this->_config['database'])
+                : $this->_connection->selectDB($this->_config['database']);
+                                
+            if ($this->_db) {
                 if (!empty($this->_config['login']) && $this->driverVersion() < '1.2.0') {
                     $return = $this->_db->authenticate($this->_config['login'], $this->_config['password']);
-                        if (!$return || !$return['ok']) {
-                            Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
-                            throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
-                        }
+                    if (!$return || !$return['ok']) {
+                        Ox_Logger::logError('MongodbSource::connect ' . $return['errmsg']);
+                        throw new Ox_MongoSourceException('MongodbSource::connect ' . $return['errmsg'],'ConnectFailed');
+                    }
                 }
             }
-
+            
+            
         } catch(MongoException $e) {
             $this->error = $e->getMessage();
             Ox_Logger::logError($this->error);
             throw new Ox_MongoSourceException('MongodbSource::connect ' . $this->error,'ConnectFailed');
         }
+
         return true;
     }
 
@@ -158,7 +166,6 @@ class Ox_MongoSource
      */
     public function selectDB($db){
         $this->connect();
-        //var_dump($this->_connection);
         $this->_db = $this->_connection->selectDB($db);
         //TODO: add the authentication
     }
@@ -233,8 +240,14 @@ class Ox_MongoSource
     public function getCollection($collection)
     {
         $this->connect();
+        
         if (!isset($this->_collectionCache[$collection])) {
-            $this->_collectionCache[$collection] = new Ox_MongoCollection( $this->_db->$collection );
+            if ($this->_db->$collection instanceof MongoCollection) {
+                $this->_collectionCache[$collection] = new Ox_MongoCollection( $this->_db->$collection );
+            }
+            else {
+                $this->_collectionCache[$collection] = new Ox_MongoDBCollection( $this->_db->$collection );
+            }
         }
         return $this->_collectionCache[$collection];
     }
@@ -361,9 +374,11 @@ class Ox_MongoSource
     public function driverVersion()
     {
         if(!$this->_driverVersion){
-            if(class_exists('MongoClient')) {
+            if (class_exists('MongoDB\Driver\Manager')) {
+                $this->_driverVersion = MONGODB_VERSION;
+            } else if (class_exists('MongoClient')) {
                 $this->_driverVersion = MongoClient::VERSION;
-            } elseif(class_exists('Mongo')) {
+            } else if (class_exists('Mongo')) {
                 $this->_driverVersion = Mongo::VERSION;
             } else {
                 if (self::DEBUG) Ox_Logger::logDebug(__CLASS__ . '-' . __FUNCTION__ . ": Unable to find MongoClient or Mongo class.");
@@ -380,7 +395,14 @@ class Ox_MongoSource
     public function databaseVersion()
     {
         if(!$this->_databaseVersion){
-            $mongo_info = $this->run(array('buildinfo'=>true));
+            // TODO: Find how to do with this with new driver.
+            if (MONGODB_VERSION) {
+                // var_dump($this);
+            }
+            else {
+                $mongo_info = $this->run(array('buildinfo'=>true));    
+            }
+            
             $this->_databaseVersion = $mongo_info['version'];
         }
         return $this->_databaseVersion;

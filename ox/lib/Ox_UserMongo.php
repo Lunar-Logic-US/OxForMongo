@@ -57,8 +57,11 @@ class Ox_UserMongo extends Ox_User
         $user_id = $session->get('user_id');
         if ($user_id) {
             $db = Ox_LibraryLoader::getResource('db');
-            $collection = $this->userCollection;
-            $this->user = $db->$collection->findOne(array('_id'=> new MongoId($user_id)));
+            $collection = $this->userCollection;            
+            $this->user = $db->$collection->findOne(array('_id'=> new MongoDB\BSON\ObjectId($user_id)));
+            $user = json_encode($this->user);
+            $user = str_replace('$oid', '_id', $user);
+            $this->user = json_decode($user, true);
         }
     }
 
@@ -72,6 +75,7 @@ class Ox_UserMongo extends Ox_User
      * get the first from all users!!
      */
     public function load() {
+Ox_Logger::logDebug("User::load");
         if (self::DEBUG) Ox_Logger::logMessage("User::load");
         $db = Ox_LibraryLoader::getResource('db');
         if (isset($this->user) && !empty($this->user)) {
