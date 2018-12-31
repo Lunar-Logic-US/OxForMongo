@@ -2,7 +2,6 @@
     "name": "lunar/ox",
     "description": "Flexible, Lightweight PHP Framework that is designed to work with MongoDB.",
     "require": {
-        "google/recaptcha": "1.1.2",
-        "mongodb/mongodb": "^1.4"
+        "google/recaptcha": "1.1.2"
     }
 }
