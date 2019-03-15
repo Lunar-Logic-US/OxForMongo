@@ -21,6 +21,7 @@
 
 
 require_once(DIR_FRAMELIB.'Ox_User.php');
+require_once(DIR_FRAMELIB.'Ox_Logger.php');
 
 /**
  * Security class to control access to resources.
@@ -123,7 +124,7 @@ class Ox_Security
         } else {
             $this->user->set('username',$username);
         }
-
+        
         if ($this->user->load()) {
             if($this->authenticateUser($this->user->getPassword(),$password)){
                 $this->loginUser();
@@ -183,6 +184,10 @@ class Ox_Security
         // Check for default user roles
         if($user_roles === null || !is_array($user_roles)) {
             $user_roles = $this->getUserRoles();
+        }
+        
+        if (!is_array($user_roles)) {
+            $user_roles = iterator_to_array($user_roles);
         }
 
         // Corner case.  isPublic will handle overridden roles arrays gracefully, so we're good.
