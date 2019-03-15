@@ -19,7 +19,11 @@
  * @package Ox_Mongo
  */
 
-require_once(DIR_OX . 'vendor/autoload.php');
+// The Composer autoload should include the PHP MongoDB Library (https://docs.mongodb.com/php-library/master/).
+if (file_exists(DIR_APP.'vendor/autoload.php')) {
+    require_once(DIR_APP.'vendor/autoload.php');
+}
+
 require_once(DIR_FRAMELIB . 'mongo/Ox_MongoCollection.php');
 require_once(DIR_FRAMELIB . 'mongo/Ox_MongoDBCollection.php');
 require_once(DIR_FRAMELIB . 'Ox_Schema.php');

@@ -117,7 +117,7 @@ class Ox_WidgetHandler
             self::_load($name);
             return self::$_widgets[$name];
         } catch (Exception $e) {
-            print "BROKEN Widget {$name}: Could not load or call the display function.";
+            print __CLASS__.'::'.__FUNCTION__ . ": BROKEN Widget {$name}: Could not load or call the display function.";
         }
         return null;
     }
@@ -136,7 +136,7 @@ class Ox_WidgetHandler
             self::_load($name);
             return self::$_widgets[$name]->render($return_as_string); //current simply set for outputs (not returning a string)
         } catch (Exception $e) {
-            print "BROKEN Widget {$name}: Could not load or call the render function.";
+            print __CLASS__.'::'.__FUNCTION__ . ": BROKEN Widget {$name}: Could not load or call the render function.";
         }
         return '';
     }

@@ -36,7 +36,7 @@ class Ox_SecurityMongoCollection extends Ox_Security
      */
     public function getUser($filter, $collection='users')
     {
-        $db= Ox_LibraryLoader::Db();        
+        $db= Ox_LibraryLoader::Db();
         $users = $db->getCollection($collection);
         
         return $users->findOne($filter);

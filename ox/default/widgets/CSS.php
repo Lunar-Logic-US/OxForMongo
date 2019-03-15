@@ -106,7 +106,6 @@ class CSS implements Ox_Widget {
      * @param $file
      * @param bool $media
      * @param string $directory
-     * @param bool $media 
      */
     public function add_to_top_cachebust($file, $media=FALSE, $directory='/css/')
     {

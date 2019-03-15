@@ -75,7 +75,7 @@ class Ox_UserMongo extends Ox_User
      * get the first from all users!!
      */
     public function load() {
-Ox_Logger::logDebug("User::load");
+	Ox_Logger::logDebug("User::load");
         if (self::DEBUG) Ox_Logger::logMessage("User::load");
         $db = Ox_LibraryLoader::getResource('db');
         if (isset($this->user) && !empty($this->user)) {
